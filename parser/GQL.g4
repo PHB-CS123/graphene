@@ -1,9 +1,10 @@
 grammar GQL;
 
-parse : stmt_list* EOF;
+parse : stmt_list EOF;
 
-stmt_list
-  : ';'* stmt ( ';'+ stmt )* ';'*
+stmt_list returns [stmts]
+  : s1=stmt {$stmts = [$s1.ctx]}
+    (';' (si=stmt {$stmts.append($si.ctx)})? )*
   ;
 
 stmt
@@ -28,9 +29,9 @@ $node_data = { "name": $nn.text, "type": $nt.text }
   ;
 
 relation returns [relation_data]
-  : '-' (rel=I_RELATION) '->'
+  : '-' ((rn=I_NAME ':')? rel=I_RELATION) '->'
   {
-$relation_data = $rel.text[1:-1]
+$relation_data = { "name": $rn.text, "type": $rel.text[1:-1] }
   }
   ;
 

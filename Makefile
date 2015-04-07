@@ -12,4 +12,7 @@ parser:
 clean-parser:
 	rm -rf parser/GQL*.py parser/*.tokens
 
+run: all
+	./graphene
+
 .PHONY: parser clean-parser
