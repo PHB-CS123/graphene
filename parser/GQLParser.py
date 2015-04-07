@@ -12,42 +12,39 @@ else:
 def serializedATN():
     with StringIO() as buf:
         buf.write(u"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3")
-        buf.write(u"\27x\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
+        buf.write(u"\27m\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
         buf.write(u"\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t\r\3")
-        buf.write(u"\2\7\2\34\n\2\f\2\16\2\37\13\2\3\2\3\2\3\3\7\3$\n\3\f")
-        buf.write(u"\3\16\3\'\13\3\3\3\3\3\6\3+\n\3\r\3\16\3,\3\3\7\3\60")
-        buf.write(u"\n\3\f\3\16\3\63\13\3\3\3\7\3\66\n\3\f\3\16\39\13\3\3")
-        buf.write(u"\4\5\4<\n\4\3\4\3\4\5\4@\n\4\3\5\3\5\3\5\3\6\3\6\5\6")
-        buf.write(u"G\n\6\3\6\3\6\3\6\3\6\3\6\3\7\3\7\3\7\3\7\3\7\3\b\3\b")
-        buf.write(u"\3\b\3\b\7\bW\n\b\f\b\16\bZ\13\b\3\t\3\t\3\t\5\t_\n\t")
-        buf.write(u"\3\n\3\n\3\n\3\n\3\n\3\n\3\13\3\13\3\13\7\13j\n\13\f")
-        buf.write(u"\13\16\13m\13\13\3\f\3\f\3\f\3\f\3\r\3\r\3\r\3\r\3\r")
-        buf.write(u"\3\r\2\2\16\2\4\6\b\n\f\16\20\22\24\26\30\2\3\3\2\17")
-        buf.write(u"\20v\2\35\3\2\2\2\4%\3\2\2\2\6;\3\2\2\2\bA\3\2\2\2\n")
-        buf.write(u"D\3\2\2\2\fM\3\2\2\2\16R\3\2\2\2\20[\3\2\2\2\22`\3\2")
-        buf.write(u"\2\2\24f\3\2\2\2\26n\3\2\2\2\30r\3\2\2\2\32\34\5\4\3")
-        buf.write(u"\2\33\32\3\2\2\2\34\37\3\2\2\2\35\33\3\2\2\2\35\36\3")
-        buf.write(u"\2\2\2\36 \3\2\2\2\37\35\3\2\2\2 !\7\2\2\3!\3\3\2\2\2")
-        buf.write(u"\"$\7\3\2\2#\"\3\2\2\2$\'\3\2\2\2%#\3\2\2\2%&\3\2\2\2")
-        buf.write(u"&(\3\2\2\2\'%\3\2\2\2(\61\5\6\4\2)+\7\3\2\2*)\3\2\2\2")
-        buf.write(u"+,\3\2\2\2,*\3\2\2\2,-\3\2\2\2-.\3\2\2\2.\60\5\6\4\2")
-        buf.write(u"/*\3\2\2\2\60\63\3\2\2\2\61/\3\2\2\2\61\62\3\2\2\2\62")
-        buf.write(u"\67\3\2\2\2\63\61\3\2\2\2\64\66\7\3\2\2\65\64\3\2\2\2")
-        buf.write(u"\669\3\2\2\2\67\65\3\2\2\2\678\3\2\2\28\5\3\2\2\29\67")
-        buf.write(u"\3\2\2\2:<\7\n\2\2;:\3\2\2\2;<\3\2\2\2<?\3\2\2\2=@\5")
-        buf.write(u"\b\5\2>@\5\20\t\2?=\3\2\2\2?>\3\2\2\2@\7\3\2\2\2AB\7")
-        buf.write(u"\13\2\2BC\5\16\b\2C\t\3\2\2\2DF\7\4\2\2EG\7\21\2\2FE")
-        buf.write(u"\3\2\2\2FG\3\2\2\2GH\3\2\2\2HI\7\5\2\2IJ\7\22\2\2JK\7")
-        buf.write(u"\6\2\2KL\b\6\1\2L\13\3\2\2\2MN\7\7\2\2NO\7\23\2\2OP\7")
-        buf.write(u"\b\2\2PQ\b\7\1\2Q\r\3\2\2\2RX\5\n\6\2ST\5\f\7\2TU\5\n")
-        buf.write(u"\6\2UW\3\2\2\2VS\3\2\2\2WZ\3\2\2\2XV\3\2\2\2XY\3\2\2")
-        buf.write(u"\2Y\17\3\2\2\2ZX\3\2\2\2[^\7\f\2\2\\_\5\22\n\2]_\5\30")
-        buf.write(u"\r\2^\\\3\2\2\2^]\3\2\2\2_\21\3\2\2\2`a\7\r\2\2ab\7\22")
-        buf.write(u"\2\2bc\7\4\2\2cd\5\24\13\2de\7\6\2\2e\23\3\2\2\2fk\5")
-        buf.write(u"\26\f\2gh\7\t\2\2hj\5\26\f\2ig\3\2\2\2jm\3\2\2\2ki\3")
-        buf.write(u"\2\2\2kl\3\2\2\2l\25\3\2\2\2mk\3\2\2\2no\7\21\2\2op\7")
-        buf.write(u"\5\2\2pq\t\2\2\2q\27\3\2\2\2rs\7\16\2\2st\7\23\2\2tu")
-        buf.write(u"\7\22\2\2uv\7\22\2\2v\31\3\2\2\2\r\35%,\61\67;?FX^k")
+        buf.write(u"\2\3\2\3\2\3\3\3\3\3\3\3\3\3\3\3\3\5\3$\n\3\7\3&\n\3")
+        buf.write(u"\f\3\16\3)\13\3\3\4\5\4,\n\4\3\4\3\4\5\4\60\n\4\3\5\3")
+        buf.write(u"\5\3\5\3\6\3\6\5\6\67\n\6\3\6\3\6\3\6\3\6\3\6\3\7\3\7")
+        buf.write(u"\3\7\5\7A\n\7\3\7\3\7\3\7\3\7\3\7\3\b\3\b\3\b\3\b\7\b")
+        buf.write(u"L\n\b\f\b\16\bO\13\b\3\t\3\t\3\t\5\tT\n\t\3\n\3\n\3\n")
+        buf.write(u"\3\n\3\n\3\n\3\13\3\13\3\13\7\13_\n\13\f\13\16\13b\13")
+        buf.write(u"\13\3\f\3\f\3\f\3\f\3\r\3\r\3\r\3\r\3\r\3\r\2\2\16\2")
+        buf.write(u"\4\6\b\n\f\16\20\22\24\26\30\2\3\3\2\17\20i\2\32\3\2")
+        buf.write(u"\2\2\4\35\3\2\2\2\6+\3\2\2\2\b\61\3\2\2\2\n\64\3\2\2")
+        buf.write(u"\2\f=\3\2\2\2\16G\3\2\2\2\20P\3\2\2\2\22U\3\2\2\2\24")
+        buf.write(u"[\3\2\2\2\26c\3\2\2\2\30g\3\2\2\2\32\33\5\4\3\2\33\34")
+        buf.write(u"\7\2\2\3\34\3\3\2\2\2\35\36\5\6\4\2\36\'\b\3\1\2\37#")
+        buf.write(u"\7\3\2\2 !\5\6\4\2!\"\b\3\1\2\"$\3\2\2\2# \3\2\2\2#$")
+        buf.write(u"\3\2\2\2$&\3\2\2\2%\37\3\2\2\2&)\3\2\2\2\'%\3\2\2\2\'")
+        buf.write(u"(\3\2\2\2(\5\3\2\2\2)\'\3\2\2\2*,\7\n\2\2+*\3\2\2\2+")
+        buf.write(u",\3\2\2\2,/\3\2\2\2-\60\5\b\5\2.\60\5\20\t\2/-\3\2\2")
+        buf.write(u"\2/.\3\2\2\2\60\7\3\2\2\2\61\62\7\13\2\2\62\63\5\16\b")
+        buf.write(u"\2\63\t\3\2\2\2\64\66\7\4\2\2\65\67\7\21\2\2\66\65\3")
+        buf.write(u"\2\2\2\66\67\3\2\2\2\678\3\2\2\289\7\5\2\29:\7\22\2\2")
+        buf.write(u":;\7\6\2\2;<\b\6\1\2<\13\3\2\2\2=@\7\7\2\2>?\7\21\2\2")
+        buf.write(u"?A\7\5\2\2@>\3\2\2\2@A\3\2\2\2AB\3\2\2\2BC\7\23\2\2C")
+        buf.write(u"D\3\2\2\2DE\7\b\2\2EF\b\7\1\2F\r\3\2\2\2GM\5\n\6\2HI")
+        buf.write(u"\5\f\7\2IJ\5\n\6\2JL\3\2\2\2KH\3\2\2\2LO\3\2\2\2MK\3")
+        buf.write(u"\2\2\2MN\3\2\2\2N\17\3\2\2\2OM\3\2\2\2PS\7\f\2\2QT\5")
+        buf.write(u"\22\n\2RT\5\30\r\2SQ\3\2\2\2SR\3\2\2\2T\21\3\2\2\2UV")
+        buf.write(u"\7\r\2\2VW\7\22\2\2WX\7\4\2\2XY\5\24\13\2YZ\7\6\2\2Z")
+        buf.write(u"\23\3\2\2\2[`\5\26\f\2\\]\7\t\2\2]_\5\26\f\2^\\\3\2\2")
+        buf.write(u"\2_b\3\2\2\2`^\3\2\2\2`a\3\2\2\2a\25\3\2\2\2b`\3\2\2")
+        buf.write(u"\2cd\7\21\2\2de\7\5\2\2ef\t\2\2\2f\27\3\2\2\2gh\7\16")
+        buf.write(u"\2\2hi\7\23\2\2ij\7\22\2\2jk\7\22\2\2k\31\3\2\2\2\13")
+        buf.write(u"#\'+/\66@MS`")
         return buf.getvalue()
 
 
@@ -125,15 +122,12 @@ class GQLParser ( Parser ):
             super(GQLParser.ParseContext, self).__init__(parent, invokingState)
             self.parser = parser
 
+        def stmt_list(self):
+            return self.getTypedRuleContext(GQLParser.Stmt_listContext,0)
+
+
         def EOF(self):
             return self.getToken(GQLParser.EOF, 0)
-
-        def stmt_list(self, i=None):
-            if i is None:
-                return self.getTypedRuleContexts(GQLParser.Stmt_listContext)
-            else:
-                return self.getTypedRuleContext(GQLParser.Stmt_listContext,i)
-
 
         def getRuleIndex(self):
             return GQLParser.RULE_parse
@@ -153,20 +147,11 @@ class GQLParser ( Parser ):
 
         localctx = GQLParser.ParseContext(self, self._ctx, self.state)
         self.enterRule(localctx, 0, self.RULE_parse)
-        self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 27
-            self._errHandler.sync(self)
-            _la = self._input.LA(1)
-            while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << GQLParser.T__0) | (1 << GQLParser.K_EXPLAIN) | (1 << GQLParser.K_MATCH) | (1 << GQLParser.K_CREATE))) != 0):
-                self.state = 24
-                self.stmt_list()
-                self.state = 29
-                self._errHandler.sync(self)
-                _la = self._input.LA(1)
-
-            self.state = 30
+            self.state = 24
+            self.stmt_list()
+            self.state = 25
             self.match(GQLParser.EOF)
         except RecognitionException as re:
             localctx.exception = re
@@ -181,6 +166,9 @@ class GQLParser ( Parser ):
         def __init__(self, parser, parent=None, invokingState=-1):
             super(GQLParser.Stmt_listContext, self).__init__(parent, invokingState)
             self.parser = parser
+            self.stmts = None
+            self.s1 = None # StmtContext
+            self.si = None # StmtContext
 
         def stmt(self, i=None):
             if i is None:
@@ -210,51 +198,26 @@ class GQLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 35
+            self.state = 27
+            localctx.s1 = self.stmt()
+            localctx.stmts = [localctx.s1]
+            self.state = 37
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while _la==GQLParser.T__0:
-                self.state = 32
+                self.state = 29
                 self.match(GQLParser.T__0)
-                self.state = 37
+                self.state = 33
+                _la = self._input.LA(1)
+                if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << GQLParser.K_EXPLAIN) | (1 << GQLParser.K_MATCH) | (1 << GQLParser.K_CREATE))) != 0):
+                    self.state = 30
+                    localctx.si = self.stmt()
+                    localctx.stmts.append(localctx.si)
+
+
+                self.state = 39
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-
-            self.state = 38
-            self.stmt()
-            self.state = 47
-            self._errHandler.sync(self)
-            _alt = self._interp.adaptivePredict(self._input,3,self._ctx)
-            while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
-                if _alt==1:
-                    self.state = 40 
-                    self._errHandler.sync(self)
-                    _la = self._input.LA(1)
-                    while True:
-                        self.state = 39
-                        self.match(GQLParser.T__0)
-                        self.state = 42 
-                        self._errHandler.sync(self)
-                        _la = self._input.LA(1)
-                        if not (_la==GQLParser.T__0):
-                            break
-
-                    self.state = 44
-                    self.stmt() 
-                self.state = 49
-                self._errHandler.sync(self)
-                _alt = self._interp.adaptivePredict(self._input,3,self._ctx)
-
-            self.state = 53
-            self._errHandler.sync(self)
-            _alt = self._interp.adaptivePredict(self._input,4,self._ctx)
-            while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
-                if _alt==1:
-                    self.state = 50
-                    self.match(GQLParser.T__0) 
-                self.state = 55
-                self._errHandler.sync(self)
-                _alt = self._interp.adaptivePredict(self._input,4,self._ctx)
 
         except RecognitionException as re:
             localctx.exception = re
@@ -303,21 +266,21 @@ class GQLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 57
+            self.state = 41
             _la = self._input.LA(1)
             if _la==GQLParser.K_EXPLAIN:
-                self.state = 56
+                self.state = 40
                 self.match(GQLParser.K_EXPLAIN)
 
 
-            self.state = 61
+            self.state = 45
             token = self._input.LA(1)
             if token in [GQLParser.K_MATCH]:
-                self.state = 59
+                self.state = 43
                 localctx.c = self.match_stmt()
 
             elif token in [GQLParser.K_CREATE]:
-                self.state = 60
+                self.state = 44
                 localctx.c = self.create_stmt()
 
             else:
@@ -364,9 +327,9 @@ class GQLParser ( Parser ):
         self.enterRule(localctx, 6, self.RULE_match_stmt)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 63
+            self.state = 47
             self.match(GQLParser.K_MATCH)
-            self.state = 64
+            self.state = 48
             self.node_chain()
         except RecognitionException as re:
             localctx.exception = re
@@ -412,21 +375,21 @@ class GQLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 66
+            self.state = 50
             self.match(GQLParser.T__1)
-            self.state = 68
+            self.state = 52
             _la = self._input.LA(1)
             if _la==GQLParser.I_NAME:
-                self.state = 67
+                self.state = 51
                 localctx.nn = self.match(GQLParser.I_NAME)
 
 
-            self.state = 70
+            self.state = 54
             self.match(GQLParser.T__2)
 
-            self.state = 71
+            self.state = 55
             localctx.nt = self.match(GQLParser.I_TYPE)
-            self.state = 72
+            self.state = 56
             self.match(GQLParser.T__3)
 
             localctx.node_data = { "name": (None if localctx.nn is None else localctx.nn.text), "type": (None if localctx.nt is None else localctx.nt.text) }
@@ -445,10 +408,14 @@ class GQLParser ( Parser ):
             super(GQLParser.RelationContext, self).__init__(parent, invokingState)
             self.parser = parser
             self.relation_data = None
+            self.rn = None # Token
             self.rel = None # Token
 
         def I_RELATION(self):
             return self.getToken(GQLParser.I_RELATION, 0)
+
+        def I_NAME(self):
+            return self.getToken(GQLParser.I_NAME, 0)
 
         def getRuleIndex(self):
             return GQLParser.RULE_relation
@@ -468,17 +435,27 @@ class GQLParser ( Parser ):
 
         localctx = GQLParser.RelationContext(self, self._ctx, self.state)
         self.enterRule(localctx, 10, self.RULE_relation)
+        self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 75
+            self.state = 59
             self.match(GQLParser.T__4)
 
-            self.state = 76
+            self.state = 62
+            _la = self._input.LA(1)
+            if _la==GQLParser.I_NAME:
+                self.state = 60
+                localctx.rn = self.match(GQLParser.I_NAME)
+                self.state = 61
+                self.match(GQLParser.T__2)
+
+
+            self.state = 64
             localctx.rel = self.match(GQLParser.I_RELATION)
-            self.state = 77
+            self.state = 66
             self.match(GQLParser.T__5)
 
-            localctx.relation_data = (None if localctx.rel is None else localctx.rel.text)[1:-1]
+            localctx.relation_data = { "name": (None if localctx.rn is None else localctx.rn.text), "type": (None if localctx.rel is None else localctx.rel.text)[1:-1] }
               
         except RecognitionException as re:
             localctx.exception = re
@@ -529,17 +506,17 @@ class GQLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 80
+            self.state = 69
             self.node()
-            self.state = 86
+            self.state = 75
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while _la==GQLParser.T__4:
-                self.state = 81
+                self.state = 70
                 self.relation()
-                self.state = 82
+                self.state = 71
                 self.node()
-                self.state = 88
+                self.state = 77
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -589,16 +566,16 @@ class GQLParser ( Parser ):
         self.enterRule(localctx, 14, self.RULE_create_stmt)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 89
+            self.state = 78
             self.match(GQLParser.K_CREATE)
-            self.state = 92
+            self.state = 81
             token = self._input.LA(1)
             if token in [GQLParser.K_TYPE]:
-                self.state = 90
+                self.state = 79
                 self.create_type()
 
             elif token in [GQLParser.K_RELATION]:
-                self.state = 91
+                self.state = 80
                 self.create_relation()
 
             else:
@@ -648,16 +625,16 @@ class GQLParser ( Parser ):
         self.enterRule(localctx, 16, self.RULE_create_type)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 94
+            self.state = 83
             self.match(GQLParser.K_TYPE)
 
-            self.state = 95
+            self.state = 84
             self.match(GQLParser.I_TYPE)
-            self.state = 96
+            self.state = 85
             self.match(GQLParser.T__1)
-            self.state = 97
+            self.state = 86
             self.type_list()
-            self.state = 98
+            self.state = 87
             self.match(GQLParser.T__3)
         except RecognitionException as re:
             localctx.exception = re
@@ -701,17 +678,17 @@ class GQLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 100
+            self.state = 89
             self.type_decl()
-            self.state = 105
+            self.state = 94
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while _la==GQLParser.T__6:
-                self.state = 101
+                self.state = 90
                 self.match(GQLParser.T__6)
-                self.state = 102
+                self.state = 91
                 self.type_decl()
-                self.state = 107
+                self.state = 96
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -759,11 +736,11 @@ class GQLParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 108
+            self.state = 97
             self.match(GQLParser.I_NAME)
-            self.state = 109
+            self.state = 98
             self.match(GQLParser.T__2)
-            self.state = 110
+            self.state = 99
             _la = self._input.LA(1)
             if not(_la==GQLParser.T_INT or _la==GQLParser.T_STR):
                 self._errHandler.recoverInline(self)
@@ -815,13 +792,13 @@ class GQLParser ( Parser ):
         self.enterRule(localctx, 22, self.RULE_create_relation)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 112
+            self.state = 101
             self.match(GQLParser.K_RELATION)
-            self.state = 113
+            self.state = 102
             self.match(GQLParser.I_RELATION)
-            self.state = 114
+            self.state = 103
             self.match(GQLParser.I_TYPE)
-            self.state = 115
+            self.state = 104
             self.match(GQLParser.I_TYPE)
         except RecognitionException as re:
             localctx.exception = re
