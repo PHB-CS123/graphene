@@ -7,7 +7,12 @@ class GrapheneServer:
         pass
 
     def parseCommands(self, commands):
-        print commands
+        for cmd in commands:
+            if cmd is None or cmd.c is None:
+                # there was an error, so for now ignore it
+                # later we will actually say something about it
+                continue
+            print cmd.c.cmd
 
     def doCommands(self, data):
         input = InputStream.InputStream(data)

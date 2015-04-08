@@ -1,5 +1,6 @@
 from Shell import Shell
 from server.GrapheneServer import GrapheneServer
+import readline
 
 server = GrapheneServer()
 

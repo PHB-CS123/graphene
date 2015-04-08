@@ -1,5 +1,11 @@
 grammar GQL;
 
+@header {
+from commands.MatchCommand import *
+from commands.CreateRelationCommand import *
+from commands.CreateTypeCommand import *
+}
+
 parse : stmt_list EOF;
 
 stmt_list returns [stmts]
@@ -19,9 +25,18 @@ exit_stmt returns [s]
   {s={"type": "exit"}}
   ;
 
-match_stmt returns [s]
+match_stmt returns [cmd]
+  @init {$cmd = None}
   : K_MATCH (nc=node_chain)
-  {s={"type": "match", "data": $nc.ctx}}
+  {$cmd = MatchCommand($nc.ctx)}
+  ;
+
+node_chain returns [chain]
+  @init {$chain = []}
+  : (n1=node {$chain.append($n1.ctx)})
+    (ri=relation {$chain.append($ri.ctx)}
+     ni=node {$chain.append($ni.ctx)})*
+  {return $chain}
   ;
 
 node returns [node_data]
@@ -31,41 +46,53 @@ node returns [node_data]
     (nt=I_TYPE)
     ')'
   {
-$node_data = { "name": $nn.text, "type": $nt.text }
+return { "chain_type": "node", "name": $nn.text, "type": $nt.text }
   }
   ;
 
 relation returns [relation_data]
   : '-' ((rn=I_NAME ':')? rel=I_RELATION) '->'
   {
-$relation_data = { "name": $rn.text, "type": $rel.text[1:-1] }
+return { "chain_type": "rel", "name": $rn.text, "type": $rel.text[1:-1] }
   }
   ;
 
-node_chain
-  : node (relation node)*
-  ;
-
-create_stmt returns [c]
-  : K_CREATE ( create_type
-             | create_relation
+create_stmt returns [cmd]
+  @init {$cmd = None}
+  : K_CREATE ( ct=create_type
+             | cr=create_relation
              )
+  {
+if $ct.ctx is not None:
+    $cmd = CreateTypeCommand($ct.ctx)
+else:
+    $cmd = CreateRelationCommand($cr.ctx)
+  }
   ;
 
 create_type
-  : K_TYPE (I_TYPE) '(' type_list ')'
+  : K_TYPE
+    (t=I_TYPE {$t=$t.text})
+    '(' (tl=type_list) ')'
   ;
 
-type_list
-  : type_decl (',' type_decl)*
+
+type_list returns [tds]
+  : td1=type_decl {$tds = [$td1.ctx]}
+    (',' (tdi=type_decl {$tds.append($tdi.ctx)}))*
+  {return $tds}
   ;
 
 type_decl
-  : I_NAME ':' ( T_INT | T_STR )
+  : (n=I_NAME) ':' (t=( T_INT | T_STR ))
+  {return ($n.text, $t.text)}
   ;
 
 create_relation
-  : K_RELATION I_RELATION I_TYPE I_TYPE;
+  : K_RELATION
+    (r=I_RELATION {$r=$r.text[1:-1]})
+    (t1=I_TYPE {$t1=$t1.text})
+    (t2=I_TYPE {$t2=$t2.text});
 
 K_EXPLAIN : E X P L A I N ;
 K_MATCH : M A T C H ;
