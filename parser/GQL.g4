@@ -10,11 +10,18 @@ stmt_list returns [stmts]
 stmt
   : (K_EXPLAIN)? ( c=match_stmt
                  | c=create_stmt
+                 | c=exit_stmt
                  )
   ;
 
-match_stmt
-  : K_MATCH node_chain
+exit_stmt returns [s]
+  : (K_EXIT | K_QUIT)
+  {s={"type": "exit"}}
+  ;
+
+match_stmt returns [s]
+  : K_MATCH (nc=node_chain)
+  {s={"type": "match", "data": $nc.ctx}}
   ;
 
 node returns [node_data]
@@ -65,6 +72,8 @@ K_MATCH : M A T C H ;
 K_CREATE : C R E A T E ;
 K_TYPE : T Y P E ;
 K_RELATION : R E L A T I O N ;
+K_EXIT : E X I T ;
+K_QUIT : Q U I T ;
 
 T_INT : I N T ;
 T_STR : S T R ;
