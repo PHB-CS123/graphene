@@ -1,6 +1,6 @@
 from antlr4 import InputStream, CommonTokenStream
-from parser.GQLLexer import GQLLexer
-from parser.GQLParser import GQLParser
+from graphene.parser.GQLLexer import GQLLexer
+from graphene.parser.GQLParser import GQLParser
 
 class GrapheneServer:
     def __init__(self):

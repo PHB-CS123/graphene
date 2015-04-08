@@ -1,6 +1,6 @@
 import struct
 
-from Node import *
+from graphene.storage.Node import *
 
 
 class NodeStore:

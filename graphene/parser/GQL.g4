@@ -1,9 +1,9 @@
 grammar GQL;
 
 @header {
-from commands.MatchCommand import *
-from commands.CreateRelationCommand import *
-from commands.CreateTypeCommand import *
+from graphene.commands.MatchCommand import *
+from graphene.commands.CreateRelationCommand import *
+from graphene.commands.CreateTypeCommand import *
 }
 
 parse : stmt_list EOF;
