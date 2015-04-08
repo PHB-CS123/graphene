@@ -1,4 +1,5 @@
 import cmd
+import readline
 
 class Shell(cmd.Cmd):
     def __init__(self, server):
