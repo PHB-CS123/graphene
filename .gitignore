@@ -129,3 +129,6 @@ sftp-config.json
 ### Graphene Program Files ###
 datafiles
 test_datafiles
+
+### Other files ###
+*.orig
