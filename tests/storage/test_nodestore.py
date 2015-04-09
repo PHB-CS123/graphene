@@ -18,7 +18,7 @@ class TestNodeStoreMethods(unittest.TestCase):
         """
         nodestore = NodeStore()
         empty_node = Node()
-        self.assertRaises(ValueError, nodestore.write_node(empty_node))
+        self.assertRaises(ValueError, nodestore.write_node, empty_node)
 
     def test_write_read(self):
         """
