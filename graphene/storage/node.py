@@ -6,7 +6,7 @@ class Node:
         propId: ID of the first property the node has
     Along with the index where the node is stored
     """
-    def __init__(self, index=0, in_use=0, rel_id=0, prop_id=0):
+    def __init__(self, index=0, in_use=False, rel_id=0, prop_id=0):
         """
         Initializes a Node with the given values
         :param index: Index of the node to initialize
@@ -24,3 +24,20 @@ class Node:
         self.inUse = in_use
         self.relId = rel_id
         self.propId = prop_id
+
+    def __eq__(self, other):
+        """
+        Overload the == operator
+        :param other: Other node
+        :type other: Node
+        :return: True if equivalent, false otherwise
+        :rtype: bool
+        """
+
+        if isinstance(other, self.__class__):
+            return (self.index == other.index) and \
+                   (self.inUse == other.inUse) and \
+                   (self.relId == other.relId) and \
+                   (self.propId == other.propId)
+        else:
+            return False

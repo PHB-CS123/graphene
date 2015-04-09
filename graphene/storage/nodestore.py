@@ -1,5 +1,7 @@
 import struct
+import os.path
 
+from graphene.storage.graphenestore import *
 from graphene.storage.node import *
 
 
@@ -43,12 +45,34 @@ class NodeStore:
         :return: NodeStore instance for handling Node record types
         :rtype NodeStore
         """
-
         try:
-            self.storeFile = open(NodeStore.FILE_NAME, "ab+")
+            graphenestore = GrapheneStore()
+            # Get the path of the file
+            file_path = graphenestore.datafilesDir + NodeStore.FILE_NAME
+            # If the file exists, simply open it
+            if os.path.isfile(file_path):
+                self.storeFile = open(file_path, "ab+")
+            # Otherwise open it and pad its first 9 bytes with 0s
+            else:
+                self.storeFile = open(file_path, "ab+")
+                self.padFileHeader()
         except IOError:
             print("ERROR: unable to open node store file: ", NodeStore.FILE_NAME)
             raise IOError
+
+    def padFileHeader(self):
+        """
+        Called when the NodeStore file is first created, pads the NodeStore
+        with 9 bytes of 0s
+        :return: Nothing
+        :rtype: None
+        """
+        # Create a packed struct of 0s
+        empty_struct = struct.Struct(NodeStore.STRUCT_FORMAT_STR)
+        packed_data = empty_struct.pack(0, 0, 0)
+
+        # File pointer should be at 0, no need to seek
+        self.storeFile.write(packed_data)
 
     def node_at_index(self, index):
         """
@@ -73,11 +97,9 @@ class NodeStore:
         # Seek to the given offset
         self.storeFile.seek(file_offset)
 
-        print("RECORD_SIZE=", NodeStore.RECORD_SIZE)
-
         # Get the index of the node to store it with the Node instance
         packed_data = self.storeFile.read(NodeStore.RECORD_SIZE)
-        index = file_offset / NodeStore.RECORD_SIZE;
+        index = file_offset / NodeStore.RECORD_SIZE
 
         return self.node_from_packed_data(index, packed_data)
 
