@@ -56,7 +56,7 @@ class NodeStore:
         :param index: Index of node
         :type index: int
         :return: Node with given index
-        :rtype: None
+        :rtype: Node
         """
 
         file_offset = index * NodeStore.RECORD_SIZE
@@ -72,6 +72,8 @@ class NodeStore:
         """
         # Seek to the given offset
         self.storeFile.seek(file_offset)
+
+        print("RECORD_SIZE=", NodeStore.RECORD_SIZE)
 
         # Get the index of the node to store it with the Node instance
         packed_data = self.storeFile.read(NodeStore.RECORD_SIZE)
