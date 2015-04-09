@@ -52,9 +52,12 @@ class NodeStore:
             # If the file exists, simply open it
             if os.path.isfile(file_path):
                 self.storeFile = open(file_path, "r+b")
-            # Otherwise open it and pad its first 9 bytes with 0s
             else:
+                # Create the file
+                open(file_path, "w+").close()
+                # Open it so that it can be read/written
                 self.storeFile = open(file_path, "r+b")
+                # Pad its first 9 bytes with 0s
                 self.padFileHeader()
         except IOError:
             print("ERROR: unable to open node store file: ", NodeStore.FILE_NAME)
