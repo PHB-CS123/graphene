@@ -48,8 +48,9 @@ class NodeStore:
             self.storeFile = open(NodeStore.FILE_NAME, "ab+")
         except IOError:
             print("ERROR: unable to open node store file: ", NodeStore.FILE_NAME)
+            raise IOError
 
-    def node_with_index(self, index):
+    def node_at_index(self, index):
         """
         Finds the Node with the given Node index
         :param index: Index of node
@@ -72,20 +73,26 @@ class NodeStore:
         # Seek to the given offset
         self.storeFile.seek(file_offset)
 
+        # Get the index of the node to store it with the Node instance
         packed_data = self.storeFile.read(NodeStore.RECORD_SIZE)
+        index = file_offset / NodeStore.RECORD_SIZE;
 
-        return self.node_from_packed_data(packed_data)
+        return self.node_from_packed_data(index, packed_data)
 
-    def write_node_to_offset(self, file_offset, node):
+    def write_node(self, node):
         """
-        Writes the data to the NodeStore file at the given offset
-        :param file_offset: Offset in bytes
-        :type file_offset: int
+        Writes the given Node to the NodeStore file
         :param node: Node to write to offset
         :type: node: Node
         :return: Nothing
         :rtype: None
         """
+
+        file_offset = node.index * NodeStore.RECORD_SIZE
+
+        if (file_offset == 0):
+            raise ValueError("Node cannot be written to offset 0")
+
         # Pack the node data, then write it to the specified offset
         packed_data = self.packed_data_from_node(node)
 
@@ -95,9 +102,11 @@ class NodeStore:
 
 
     @classmethod
-    def node_from_packed_data(cls, packed_data):
+    def node_from_packed_data(cls, index, packed_data):
         """
         Creates a node from the given packed data
+        :param index: Index of the node that the packed data belongs to
+        :type index: int
         :param packed_data: Packed binary data
         :return: Node from packed data
         :rtype: Node
@@ -113,7 +122,7 @@ class NodeStore:
         prop_id = unpacked_data[2]
 
         # Create a node record with these components
-        return Node(in_use, rel_id, prop_id)
+        return Node(index, in_use, rel_id, prop_id)
 
     @classmethod
     def packed_data_from_node(cls, node):
