@@ -60,8 +60,32 @@ class TestNodeStoreMethods(unittest.TestCase):
         self.assertEquals(valid_node1, valid_node1_file)
         self.assertEquals(valid_node2, valid_node2_file)
 
-    def tearDown(self):
+    def test_overwrite_node(self):
         """
-        Removes any test files so that this test does not interfere with others
+        Tests that overwriting a node works
         """
-        # GrapheneStore().remove_test_datafiles()
+
+        # Create a node that overwrites an existing node
+        nodestore = NodeStore()
+        # Get old node values and new node values
+        old_node1 = Node(1, False, 1, 1)
+        new_node2 = Node(2, True, 8, 8)
+        old_node3 = Node(3, False, 3, 3)
+
+        # Write the new node
+        nodestore.write_node(new_node2)
+
+        # Verify that the data is as expected
+        old_node1_file = nodestore.node_at_index(old_node1.index)
+        self.assertEquals(old_node1, old_node1_file)
+
+        new_node2_file = nodestore.node_at_index(new_node2.index)
+        self.assertEquals(new_node2, new_node2_file)
+
+        old_node3_file = nodestore.node_at_index(old_node3.index)
+        self.assertEquals(old_node3, old_node3_file)
+
+
+
+
+
