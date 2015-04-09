@@ -102,7 +102,9 @@ coverage.xml
 *.log
 
 # Sphinx documentation
-docs/_build/
+docs/build/
+*.rst
+!index.rst
 
 # PyBuilder
 target/
