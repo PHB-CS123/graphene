@@ -68,6 +68,9 @@ clean-parser:
 run: all
 	./graphene-client
 
+test:
+	py.test
+
 gendocs:
 	sphinx-apidoc -f -o docs graphene
 
