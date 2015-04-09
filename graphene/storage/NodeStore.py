@@ -61,7 +61,6 @@ class NodeStore:
         file_offset = index * NodeStore.RECORD_SIZE
         return self.node_at_offset(file_offset)
 
-
     def node_at_offset(self, file_offset):
         """
         Gets the node at the given file offset (bytes)
@@ -110,11 +109,11 @@ class NodeStore:
 
         # Get the node components
         in_use = unpacked_data[0]
-        node_id = unpacked_data[1]
-        rel_id = unpacked_data[2]
+        rel_id = unpacked_data[1]
+        prop_id = unpacked_data[2]
 
         # Create a node record with these components
-        return Node(in_use, node_id, rel_id)
+        return Node(in_use, rel_id, prop_id)
 
     @classmethod
     def packed_data_from_node(cls, node):
@@ -125,9 +124,9 @@ class NodeStore:
         :return: Packed data
         """
 
-        # Pack the node into a struct with the order (inUse, nodeId, relId)
+        # Pack the node into a struct with the order (inUse, relId, propId)
         node_struct = struct.Struct(NodeStore.STRUCT_FORMAT_STR)
-        packed_data = node_struct.pack(node.inUse, node.nodeId, node.relId)
+        packed_data = node_struct.pack(node.inUse, node.relId, node.propId)
 
         return packed_data
 
