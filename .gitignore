@@ -35,7 +35,7 @@
 ## Plugin-specific files:
 
 # IntelliJ
-/out/
+out/
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/
@@ -125,3 +125,7 @@ target/
 
 # sftp configuration file
 sftp-config.json
+
+### Graphene Program Files ###
+datafiles
+test_datafiles
