@@ -25,6 +25,7 @@ class Shell(cmd.Cmd):
 
     def default(self, line):
         try:
-            self.server.doCommands(line)
+            if not self.server.doCommands(line):
+                return True
         except Exception, e:
             print "Error: %s" % e

@@ -1,9 +1,7 @@
 grammar GQL;
 
 @header {
-from graphene.commands.MatchCommand import *
-from graphene.commands.CreateRelationCommand import *
-from graphene.commands.CreateTypeCommand import *
+from graphene.commands import *
 }
 
 parse : stmt_list EOF;
@@ -20,9 +18,9 @@ stmt
                  )
   ;
 
-exit_stmt returns [s]
+exit_stmt returns [cmd]
   : (K_EXIT | K_QUIT)
-  {s={"type": "exit"}}
+  {$cmd = ExitCommand()}
   ;
 
 match_stmt returns [cmd]

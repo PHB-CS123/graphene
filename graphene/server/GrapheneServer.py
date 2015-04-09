@@ -1,6 +1,7 @@
 from antlr4 import InputStream, CommonTokenStream
 from graphene.parser.GQLLexer import GQLLexer
 from graphene.parser.GQLParser import GQLParser
+from graphene.commands import *
 
 class GrapheneServer:
     def __init__(self):
@@ -12,7 +13,10 @@ class GrapheneServer:
                 # there was an error, so for now ignore it
                 # later we will actually say something about it
                 continue
+            if isinstance(cmd.c.cmd, ExitCommand):
+                return False
             print cmd.c.cmd
+        return True
 
     def doCommands(self, data):
         input = InputStream.InputStream(data)
@@ -21,6 +25,6 @@ class GrapheneServer:
         parser = GQLParser(stream)
         try:
             tree = parser.parse()
-            self.parseCommands(tree.stmt_list().stmts)
+            return self.parseCommands(tree.stmt_list().stmts)
         except Exception, e:
             print e
