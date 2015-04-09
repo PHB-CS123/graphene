@@ -1,4 +1,4 @@
-pip install -r lib/pip-reqs.txt
+pip2 install -r lib/pip-reqs.txt
 cd lib/antlr4-python2
-python setup.py install
+python2 setup.py install
 cd ../../
