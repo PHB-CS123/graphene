@@ -2,6 +2,7 @@ grammar GQL;
 
 @header {
 from graphene.commands import *
+from graphene.expressions import *
 }
 
 parse : stmt_list EOF;
@@ -37,22 +38,23 @@ node_chain returns [chain]
   {return $chain}
   ;
 
-node returns [node_data]
+node
   : '('
-    (nn=I_NAME)?
-    ':'
+    (nn=I_NAME ':')?
     (nt=I_TYPE)
     ')'
-  {
-return { "chain_type": "node", "name": $nn.text, "type": $nt.text }
-  }
+  {return MatchNode($nn.text, $nt.text)}
   ;
 
-relation returns [relation_data]
-  : '-' ((rn=I_NAME ':')? rel=I_RELATION) '->'
-  {
-return { "chain_type": "rel", "name": $rn.text, "type": $rel.text[1:-1] }
-  }
+/*
+ * I_RELATION matches all totally uppercase strings, and I_TYPE matches all
+ * strings that start with a capital letter... but if the string is one
+ * character long, this is ambiguous. Hence we allow both identifier
+ * possibilities, but ensure they pass the fully uppercase predicate.
+ */
+relation
+  : '-' '[' (rn=I_NAME ':')? (rel=(I_RELATION|I_TYPE) {$rel.text.isupper()}?) ']' '->'
+  {return MatchRelation($rn.text, $rel.text)}
   ;
 
 create_stmt returns [cmd]
@@ -71,7 +73,7 @@ else:
 create_type
   : K_TYPE
     (t=I_TYPE {$t=$t.text})
-    '(' (tl=type_list) ')'
+    '[' (tl=type_list) ']'
   ;
 
 
@@ -103,9 +105,9 @@ K_QUIT : Q U I T ;
 T_INT : I N T ;
 T_STR : S T R ;
 
-I_NAME : LCASE (LCASE | DIGIT)* ;
-I_TYPE : UCASE LCASE* ;
-I_RELATION : '(' UCASE+ ')' ;
+I_NAME : LCASE (LCASE | DIGIT | OTHER_VALID)* ;
+I_TYPE : UCASE LETTER*;
+I_RELATION : UCASE+ {self.text.isupper()}?;
 
 SPACES
   : [ \u000B\u000C\t\r\n] -> skip
@@ -123,7 +125,9 @@ UNEXPECTED_CHAR
   : .
   ;
 
+fragment OTHER_VALID : [_\-];
 fragment DIGIT : [0-9];
+fragment LETTER : [A-Za-z];
 fragment UCASE : [A-Z];
 fragment LCASE : [a-z];
 
