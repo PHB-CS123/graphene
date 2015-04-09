@@ -64,4 +64,4 @@ class TestNodeStoreMethods(unittest.TestCase):
         """
         Removes any test files so that this test does not interfere with others
         """
-        GrapheneStore().remove_test_datafiles()
+        # GrapheneStore().remove_test_datafiles()
