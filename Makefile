@@ -20,10 +20,10 @@ clean-parser:
 run: default
 	./graphene-client
 
-test:
+test: default
 	py.test
 
 docs:
 	make -f Makefile.docs html
 
-.PHONY: clean parser clean-parser docs
+.PHONY: clean clean-parser docs
