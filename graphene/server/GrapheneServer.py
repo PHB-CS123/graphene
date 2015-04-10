@@ -32,6 +32,6 @@ class GrapheneServer:
         try:
             tree = parser.parse()
             return self.parseCommands(tree.stmt_list().stmts)
-        except ParserError, e:
+        except ParserError as e:
             print "Parser error: %s" % e
             return True

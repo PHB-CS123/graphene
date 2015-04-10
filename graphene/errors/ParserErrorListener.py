@@ -4,5 +4,5 @@ from graphene.errors.ParserError import ParserError
 class ParserErrorListener(ErrorListener):
 
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
-        #print recognizer, offendingSymbol, line, column, msg, e
-        raise ParserError(msg)
+        print dir(e)
+        raise ParserError(recognizer, offendingSymbol, line, column, msg, e)

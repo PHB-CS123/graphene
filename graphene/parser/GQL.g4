@@ -128,10 +128,6 @@ LINE_COMMENT
   : '//' ~[\r\n]* -> skip
   ;
 
-UNEXPECTED_CHAR
-  : .
-  ;
-
 fragment OTHER_VALID : [_\-];
 fragment DIGIT : [0-9];
 fragment LETTER : [A-Za-z];
