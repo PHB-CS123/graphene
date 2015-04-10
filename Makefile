@@ -7,15 +7,13 @@ default: parser
 
 all: parser docs
 
-clean: clean-parser
-	rm -rf $(BUILDDIR)/*
-	rm -rf dir/*.rst
+clean: clean-parser clean-docs
 
 parser:
 	$(ANTLR4) $(SRC)/parser/GQL.g4
 
 clean-parser:
-	rm -rf $(SRC)/parser/GQL*.py $(SRC)/parser/*.tokens
+	rm -rf $(SRC)/parser/GQL*.py* $(SRC)/parser/*.tokens
 
 run: default
 	./graphene-client
@@ -25,5 +23,8 @@ test: default
 
 docs:
 	make -f Makefile.docs html
+
+clean-docs:
+	make -f Makefile.docs clean
 
 .PHONY: clean clean-parser docs
