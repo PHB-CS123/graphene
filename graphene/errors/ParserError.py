@@ -8,5 +8,6 @@ class ParserError(Exception):
         self.original_err = e
 
     def __str__(self):
-        print dir(self.offendingSymbol.getTokenSource())
-        return self.original_msg
+        text = self.recognizer.getInputStream().getText()
+        marker = "\t%s\n\t%s^" % (text, '-' * self.column)
+        return "Parser error: %s\nAt\n%s" % (self.original_msg, marker)

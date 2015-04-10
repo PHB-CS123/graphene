@@ -77,7 +77,7 @@ else:
 create_type
   : K_TYPE
     (t=I_TYPE {$t=$t.text})
-    '[' (tl=type_list) ']'
+    '(' (tl=type_list) ')'
   ;
 
 
@@ -94,7 +94,7 @@ type_decl
 
 create_relation
   : K_RELATION
-    (r=I_RELATION {$r=$r.text[1:-1]})
+    (r=(I_RELATION|I_TYPE) {$r.text.isupper()}? {$r=$r.text})
     (t1=I_TYPE {$t1=$t1.text})
     (t2=I_TYPE {$t2=$t2.text});
 
@@ -117,15 +117,15 @@ I_RELATION : UCASE+ {self.text.isupper()}?;
 
 // Other tokens
 SPACES
-  : [ \u000B\u000C\t\r\n] -> skip
+  : [ \u000B\u000C\t\r\n] -> channel(HIDDEN)
   ;
 
 BLOCK_COMMENT
-  : '/*' .*? '*/' -> skip
+  : '/*' .*? '*/' -> channel(HIDDEN)
   ;
 
 LINE_COMMENT
-  : '//' ~[\r\n]* -> skip
+  : '//' ~[\r\n]* -> channel(HIDDEN)
   ;
 
 fragment OTHER_VALID : [_\-];

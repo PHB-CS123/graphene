@@ -21,7 +21,7 @@ class GrapheneServer:
         return True
 
     def doCommands(self, data):
-        errorListener = ParserErrorListener();
+        errorListener = ParserErrorListener()
         input = InputStream.InputStream(data)
         lexer = GQLLexer(input)
         lexer.removeErrorListeners()
@@ -33,5 +33,5 @@ class GrapheneServer:
             tree = parser.parse()
             return self.parseCommands(tree.stmt_list().stmts)
         except ParserError as e:
-            print "Parser error: %s" % e
+            print e
             return True
