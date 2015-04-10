@@ -5,6 +5,7 @@ from graphene.commands import *
 from graphene.expressions import *
 }
 
+// General parsing, including statement lists
 parse : stmt_list EOF;
 
 stmt_list returns [stmts]
@@ -13,17 +14,19 @@ stmt_list returns [stmts]
   ;
 
 stmt
-  : (K_EXPLAIN)? ( c=match_stmt
-                 | c=create_stmt
-                 | c=exit_stmt
-                 )
+  : ( c=match_stmt
+    | c=create_stmt
+    | c=exit_stmt
+    )
   ;
 
+// EXIT command
 exit_stmt returns [cmd]
   : (K_EXIT | K_QUIT)
   {$cmd = ExitCommand()}
   ;
 
+// MATCH command
 match_stmt returns [cmd]
   @init {$cmd = None}
   : K_MATCH (nc=node_chain)
@@ -57,6 +60,7 @@ relation
   {return MatchRelation($rn.text, $rel.text)}
   ;
 
+// CREATE command
 create_stmt returns [cmd]
   @init {$cmd = None}
   : K_CREATE ( ct=create_type
@@ -94,7 +98,7 @@ create_relation
     (t1=I_TYPE {$t1=$t1.text})
     (t2=I_TYPE {$t2=$t2.text});
 
-K_EXPLAIN : E X P L A I N ;
+// Keywords
 K_MATCH : M A T C H ;
 K_CREATE : C R E A T E ;
 K_TYPE : T Y P E ;
@@ -102,13 +106,16 @@ K_RELATION : R E L A T I O N ;
 K_EXIT : E X I T ;
 K_QUIT : Q U I T ;
 
+// Types
 T_INT : I N T ;
 T_STR : S T R ;
 
+// Identifiers
 I_NAME : LCASE (LCASE | DIGIT | OTHER_VALID)* ;
 I_TYPE : UCASE LETTER*;
 I_RELATION : UCASE+ {self.text.isupper()}?;
 
+// Other tokens
 SPACES
   : [ \u000B\u000C\t\r\n] -> skip
   ;

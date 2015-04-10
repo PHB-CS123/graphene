@@ -2,6 +2,8 @@ from antlr4 import InputStream, CommonTokenStream
 from graphene.parser.GQLLexer import GQLLexer
 from graphene.parser.GQLParser import GQLParser
 from graphene.commands import *
+from graphene.errors.ParserError import ParserError
+from graphene.errors.ParserErrorListener import ParserErrorListener
 
 class GrapheneServer:
     def __init__(self):
@@ -19,12 +21,17 @@ class GrapheneServer:
         return True
 
     def doCommands(self, data):
+        errorListener = ParserErrorListener();
         input = InputStream.InputStream(data)
         lexer = GQLLexer(input)
+        lexer.removeErrorListeners()
         stream = CommonTokenStream(lexer)
         parser = GQLParser(stream)
+        parser.removeErrorListeners()
+        parser.addErrorListener(errorListener)
         try:
             tree = parser.parse()
             return self.parseCommands(tree.stmt_list().stmts)
-        except Exception, e:
-            print e
+        except ParserError, e:
+            print "Parser error: %s" % e
+            return True
