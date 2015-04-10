@@ -4,3 +4,9 @@ python:
 install:
   "./install-deps.sh"
 script: make test
+notifications:
+  email:
+    recipients:
+      - ebulkin@caltech.edu
+      - codyhan94@gmail.com
+      - dpena@caltech.edu
