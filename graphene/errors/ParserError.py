@@ -1,4 +1,9 @@
 class ParserError(Exception):
+    """
+    Exception class for parser errors. Message contains information about
+    specific location of offending symbols.
+    """
+
     def __init__(self, recognizer, offendingSymbol, line, column, msg, e):
         self.offendingSymbol = offendingSymbol
         self.lineno = line
