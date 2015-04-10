@@ -3,7 +3,9 @@ JAVA_OPTS = "-Dlanguage=Python2"
 ANTLR4 = java -cp $(JAR_FILE) org.antlr.v4.Tool $(JAVA_OPTS)
 SRC = graphene
 
-all: parser
+default: parser
+
+all: parser docs
 
 clean: clean-parser
 	rm -rf $(BUILDDIR)/*
@@ -21,4 +23,7 @@ run: all
 test:
 	py.test
 
-.PHONY: clean parser clean-parser
+docs:
+	make -f Makefile.docs html
+
+.PHONY: clean parser clean-parser docs
