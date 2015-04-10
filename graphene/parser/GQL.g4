@@ -113,7 +113,7 @@ T_STR : S T R ;
 // Identifiers
 I_NAME : LCASE (LCASE | DIGIT | OTHER_VALID)* ;
 I_TYPE : UCASE LETTER*;
-I_RELATION : UCASE+ {self.text.isupper()}?;
+I_RELATION : UCASE (UCASE | OTHER_VALID)+ {self.text.isupper()}?;
 
 // Other tokens
 SPACES
