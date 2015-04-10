@@ -17,7 +17,7 @@ parser:
 clean-parser:
 	rm -rf $(SRC)/parser/GQL*.py $(SRC)/parser/*.tokens
 
-run: all
+run: default
 	./graphene-client
 
 test:
