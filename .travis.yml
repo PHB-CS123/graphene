@@ -1,6 +1,12 @@
 language: python
 python:
   "2.7"
-install: 
+install:
   "./install-deps.sh"
-script: py.test
+script: make test
+notifications:
+  email:
+    recipients:
+      - ebulkin@caltech.edu
+      - codyhan94@gmail.com
+      - dpena@caltech.edu
