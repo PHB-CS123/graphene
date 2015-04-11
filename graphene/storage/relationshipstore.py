@@ -23,7 +23,7 @@ class RelationshipStore:
     # '=': native byte order representation, standard size, no alignment
     # 'B': unsigned char
     # 'I': unsigned int
-    STRUCT_FORMAT_STR = "= B I I I I I I I"
+    STRUCT_FORMAT_STR = "= B I I I I I I I I"
     ''':type: str'''
 
     # Size of an individual record (bytes)
@@ -185,7 +185,7 @@ class RelationshipStore:
         :return: Packed class struct of 0s
         """
         empty_struct = struct.Struct(cls.STRUCT_FORMAT_STR)
-        packed_data = empty_struct.pack(0, 0, 0, 0, 0, 0, 0, 0)
+        packed_data = empty_struct.pack(0, 0, 0, 0, 0, 0, 0, 0, 0)
         return packed_data
 
     @classmethod
