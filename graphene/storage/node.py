@@ -20,7 +20,9 @@ class Node:
         :return: Node instance with the specified values
         :rtype: Node
         """
+        # Index of the node is not stored in the NodeStore file
         self.index = index
+        # Values stored in the NodeStore file
         self.inUse = in_use
         self.relId = rel_id
         self.propId = prop_id

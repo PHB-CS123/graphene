@@ -23,9 +23,8 @@ class NodeStore:
     ''':type: int'''
 
     # Format string used to compact these values
-    # '<': little endian representation
+    # '=': native byte order representation, standard size, no alignment
     # '?': boolean
-    # 'I': unsigned int
     # 'I': unsigned int
     STRUCT_FORMAT_STR = "= ? I I"
     ''':type: str'''
@@ -42,13 +41,14 @@ class NodeStore:
         """
         Creates a NodeStore instance which handles reading/writing to the
         file containing Node values.
-        :return: NodeStore instance for handling Node record types
+        :return: NodeStore instance for handling Node records
         :rtype NodeStore
         """
+        graphenestore = GrapheneStore()
+        # Get the path of the file
+        file_path = graphenestore.datafilesDir + self.FILE_NAME
+
         try:
-            graphenestore = GrapheneStore()
-            # Get the path of the file
-            file_path = graphenestore.datafilesDir + NodeStore.FILE_NAME
             # If the file exists, simply open it
             if os.path.isfile(file_path):
                 self.storeFile = open(file_path, "r+b")
@@ -58,22 +58,20 @@ class NodeStore:
                 # Open it so that it can be read/written
                 self.storeFile = open(file_path, "r+b")
                 # Pad its first 9 bytes with 0s
-                self.padFileHeader()
+                self.pad_file_header()
         except IOError:
-            print("ERROR: unable to open node store file: ", NodeStore.FILE_NAME)
+            print("ERROR: unable to open node store file: " + file_path)
             raise IOError
 
-    def padFileHeader(self):
+    def pad_file_header(self):
         """
         Called when the NodeStore file is first created, pads the NodeStore
-        with 9 bytes of 0s
+        file with 9 bytes of 0s
         :return: Nothing
         :rtype: None
         """
         # Create a packed struct of 0s
-        empty_struct = struct.Struct(NodeStore.STRUCT_FORMAT_STR)
-        packed_data = empty_struct.pack(0, 0, 0)
-
+        packed_data = self.empty_struct_data()
         # File pointer should be at 0, no need to seek
         self.storeFile.write(packed_data)
 
@@ -86,23 +84,12 @@ class NodeStore:
         :rtype: Node
         """
 
-        file_offset = index * NodeStore.RECORD_SIZE
-        return self.node_at_offset(file_offset)
-
-    def node_at_offset(self, file_offset):
-        """
-        Gets the node at the given file offset (bytes)
-        :param file_offset: Offset of the node in the file (in bytes)
-        :type file_offset: int
-        :return: Node stored at the given offset
-        :rtype: Node
-        """
-        # Seek to the given offset
+        file_offset = index * self.RECORD_SIZE
+        # Seek to the calculated offset
         self.storeFile.seek(file_offset)
 
-        # Get the index of the node to store it with the Node instance
-        packed_data = self.storeFile.read(NodeStore.RECORD_SIZE)
-        index = file_offset / NodeStore.RECORD_SIZE
+        # Get the packed data from the file
+        packed_data = self.storeFile.read(self.RECORD_SIZE)
 
         return self.node_from_packed_data(index, packed_data)
 
@@ -115,15 +102,15 @@ class NodeStore:
         :rtype: None
         """
 
-        file_offset = node.index * NodeStore.RECORD_SIZE
+        file_offset = node.index * self.RECORD_SIZE
 
-        if (file_offset == 0):
+        if file_offset == 0:
             raise ValueError("Node cannot be written to offset 0")
 
         # Pack the node data, then write it to the specified offset
         packed_data = self.packed_data_from_node(node)
 
-        # Seek to the given offset and write the data
+        # Seek to the calculated offset and write the data
         self.storeFile.seek(file_offset)
         self.storeFile.write(packed_data)
 
@@ -140,7 +127,7 @@ class NodeStore:
         """
 
         # Unpack the data using the Node struct format
-        node_struct = struct.Struct(NodeStore.STRUCT_FORMAT_STR)
+        node_struct = struct.Struct(cls.STRUCT_FORMAT_STR)
         unpacked_data = node_struct.unpack(packed_data)
 
         # Get the node components
@@ -161,9 +148,19 @@ class NodeStore:
         """
 
         # Pack the node into a struct with the order (inUse, relId, propId)
-        node_struct = struct.Struct(NodeStore.STRUCT_FORMAT_STR)
+        node_struct = struct.Struct(cls.STRUCT_FORMAT_STR)
         packed_data = node_struct.pack(node.inUse, node.relId, node.propId)
 
+        return packed_data
+
+    @classmethod
+    def empty_struct_data(cls):
+        """
+        Creates a packed struct of 0s
+        :return: Packed class struct of 0s
+        """
+        empty_struct = struct.Struct(cls.STRUCT_FORMAT_STR)
+        packed_data = empty_struct.pack(0, 0, 0)
         return packed_data
 
     def __del__(self):
