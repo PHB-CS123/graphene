@@ -3,7 +3,8 @@ JAVA_OPTS = "-Dlanguage=Python2"
 ANTLR4 = java -cp $(JAR_FILE) org.antlr.v4.Tool $(JAVA_OPTS)
 SRC = graphene
 BUILD_DIR = build/
-COV_OPTS = --cov-report term-missing --cov-report html --cov-config .coveragerc --cov tests/
+TEST_DIR = tests/
+COV_OPTS = --cov-report term-missing --cov-report html --cov-config .coveragerc --cov $(SRC) $(TEST_DIR)
 
 default: parser
 
