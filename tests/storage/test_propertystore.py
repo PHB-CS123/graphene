@@ -15,8 +15,8 @@ class TestPropertyStoreMethods(unittest.TestCase):
         """
         Clean the database so that the tests are independent of one another
         """
-        graphenestore = GrapheneStore()
-        graphenestore.remove_test_datafiles()
+        graphene_store = GrapheneStore()
+        graphene_store.remove_test_datafiles()
 
     def test_empty_init(self):
         """
@@ -34,6 +34,7 @@ class TestPropertyStoreMethods(unittest.TestCase):
         Test that writing a property to offset 0 raises an error
         """
         property_store = PropertyStore()
+
         empty_property = Property()
         with self.assertRaises(ValueError):
             property_store.write_property(empty_property)
@@ -43,6 +44,7 @@ class TestPropertyStoreMethods(unittest.TestCase):
         Test that reading a property from offset 0 raises an error
         """
         property_store = PropertyStore()
+
         with self.assertRaises(ValueError):
             property_store.property_at_index(0)
 
@@ -51,8 +53,9 @@ class TestPropertyStoreMethods(unittest.TestCase):
         Tests that the property written to the PropertyStore is the
         property that is read.
         """
-        # Create a property and add it to the PropertyStore file
         property_store = PropertyStore()
+
+        # Create a property and add it to the PropertyStore file
         db_property = Property(1, False, Property.PropertyType.int, 2, 3, 4, 5)
         property_store.write_property(db_property)
 
@@ -67,7 +70,6 @@ class TestPropertyStoreMethods(unittest.TestCase):
         Tests when 2 properties are written after 1 property
         to the PropertyStore
         """
-
         property_store = PropertyStore()
 
         # Create one property and write it to the PropertyStore
@@ -94,7 +96,6 @@ class TestPropertyStoreMethods(unittest.TestCase):
         """
         Tests that overwriting a property in a database with 3 properties works
         """
-
         property_store = PropertyStore()
 
         # Create 3 properties
@@ -132,4 +133,53 @@ class TestPropertyStoreMethods(unittest.TestCase):
 
         property3_file = property_store.property_at_index(property3.index)
         self.assertEquals(property3, property3_file)
+
+    def test_delete_property(self):
+        """
+        Tests that deleting 2 properties in a database with 3 properties works
+        """
+        property_store = PropertyStore()
+
+        # Create 3 properties
+        property1 = Property(1, False, Property.PropertyType.short, 2, 3, 4, 5)
+        property2 = Property(2, True, Property.PropertyType.string, 4, 6, 8, 10)
+        property3 = Property(9, False, Property.PropertyType.double, 8, 7, 6, 5)
+
+        # Write them to the property_store
+        property_store.write_property(property1)
+        property_store.write_property(property2)
+        property_store.write_property(property3)
+
+        # Verify that they are in the store as expected
+        property1_file = property_store.property_at_index(property1.index)
+        self.assertEquals(property1, property1_file)
+
+        property2_file = property_store.property_at_index(property2.index)
+        self.assertEquals(property2, property2_file)
+
+        property3_file = property_store.property_at_index(property3.index)
+        self.assertEquals(property3, property3_file)
+
+        # Delete properties 1 and 3
+        property_store.delete_property(property1)
+        property_store.delete_property(property3)
+
+        # Create properties 1 and 3 with zeroed out values
+        zero_property1 = Property(property1.index, False,
+                                  Property.PropertyType.undefined, 0, 0, 0, 0)
+        zero_property3 = Property(property3.index, False,
+                                  Property.PropertyType.undefined, 0, 0, 0, 0)
+
+        # Verify deleted property is zeroed out
+        del_property1_file = property_store.property_at_index(property1.index)
+        self.assertEquals(zero_property1, del_property1_file)
+
+        # Verify unaffected property is as expected
+        property2_file = property_store.property_at_index(property2.index)
+        self.assertEquals(property2, property2_file)
+
+        # Verify deleted property is zeroed out
+        del_property3_file = property_store.property_at_index(property3.index)
+        self.assertEquals(zero_property3, del_property3_file)
+
 

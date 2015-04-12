@@ -13,6 +13,7 @@ class RelationshipStore:
     """
 
     class InUseAndDir(Enum):
+        undefined = 0
         inUse_rightDir = 0b0001
         inUse_leftDir = 0b0010
         notInUse_rightDir = 0b0100
@@ -29,7 +30,7 @@ class RelationshipStore:
     RECORD_SIZE = struct.calcsize(STRUCT_FORMAT_STR)
     ''':type: int'''
 
-    # Name of NodeStore File
+    # Name of RelationshipStore File
     FILE_NAME = "graphenestore.relationshipstore.db"
     ''':type: str'''
 
@@ -78,10 +79,10 @@ class RelationshipStore:
         :return: Relationship with given index
         :rtype: Relationship
         """
-        file_offset = index * self.RECORD_SIZE
+        if index == 0:
+            raise ValueError("Relationship cannot be read from index 0")
 
-        if file_offset == 0:
-            raise ValueError("Relationship cannot be read from offset 0")
+        file_offset = index * self.RECORD_SIZE
 
         # Seek to the calculated offset
         self.storeFile.seek(file_offset)
@@ -93,19 +94,53 @@ class RelationshipStore:
 
     def write_relationship(self, relationship):
         """
-        Writes the given relationship to the RelationshipStore file
-        :param relationship: Relationship to write to offset
+        Writes the given relationship to the RelationshipStore
+        :param relationship: Relationship to write
         :type relationship: Relationship
         :return: Nothing
         :rtype: None
         """
-        file_offset = relationship.index * self.RECORD_SIZE
-
-        if file_offset == 0:
-            raise ValueError("Relationship cannot be written to offset 0")
-
         # Pack the relationship data
         packed_data = self.packed_data_from_relation(relationship)
+        # Write the packed data to the relationship index
+        self.write_to_index_packed_data(relationship.index, packed_data)
+
+    def delete_relationship(self, relationship):
+        """
+        Deletes the given relationship from the RelationshipStore
+        :param relationship: Relationship to delete
+        :type relationship: Relationship
+        :return: Nothing
+        :rtype: None
+        """
+        self.delete_relationship_at_index(relationship.index)
+
+    def delete_relationship_at_index(self, index):
+        """
+        Deletes the relationship at the given index from the RelationshipStore
+        :param index: Index of the relationship
+        :type index: int
+        :return: Nothing
+        :rtype: None
+        """
+        # Get an empty struct to zero-out the data
+        empty_struct = self.empty_struct_data()
+        # Write the zeroes to the file
+        self.write_to_index_packed_data(index, empty_struct)
+
+    def write_to_index_packed_data(self, index, packed_data):
+        """
+        Writes the packed data to the given index
+        :param index: Index to write to
+        :type index: int
+        :param packed_data: Packed data to write
+        :return: Nothing
+        :rtype: None
+        """
+        if index == 0:
+            raise ValueError("Relationship cannot be written to index 0")
+
+        file_offset = index * self.RECORD_SIZE
 
         # Seek to the calculated offset and write the data
         self.storeFile.seek(file_offset)
@@ -119,8 +154,8 @@ class RelationshipStore:
         :param index: Index of the relationship the packed data belongs to
         :type index: int
         :param packed_data: Packed binary data
-        :return: Node from packed data
-        :rtype: Node
+        :return: Relationship from packed data
+        :rtype: Relationship
         """
 
         # Unpack the data using the relationship struct format
@@ -207,6 +242,8 @@ class RelationshipStore:
             return False, Relationship.Direction.left
         elif enum == cls.InUseAndDir.notInUse_rightDir:
             return False, Relationship.Direction.right
+        elif enum == cls.InUseAndDir.undefined:
+            return False, Relationship.Direction.undefined
         elif isinstance(enum, cls.InUseAndDir):
             raise ValueError("Invalid InUseAndDir value")
         else:
@@ -216,7 +253,7 @@ class RelationshipStore:
     def enum_from_in_use_dir(cls, in_use, direction):
         """
         Create an enum containing the in use value and direction given
-        :param in_use: Whether the node is being used
+        :param in_use: Whether the relationship is being used
         :type in_use: bool
         :param direction: Left or right
         :type direction: Direction
@@ -233,6 +270,8 @@ class RelationshipStore:
                 return cls.InUseAndDir.inUse_rightDir
             else:
                 return cls.InUseAndDir.notInUse_rightDir
+        elif direction == Relationship.Direction.undefined:
+            return cls.InUseAndDir.undefined
         elif isinstance(direction, Relationship.Direction):
             raise ValueError("Invalid Direction value")
         else:

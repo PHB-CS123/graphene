@@ -3,6 +3,8 @@ from enum import Enum
 
 class Property:
     class PropertyType(Enum):
+        # Undefined type
+        undefined = 0
         # Primitive types
         int = 1
         long = 2
@@ -22,8 +24,6 @@ class Property:
         floatArray = 14
         doubleArray = 15
         stringArray = 16
-        # Undefined type
-        undefined = 17
 
     def __init__(self, index=0, in_use=True, prop_type=PropertyType.undefined,
                  key_index_id=0, prop_block_id=0, prev_prop_id=0,

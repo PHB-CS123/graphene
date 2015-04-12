@@ -15,8 +15,8 @@ class TestRelationshipStoreMethods(unittest.TestCase):
         """
         Clean the database so that the tests are independent of one another
         """
-        graphenestore = GrapheneStore()
-        graphenestore.remove_test_datafiles()
+        graphene_store = GrapheneStore()
+        graphene_store.remove_test_datafiles()
 
     def test_empty_init(self):
         """
@@ -34,6 +34,7 @@ class TestRelationshipStoreMethods(unittest.TestCase):
         Test that writing a relationship to offset 0 raises an error
         """
         relationship_store = RelationshipStore()
+
         empty_relationship = Relationship()
         with self.assertRaises(ValueError):
             relationship_store.write_relationship(empty_relationship)
@@ -43,6 +44,7 @@ class TestRelationshipStoreMethods(unittest.TestCase):
         Test that reading a relationship from index 0 raises an error
         """
         relationship_store = RelationshipStore()
+
         with self.assertRaises(ValueError):
             relationship_store.relationship_at_index(0)
 
@@ -51,8 +53,9 @@ class TestRelationshipStoreMethods(unittest.TestCase):
         Tests that the relationship written to the RelationshipStore is the
         relationship that is read.
         """
-        # Create a relationship and add it to the RelationshipStore file
         relationship_store = RelationshipStore()
+
+        # Create a relationship and add it to the RelationshipStore file
         relationship = Relationship(1, False, Relationship.Direction.left,
                                     2, 3, 4, 5, 6, 7, 8, 9)
         relationship_store.write_relationship(relationship)
@@ -69,7 +72,6 @@ class TestRelationshipStoreMethods(unittest.TestCase):
         Tests when 2 relationships are written after 1 relationship
         to the RelationshipStore
         """
-
         relationship_store = RelationshipStore()
 
         # Create one relationship and write it to the RelationshipStore
@@ -103,7 +105,6 @@ class TestRelationshipStoreMethods(unittest.TestCase):
         Tests that overwriting a relationship in a database with 3
         relationships works
         """
-
         relationship_store = RelationshipStore()
 
         # Create 3 relationships
@@ -150,3 +151,56 @@ class TestRelationshipStoreMethods(unittest.TestCase):
             relationship_store.relationship_at_index(relationship3.index)
         self.assertEquals(relationship3, relationship3_file)
 
+    def test_delete_relationship(self):
+        """
+        Tests that deleting 2 relationships in a database with 3
+        relationships works
+        """
+        relationship_store = RelationshipStore()
+
+        # Create 3 relationships
+        rel1 = Relationship(1, True, Relationship.Direction.left,
+                            2, 3, 4, 5, 6, 7, 8, 9)
+        rel2 = Relationship(2, True, Relationship.Direction.right,
+                            4, 6, 8, 10, 12, 14, 16, 18)
+        rel3 = Relationship(9, True, Relationship.Direction.right,
+                            8, 7, 6, 5, 4, 3, 2, 1)
+
+        # Write them to the relationship_store
+        relationship_store.write_relationship(rel1)
+        relationship_store.write_relationship(rel2)
+        relationship_store.write_relationship(rel3)
+
+        # Verify that they are in the store as expected
+        rel1_file = relationship_store.relationship_at_index(rel1.index)
+        self.assertEquals(rel1, rel1_file)
+
+        rel2_file = relationship_store.relationship_at_index(rel2.index)
+        self.assertEquals(rel2, rel2_file)
+
+        rel3_file = relationship_store.relationship_at_index(rel3.index)
+        self.assertEquals(rel3, rel3_file)
+
+        # Delete relationships 1 and 3
+        relationship_store.delete_relationship(rel1)
+        relationship_store.delete_relationship(rel3)
+
+        # Create relationships 1 and 3 with zeroed out values
+        zero_rel1 = Relationship(rel1.index, False,
+                                 Relationship.Direction.undefined,
+                                 0, 0, 0, 0, 0, 0, 0, 0)
+        zero_rel3 = Relationship(rel3.index, False,
+                                 Relationship.Direction.undefined,
+                                 0, 0, 0, 0, 0, 0, 0, 0)
+
+        # Verify deleted relationship is zeroed out
+        del_rel1_file = relationship_store.relationship_at_index(rel1.index)
+        self.assertEquals(zero_rel1, del_rel1_file)
+
+        # Verify unaffected relationship is as expected
+        rel2_file = relationship_store.relationship_at_index(rel2.index)
+        self.assertEquals(rel2, rel2_file)
+
+        # Verify deleted relationship is zeroed out
+        del_rel3_file = relationship_store.relationship_at_index(rel3.index)
+        self.assertEquals(zero_rel3, del_rel3_file)

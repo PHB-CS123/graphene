@@ -10,6 +10,7 @@ class TestPropertyMethods(unittest.TestCase):
         default values below.
         """
         db_property = Property()
+
         self.assertEquals(db_property.index, 0)
         self.assertEquals(db_property.inUse, True)
         self.assertEquals(db_property.type, Property.PropertyType.undefined)

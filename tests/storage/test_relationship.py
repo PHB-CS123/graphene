@@ -10,20 +10,20 @@ class TestRelationshipMethods(unittest.TestCase):
         default values below.
         """
         # Create empty relationship
-        relationship = Relationship()
+        rel = Relationship()
 
         # Check values
-        self.assertEquals(relationship.index, 0)
-        self.assertEquals(relationship.inUse, True)
-        self.assertEquals(relationship.direction, Relationship.Direction.right)
-        self.assertEquals(relationship.firstNodeId, 0)
-        self.assertEquals(relationship.secondNodeId, 0)
-        self.assertEquals(relationship.relType, 0)
-        self.assertEquals(relationship.firstPrevRelId, 0)
-        self.assertEquals(relationship.firstNextRelId, 0)
-        self.assertEquals(relationship.secondPrevRelId, 0)
-        self.assertEquals(relationship.secondNextRelId, 0)
-        self.assertEquals(relationship.propId, 0)
+        self.assertEquals(rel.index, 0)
+        self.assertEquals(rel.inUse, True)
+        self.assertEquals(rel.direction, Relationship.Direction.undefined)
+        self.assertEquals(rel.firstNodeId, 0)
+        self.assertEquals(rel.secondNodeId, 0)
+        self.assertEquals(rel.relType, 0)
+        self.assertEquals(rel.firstPrevRelId, 0)
+        self.assertEquals(rel.firstNextRelId, 0)
+        self.assertEquals(rel.secondPrevRelId, 0)
+        self.assertEquals(rel.secondNextRelId, 0)
+        self.assertEquals(rel.propId, 0)
 
     def test_init(self):
         """
@@ -44,23 +44,23 @@ class TestRelationshipMethods(unittest.TestCase):
         prop_id = 9
 
         # Create relationship
-        relationship = Relationship(index, in_use, direction, first_node_id,
-                                    second_node_id, rel_type, first_prev_rel_id,
-                                    first_next_rel_id, second_prev_rel_id,
-                                    second_next_rel_id, prop_id)
+        rel = Relationship(index, in_use, direction, first_node_id,
+                           second_node_id, rel_type, first_prev_rel_id,
+                           first_next_rel_id, second_prev_rel_id,
+                           second_next_rel_id, prop_id)
 
         # Check values
-        self.assertEquals(relationship.index, 1)
-        self.assertEquals(relationship.inUse, False)
-        self.assertEquals(relationship.direction, Relationship.Direction.left)
-        self.assertEquals(relationship.firstNodeId, 2)
-        self.assertEquals(relationship.secondNodeId, 3)
-        self.assertEquals(relationship.relType, 4)
-        self.assertEquals(relationship.firstPrevRelId, 5)
-        self.assertEquals(relationship.firstNextRelId, 6)
-        self.assertEquals(relationship.secondPrevRelId, 7)
-        self.assertEquals(relationship.secondNextRelId, 8)
-        self.assertEquals(relationship.propId, 9)
+        self.assertEquals(rel.index, 1)
+        self.assertEquals(rel.inUse, False)
+        self.assertEquals(rel.direction, Relationship.Direction.left)
+        self.assertEquals(rel.firstNodeId, 2)
+        self.assertEquals(rel.secondNodeId, 3)
+        self.assertEquals(rel.relType, 4)
+        self.assertEquals(rel.firstPrevRelId, 5)
+        self.assertEquals(rel.firstNextRelId, 6)
+        self.assertEquals(rel.secondPrevRelId, 7)
+        self.assertEquals(rel.secondNextRelId, 8)
+        self.assertEquals(rel.propId, 9)
 
     def test_eq(self):
         """

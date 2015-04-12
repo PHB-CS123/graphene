@@ -10,17 +10,6 @@ class NodeStore:
     Handles storage of nodes to a file. It stores nodes using the format
     (inUse, nextRelId, nextPropId)
     """
-    # Size of parts of NodeStore records (bytes)
-
-    # Whether the node is in use
-    IN_USE_SIZE = 1
-    ''':type: int'''
-    # First relation of this node
-    NEXT_REL_ID_SIZE = 4
-    ''':type: int'''
-    # First property of this node
-    NEXT_PROP_ID_SIZE = 4
-    ''':type: int'''
 
     # Format string used to compact these values
     # '=': native byte order representation, standard size, no alignment
@@ -83,9 +72,10 @@ class NodeStore:
         :return: Node with given index
         :rtype: Node
         """
+        if index == 0:
+            raise ValueError("Node cannot be read from index 0")
+
         file_offset = index * self.RECORD_SIZE
-        if file_offset == 0:
-            raise ValueError("Node cannot be read from offset 0")
 
         # Seek to the calculated offset
         self.storeFile.seek(file_offset)
@@ -98,18 +88,52 @@ class NodeStore:
     def write_node(self, node):
         """
         Writes the given Node to the NodeStore file
-        :param node: Node to write to offset
+        :param node: Node to write
         :type: node: Node
         :return: Nothing
         :rtype: None
         """
-        file_offset = node.index * self.RECORD_SIZE
-
-        if file_offset == 0:
-            raise ValueError("Node cannot be written to offset 0")
-
-        # Pack the node data, then write it to the specified offset
+        # Pack the node data, then write it to the node index
         packed_data = self.packed_data_from_node(node)
+        # Write the packed data to the node index
+        self.write_to_index_packed_data(node.index, packed_data)
+
+    def delete_node(self, node):
+        """
+        Deletes the given node from the NodeStore
+        :param node: Node to delete
+        :type node: Node
+        :return: Nothing
+        :rtype: None
+        """
+        self.delete_node_at_index(node.index)
+
+    def delete_node_at_index(self, index):
+        """
+        Deletes the node at the given index from the NodeStore
+        :param index: Index of the node
+        :type index: int
+        :return: Nothing
+        :rtype: None
+        """
+        # Get an empty struct to zero-out the data
+        empty_struct = self.empty_struct_data()
+        # Write the zeroes to the file
+        self.write_to_index_packed_data(index, empty_struct)
+
+    def write_to_index_packed_data(self, index, packed_data):
+        """
+        Writes the packed data to the given index
+        :param index: Index to write to
+        :type index: int
+        :param packed_data: Packed data to write
+        :return: Nothing
+        :rtype: None
+        """
+        if index == 0:
+            raise ValueError("Node cannot be written to index 0")
+
+        file_offset = index * self.RECORD_SIZE
 
         # Seek to the calculated offset and write the data
         self.storeFile.seek(file_offset)

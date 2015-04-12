@@ -1,6 +1,7 @@
 import os
 import shutil
 
+
 class GrapheneStore:
     TESTING = False
 

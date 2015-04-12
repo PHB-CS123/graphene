@@ -23,7 +23,7 @@ class PropertyStore:
     RECORD_SIZE = struct.calcsize(STRUCT_FORMAT_STR)
     ''':type: int'''
 
-    # Name of NodeStore File
+    # Name of PropertyStore File
     FILE_NAME = "graphenestore.propertystore.db"
     ''':type: str'''
 
@@ -72,10 +72,10 @@ class PropertyStore:
         :return: Property with given index
         :rtype: Property
         """
-        file_offset = index * self.RECORD_SIZE
+        if index == 0:
+            raise ValueError("Property cannot be read from index 0")
 
-        if file_offset == 0:
-            raise ValueError("Property cannot be read from offset 0")
+        file_offset = index * self.RECORD_SIZE
 
         # Seek to the calculated offset
         self.storeFile.seek(file_offset)
@@ -88,18 +88,53 @@ class PropertyStore:
     def write_property(self, db_property):
         """
         Writes the given property to the PropertyStore file
-        :param db_property: Property to write to offset
+        :param db_property: Property to write
         :type db_property: Property
         :return: Nothing
         :rtype: None
         """
-        file_offset = db_property.index * self.RECORD_SIZE
-
-        if file_offset == 0:
-            raise ValueError("Relationship cannot be written to offset 0")
-
         # Pack the property data
         packed_data = self.packed_data_from_property(db_property)
+        # Write the packed data to the property index
+        self.write_to_index_packed_data(db_property.index, packed_data)
+
+    def delete_property(self, db_property):
+        """
+        Deletes the given property from the PropertyStore
+        :param db_property: Property to delete
+        :type db_property: Property
+        :return: Nothing
+        :rtype: None
+        """
+        self.delete_property_at_index(db_property.index)
+
+
+    def delete_property_at_index(self, index):
+        """
+        Deletes the property at the given index from the PropertyStore
+        :param index: Index of the property
+        :type index: int
+        :return: Nothing
+        :rtype: None
+        """
+        # Get an empty struct to zero-out the data
+        empty_struct = self.empty_struct_data()
+        # Write the zeroes to the file
+        self.write_to_index_packed_data(index, empty_struct)
+
+    def write_to_index_packed_data(self, index, packed_data):
+        """
+        Writes the packed data to the given index
+        :param index: Index to write to
+        :type index: int
+        :param packed_data: Packed data to write
+        :return: Nothing
+        :rtype: None
+        """
+        if index == 0:
+            raise ValueError("Property cannot be written to index 0")
+
+        file_offset = index * self.RECORD_SIZE
 
         # Seek to the calculated offset and write the data
         self.storeFile.seek(file_offset)
@@ -113,8 +148,8 @@ class PropertyStore:
         :param index: Index of the property the packed data belongs to
         :type index: int
         :param packed_data: Packed binary data
-        :return: Node from packed data
-        :rtype: Node
+        :return: Property from packed data
+        :rtype: Property
         """
 
         # Unpack the data using the property struct format
