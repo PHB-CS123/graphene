@@ -6,7 +6,7 @@ class Node:
         propId: ID of the first property the node has
     Along with the index where the node is stored
     """
-    def __init__(self, index=0, in_use=False, rel_id=0, prop_id=0):
+    def __init__(self, index=0, in_use=True, rel_id=0, prop_id=0):
         """
         Initializes a Node with the given values
         :param index: Index of the node to initialize

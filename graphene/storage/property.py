@@ -1,33 +1,33 @@
 from enum import Enum
 
 
-class PropertyType(Enum):
-    # Primitive types
-    int = 1
-    long = 2
-    bool = 3
-    short = 4
-    char = 5
-    float = 6
-    double = 7
-    # String type (dynamic)
-    string = 8
-    # Array types (dynamic)
-    intArray = 9
-    longArray = 10
-    boolArray = 11
-    shortArray = 12
-    charArray = 13
-    floatArray = 14
-    doubleArray = 15
-    stringArray = 16
-    # Undefined type
-    undefined = 17
-
-
 class Property:
-    def __init__(self, index=0, in_use=False, prop_type=0, key_index_id=0,
-                 prop_block_id=0, prev_prop_id=0, next_prop_id=0):
+    class PropertyType(Enum):
+        # Primitive types
+        int = 1
+        long = 2
+        bool = 3
+        short = 4
+        char = 5
+        float = 6
+        double = 7
+        # String type (dynamic)
+        string = 8
+        # Array types (dynamic)
+        intArray = 9
+        longArray = 10
+        boolArray = 11
+        shortArray = 12
+        charArray = 13
+        floatArray = 14
+        doubleArray = 15
+        stringArray = 16
+        # Undefined type
+        undefined = 17
+
+    def __init__(self, index=0, in_use=True, prop_type=PropertyType.undefined,
+                 key_index_id=0, prop_block_id=0, prev_prop_id=0,
+                 next_prop_id=0):
         """
         Initializes a property with the given values
         :param index: Index of the property to initialize

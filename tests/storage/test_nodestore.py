@@ -24,12 +24,20 @@ class TestNodeStoreMethods(unittest.TestCase):
 
     def test_invalid_write(self):
         """
-        Test that writing a node to offset 0 raises an error
+        Test that writing a node to index 0 raises an error
         """
         node_store = NodeStore()
         empty_node = Node()
         with self.assertRaises(ValueError):
             node_store.write_node(empty_node)
+
+    def test_invalid_read(self):
+        """
+        Test that reading a node from index 0 raises an error
+        """
+        node_store = NodeStore()
+        with self.assertRaises(ValueError):
+            node_store.node_at_index(0)
 
     def test_write_read_1_node(self):
         """
@@ -75,7 +83,7 @@ class TestNodeStoreMethods(unittest.TestCase):
 
     def test_overwrite_node(self):
         """
-        Tests that overwriting a node in a database with 2 nodes works
+        Tests that overwriting a node in a database with 3 nodes works
         """
 
         node_store = NodeStore()

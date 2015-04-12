@@ -6,13 +6,16 @@ from graphene.storage.relationship import *
 class TestRelationshipMethods(unittest.TestCase):
     def test_empty_init(self):
         """
-        Tests that initializing a Relationship with no arguments, uses the
+        Tests that initializing a relationship with no arguments, uses the
         default values below.
         """
+        # Create empty relationship
         relationship = Relationship()
+
+        # Check values
         self.assertEquals(relationship.index, 0)
-        self.assertEquals(relationship.inUse, False)
-        self.assertEquals(relationship.direction, Direction.right)
+        self.assertEquals(relationship.inUse, True)
+        self.assertEquals(relationship.direction, Relationship.Direction.right)
         self.assertEquals(relationship.firstNodeId, 0)
         self.assertEquals(relationship.secondNodeId, 0)
         self.assertEquals(relationship.relType, 0)
@@ -24,13 +27,13 @@ class TestRelationshipMethods(unittest.TestCase):
 
     def test_init(self):
         """
-        Tests that initializing a Relationship with a set of values stores
+        Tests that initializing a relationship with a set of values stores
         those values properly
         """
         # Relationship values
         index = 1
-        in_use = True
-        direction = Direction.left
+        in_use = False
+        direction = Relationship.Direction.left
         first_node_id = 2
         second_node_id = 3
         rel_type = 4
@@ -46,9 +49,10 @@ class TestRelationshipMethods(unittest.TestCase):
                                     first_next_rel_id, second_prev_rel_id,
                                     second_next_rel_id, prop_id)
 
+        # Check values
         self.assertEquals(relationship.index, 1)
-        self.assertEquals(relationship.inUse, True)
-        self.assertEquals(relationship.direction, Direction.left)
+        self.assertEquals(relationship.inUse, False)
+        self.assertEquals(relationship.direction, Relationship.Direction.left)
         self.assertEquals(relationship.firstNodeId, 2)
         self.assertEquals(relationship.secondNodeId, 3)
         self.assertEquals(relationship.relType, 4)
@@ -63,11 +67,11 @@ class TestRelationshipMethods(unittest.TestCase):
         Tests that == operator returns True when two relationships are equal
         and False when they are not
         """
-        relationship1 = Relationship(1, True, Direction.left,
+        relationship1 = Relationship(1, True, Relationship.Direction.left,
                                      2, 3, 4, 5, 6, 7, 8, 9)
-        relationship2 = Relationship(1, True, Direction.left,
+        relationship2 = Relationship(1, True, Relationship.Direction.left,
                                      2, 3, 4, 5, 6, 7, 8, 9)
-        relationship3 = Relationship(9, True, Direction.left,
+        relationship3 = Relationship(9, False, Relationship.Direction.right,
                                      8, 7, 6, 5, 4, 3, 2, 1)
 
         self.assertEquals(relationship1 == relationship2, True)

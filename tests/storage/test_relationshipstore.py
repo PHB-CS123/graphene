@@ -2,6 +2,7 @@ import unittest
 
 from graphene.storage.relationshipstore import *
 
+
 class TestRelationshipStoreMethods(unittest.TestCase):
     def setUp(self):
         """
@@ -37,6 +38,14 @@ class TestRelationshipStoreMethods(unittest.TestCase):
         with self.assertRaises(ValueError):
             relationship_store.write_relationship(empty_relationship)
 
+    def test_invalid_read(self):
+        """
+        Test that reading a relationship from index 0 raises an error
+        """
+        relationship_store = RelationshipStore()
+        with self.assertRaises(ValueError):
+            relationship_store.relationship_at_index(0)
+
     def test_write_read_1_relationship(self):
         """
         Tests that the relationship written to the RelationshipStore is the
@@ -44,8 +53,8 @@ class TestRelationshipStoreMethods(unittest.TestCase):
         """
         # Create a relationship and add it to the RelationshipStore file
         relationship_store = RelationshipStore()
-        relationship = Relationship(1, False, Direction.left,
-                                  2, 3, 4, 5, 6, 7, 8, 9)
+        relationship = Relationship(1, False, Relationship.Direction.left,
+                                    2, 3, 4, 5, 6, 7, 8, 9)
         relationship_store.write_relationship(relationship)
 
         # Read the relationship from the RelationshipStore file
@@ -64,14 +73,14 @@ class TestRelationshipStoreMethods(unittest.TestCase):
         relationship_store = RelationshipStore()
 
         # Create one relationship and write it to the RelationshipStore
-        relationship1 = Relationship(1, False, Direction.left,
+        relationship1 = Relationship(1, False, Relationship.Direction.left,
                                      2, 3, 4, 5, 6, 7, 8, 9)
         relationship_store.write_relationship(relationship1)
 
         # Create 2 relationships and add them to the RelationshipStore
-        relationship2 = Relationship(2, False, Direction.right,
+        relationship2 = Relationship(2, False, Relationship.Direction.right,
                                      4, 6, 8, 10, 12, 14, 16, 18)
-        relationship3 = Relationship(9, False, Direction.right,
+        relationship3 = Relationship(9, False, Relationship.Direction.right,
                                      8, 7, 6, 5, 4, 3, 2, 1)
         relationship_store.write_relationship(relationship2)
         relationship_store.write_relationship(relationship3)
@@ -91,18 +100,18 @@ class TestRelationshipStoreMethods(unittest.TestCase):
 
     def test_overwrite_relationship(self):
         """
-        Tests that overwriting a relationship in a database with 2
-        relationship works
+        Tests that overwriting a relationship in a database with 3
+        relationships works
         """
 
         relationship_store = RelationshipStore()
 
         # Create 3 relationships
-        relationship1 = Relationship(1, False, Direction.left,
+        relationship1 = Relationship(1, False, Relationship.Direction.left,
                                      2, 3, 4, 5, 6, 7, 8, 9)
-        relationship2 = Relationship(2, False, Direction.right,
+        relationship2 = Relationship(2, False, Relationship.Direction.right,
                                      4, 6, 8, 10, 12, 14, 16, 18)
-        relationship3 = Relationship(9, False, Direction.right,
+        relationship3 = Relationship(9, False, Relationship.Direction.right,
                                      8, 7, 6, 5, 4, 3, 2, 1)
 
         # Write them to the relationship_store
@@ -124,7 +133,7 @@ class TestRelationshipStoreMethods(unittest.TestCase):
         self.assertEquals(relationship3, relationship3_file)
 
         # Create a new relationship2 and overwrite the old relationship2
-        new_relationship2 = Relationship(3, True, Direction.left,
+        new_relationship2 = Relationship(3, True, Relationship.Direction.left,
                                          6, 9, 12, 15, 18, 21, 24, 27)
         relationship_store.write_relationship(new_relationship2)
 

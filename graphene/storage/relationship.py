@@ -1,14 +1,13 @@
 from enum import Enum
 
 
-class Direction(Enum):
-    left = 0
-    right = 1
-
-
 class Relationship:
+    class Direction(Enum):
+        left = 0
+        right = 1
 
-    def __init__(self, index=0, in_use=False, direction=Direction.right,
+
+    def __init__(self, index=0, in_use=True, direction=Direction.right,
                  first_node_id=0, second_node_id=0, rel_type=0,
                  first_prev_rel_id=0, first_next_rel_id=0,
                  second_prev_rel_id=0, second_next_rel_id=0,

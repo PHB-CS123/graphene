@@ -123,7 +123,7 @@ class PropertyStore:
 
         # Get the property components
         in_use = unpacked_data[0]
-        prop_type = unpacked_data[1]
+        prop_type = Property.PropertyType(unpacked_data[1])
         key_index_id = unpacked_data[2]
         prop_block_id = unpacked_data[3]
         prev_prop_id = unpacked_data[4]
@@ -147,7 +147,7 @@ class PropertyStore:
         property_struct = struct.Struct(cls.STRUCT_FORMAT_STR)
 
         packed_data = property_struct.pack(db_property.inUse,
-                                           db_property.type,
+                                           db_property.type.value,
                                            db_property.keyIndexId,
                                            db_property.propBlockId,
                                            db_property.prevPropId,

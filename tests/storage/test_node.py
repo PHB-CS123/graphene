@@ -11,7 +11,7 @@ class TestNodeMethods(unittest.TestCase):
         """
         node = Node()
         self.assertEquals(node.index, 0)
-        self.assertEquals(node.inUse, False)
+        self.assertEquals(node.inUse, True)
         self.assertEquals(node.relId, 0)
         self.assertEquals(node.propId, 0)
 
@@ -20,9 +20,9 @@ class TestNodeMethods(unittest.TestCase):
         Tests that initializing a Node with a set of values stores
         those values properly
         """
-        node = Node(32, True, 42, 21)
+        node = Node(32, False, 42, 21)
         self.assertEquals(node.index, 32)
-        self.assertEquals(node.inUse, True)
+        self.assertEquals(node.inUse, False)
         self.assertEquals(node.relId, 42)
         self.assertEquals(node.propId, 21)
 

@@ -200,13 +200,13 @@ class RelationshipStore:
         :rtype: tuple
         """
         if enum == cls.InUseAndDir.inUse_leftDir:
-            return True, Direction.left
+            return True, Relationship.Direction.left
         elif enum == cls.InUseAndDir.inUse_rightDir:
-            return True, Direction.right
+            return True, Relationship.Direction.right
         elif enum == cls.InUseAndDir.notInUse_leftDir:
-            return False, Direction.left
+            return False, Relationship.Direction.left
         elif enum == cls.InUseAndDir.notInUse_rightDir:
-            return False, Direction.right
+            return False, Relationship.Direction.right
         elif isinstance(enum, cls.InUseAndDir):
             raise ValueError("Invalid InUseAndDir value")
         else:
@@ -223,17 +223,17 @@ class RelationshipStore:
         :return: Enum containing both values
         :rtype: InUseAndDir
         """
-        if direction == Direction.left:
+        if direction == Relationship.Direction.left:
             if in_use:
                 return cls.InUseAndDir.inUse_leftDir
             else:
                 return cls.InUseAndDir.notInUse_leftDir
-        elif direction == Direction.right:
+        elif direction == Relationship.Direction.right:
             if in_use:
                 return cls.InUseAndDir.inUse_rightDir
             else:
                 return cls.InUseAndDir.notInUse_rightDir
-        elif isinstance(direction, Direction):
+        elif isinstance(direction, Relationship.Direction):
             raise ValueError("Invalid Direction value")
         else:
             raise TypeError("Given direction is not fo type Direction")
