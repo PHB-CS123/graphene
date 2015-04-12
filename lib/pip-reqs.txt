@@ -1,3 +1,4 @@
 pytest
 pytest-sugar
 Sphinx
+enum34
