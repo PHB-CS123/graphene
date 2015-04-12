@@ -78,7 +78,6 @@ class TestNodeStoreMethods(unittest.TestCase):
         Tests that overwriting a node in a database with 2 nodes works
         """
 
-
         node_store = NodeStore()
 
         # Create 3 old nodes

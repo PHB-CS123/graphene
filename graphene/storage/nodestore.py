@@ -83,8 +83,10 @@ class NodeStore:
         :return: Node with given index
         :rtype: Node
         """
-
         file_offset = index * self.RECORD_SIZE
+        if file_offset == 0:
+            raise ValueError("Node cannot be read from offset 0")
+
         # Seek to the calculated offset
         self.storeFile.seek(file_offset)
 
@@ -101,7 +103,6 @@ class NodeStore:
         :return: Nothing
         :rtype: None
         """
-
         file_offset = node.index * self.RECORD_SIZE
 
         if file_offset == 0:

@@ -80,6 +80,10 @@ class RelationshipStore:
         :rtype: Relationship
         """
         file_offset = index * self.RECORD_SIZE
+
+        if file_offset == 0:
+            raise ValueError("Relationship cannot be read from offset 0")
+
         # Seek to the calculated offset
         self.storeFile.seek(file_offset)
 
@@ -96,7 +100,6 @@ class RelationshipStore:
         :return: Nothing
         :rtype: None
         """
-
         file_offset = relationship.index * self.RECORD_SIZE
 
         if file_offset == 0:
