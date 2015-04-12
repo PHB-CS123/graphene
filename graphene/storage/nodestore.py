@@ -60,7 +60,7 @@ class NodeStore:
                 # Pad its first 9 bytes with 0s
                 self.pad_file_header()
         except IOError:
-            print("ERROR: unable to open node store file: " + file_path)
+            print("ERROR: unable to open NodeStore file: " + file_path)
             raise IOError
 
     def pad_file_header(self):

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class PropertyType(Enum):
     # Primitive types
     int = 1

@@ -1,9 +1,8 @@
 import struct
-import os.path
-from enum import Enum
 
 from graphene.storage.graphenestore import *
 from graphene.storage.relationship import *
+
 
 class RelationshipStore:
     """
@@ -14,10 +13,10 @@ class RelationshipStore:
     """
 
     class InUseAndDir(Enum):
-        in_use_right_dir = 0b0001
-        in_use_left_dir = 0b0010
-        not_in_use_right_dir = 0b0100
-        not_in_use_left_dir = 0b1000
+        inUse_rightDir = 0b0001
+        inUse_leftDir = 0b0010
+        notInUse_rightDir = 0b0100
+        notInUse_leftDir = 0b1000
 
     # Format string used to compact these values
     # '=': native byte order representation, standard size, no alignment
@@ -37,14 +36,14 @@ class RelationshipStore:
     def __init__(self):
         """
         Creates a RelationshipStore instance which handles reading/writing to
-        the file containing Relationship values
-        :return: RelationshipStore instance for handling Relationship records
+        the file containing relationship values
+        :return: RelationshipStore instance for handling relationship records
         :rtype: RelationshipStore
         """
+        graphenestore = GrapheneStore()
+        # Get the path of the file
+        file_path = graphenestore.datafilesDir + self.FILE_NAME
         try:
-            graphenestore = GrapheneStore()
-            # Get the path of the file
-            file_path = graphenestore.datafilesDir + self.FILE_NAME
             # If the file exists, simply open it
             if os.path.isfile(file_path):
                 self.storeFile = open(file_path, "r+b")
@@ -54,15 +53,15 @@ class RelationshipStore:
                 # Open it so that it can be read/written
                 self.storeFile = open(file_path, "r+b")
                 # Pad its first 9 bytes with 0s
-                self.padFileHeader()
+                self.pad_file_header()
         except IOError:
-            print("ERROR: unable to open relationship store file: ", file_path)
+            print("ERROR: unable to open RelationshipStore file: ", file_path)
             raise IOError
 
-    def padFileHeader(self):
+    def pad_file_header(self):
         """
         Called when the RelationshipStore file is first created, pads the
-        RelationshipStore file with 9 bytes of 0s
+        RelationshipStore file with 33 bytes of 0s
         :return: Nothing
         :rtype: None
         """
@@ -73,7 +72,7 @@ class RelationshipStore:
 
     def relationship_at_index(self, index):
         """
-        Finds the Relationship with the given Relationship index
+        Finds the relationship with the given relationship index
         :param index: Index of relationship
         :type index: int
         :return: Relationship with given index
@@ -94,7 +93,7 @@ class RelationshipStore:
 
     def write_relationship(self, relationship):
         """
-        Writes the given Relationship to the RelationshipStore file
+        Writes the given relationship to the RelationshipStore file
         :param relationship: Relationship to write to offset
         :type relationship: Relationship
         :return: Nothing
@@ -124,7 +123,7 @@ class RelationshipStore:
         :rtype: Node
         """
 
-        # Unpack the data using the Relationship struct format
+        # Unpack the data using the relationship struct format
         relationship_struct = struct.Struct(cls.STRUCT_FORMAT_STR)
         unpacked_data = relationship_struct.unpack(packed_data)
 
@@ -154,9 +153,9 @@ class RelationshipStore:
     @classmethod
     def packed_data_from_relation(cls, relationship):
         """
-        Creates packed data with Relation structure to be written to a file
-        :param relationship: Relation to convert into packed data
-        :type relationship: Relation
+        Creates packed data with Relationship structure to be written to a file
+        :param relationship: Relationship to convert into packed data
+        :type relationship: Relationship
         :return: Packed data
         """
 
@@ -200,13 +199,13 @@ class RelationshipStore:
         :return: Tuple (in_use, direction)
         :rtype: tuple
         """
-        if enum == cls.InUseAndDir.in_use_left_dir:
+        if enum == cls.InUseAndDir.inUse_leftDir:
             return True, Direction.left
-        elif enum == cls.InUseAndDir.in_use_right_dir:
+        elif enum == cls.InUseAndDir.inUse_rightDir:
             return True, Direction.right
-        elif enum == cls.InUseAndDir.not_in_use_left_dir:
+        elif enum == cls.InUseAndDir.notInUse_leftDir:
             return False, Direction.left
-        elif enum == cls.InUseAndDir.not_in_use_right_dir:
+        elif enum == cls.InUseAndDir.notInUse_rightDir:
             return False, Direction.right
         elif isinstance(enum, cls.InUseAndDir):
             raise ValueError("Invalid InUseAndDir value")
@@ -226,14 +225,14 @@ class RelationshipStore:
         """
         if direction == Direction.left:
             if in_use:
-                return cls.InUseAndDir.in_use_left_dir
+                return cls.InUseAndDir.inUse_leftDir
             else:
-                return cls.InUseAndDir.not_in_use_left_dir
+                return cls.InUseAndDir.notInUse_leftDir
         elif direction == Direction.right:
             if in_use:
-                return cls.InUseAndDir.in_use_right_dir
+                return cls.InUseAndDir.inUse_rightDir
             else:
-                return cls.InUseAndDir.not_in_use_right_dir
+                return cls.InUseAndDir.notInUse_rightDir
         elif isinstance(direction, Direction):
             raise ValueError("Invalid Direction value")
         else:
