@@ -1,4 +1,6 @@
-class CreateRelationCommand:
+from graphene.commands.Command import Command
+
+class CreateRelationCommand(Command):
     def __init__(self, ctx):
         self.rel_name = ctx.r;
         self.first_type = ctx.t1;

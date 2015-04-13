@@ -17,6 +17,7 @@ class GrapheneServer:
 
         :param list commands: List of commands
         """
+        result = []
         for cmd in commands:
             if cmd is None or cmd.c is None:
                 # there was an error, so for now ignore it
@@ -24,8 +25,9 @@ class GrapheneServer:
                 continue
             if isinstance(cmd.c.cmd, ExitCommand):
                 return False
-            print cmd.c.cmd
-        return True
+            command = cmd.c.cmd
+            result.append(command)
+        return result
 
     def doCommands(self, data):
         """
@@ -55,7 +57,12 @@ class GrapheneServer:
         # error was handled.
         try:
             tree = parser.parse()
-            return self.parseCommands(tree.stmt_list().stmts)
+            cmds = self.parseCommands(tree.stmt_list().stmts)
+            if not cmds:
+                return False
+            for cmd in cmds:
+                cmd.execute()
+            return True
         except ParserError as e:
             print e
             return True
