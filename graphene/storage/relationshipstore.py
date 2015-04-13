@@ -38,6 +38,7 @@ class RelationshipStore:
         """
         Creates a RelationshipStore instance which handles reading/writing to
         the file containing relationship values
+
         :return: RelationshipStore instance for handling relationship records
         :rtype: RelationshipStore
         """
@@ -63,6 +64,7 @@ class RelationshipStore:
         """
         Called when the RelationshipStore file is first created, pads the
         RelationshipStore file with 33 bytes of 0s
+
         :return: Nothing
         :rtype: None
         """
@@ -74,6 +76,7 @@ class RelationshipStore:
     def relationship_at_index(self, index):
         """
         Finds the relationship with the given relationship index
+
         :param index: Index of relationship
         :type index: int
         :return: Relationship with given index
@@ -95,6 +98,7 @@ class RelationshipStore:
     def write_relationship(self, relationship):
         """
         Writes the given relationship to the RelationshipStore
+
         :param relationship: Relationship to write
         :type relationship: Relationship
         :return: Nothing
@@ -108,6 +112,7 @@ class RelationshipStore:
     def delete_relationship(self, relationship):
         """
         Deletes the given relationship from the RelationshipStore
+
         :param relationship: Relationship to delete
         :type relationship: Relationship
         :return: Nothing
@@ -118,6 +123,7 @@ class RelationshipStore:
     def delete_relationship_at_index(self, index):
         """
         Deletes the relationship at the given index from the RelationshipStore
+
         :param index: Index of the relationship
         :type index: int
         :return: Nothing
@@ -131,6 +137,7 @@ class RelationshipStore:
     def write_to_index_packed_data(self, index, packed_data):
         """
         Writes the packed data to the given index
+
         :param index: Index to write to
         :type index: int
         :param packed_data: Packed data to write
@@ -151,6 +158,7 @@ class RelationshipStore:
     def relationship_from_packed_data(cls, index, packed_data):
         """
         Creates a relationship from the given packed data
+
         :param index: Index of the relationship the packed data belongs to
         :type index: int
         :param packed_data: Packed binary data
@@ -189,6 +197,7 @@ class RelationshipStore:
     def packed_data_from_relation(cls, relationship):
         """
         Creates packed data with Relationship structure to be written to a file
+
         :param relationship: Relationship to convert into packed data
         :type relationship: Relationship
         :return: Packed data
@@ -219,6 +228,7 @@ class RelationshipStore:
     def empty_struct_data(cls):
         """
         Creates a packed struct of 0s
+
         :return: Packed class struct of 0s
         """
         empty_struct = struct.Struct(cls.STRUCT_FORMAT_STR)
@@ -229,6 +239,7 @@ class RelationshipStore:
     def in_use_dir_from_enum(cls, enum):
         """
         Get the in use and direction from the given enum which contains both
+
         :param enum: Enum containing both values
         :type enum: InUseAndDir
         :return: Tuple (in_use, direction)
@@ -253,6 +264,7 @@ class RelationshipStore:
     def enum_from_in_use_dir(cls, in_use, direction):
         """
         Create an enum containing the in use value and direction given
+
         :param in_use: Whether the relationship is being used
         :type in_use: bool
         :param direction: Left or right

@@ -31,6 +31,7 @@ class PropertyStore:
         """
         Creates a PropertyStore instance which handles reading/writing to
         the file containing property values
+
         :return: PropertyStore instance for handling property records
         :rtype: PropertyStore
         """
@@ -56,6 +57,7 @@ class PropertyStore:
         """
         Called when the PropertyStore file is first created, pads the
         PropertyStore file with 25 bytes of 0s
+
         :return: Nothing
         :rtype: None
         """
@@ -67,6 +69,7 @@ class PropertyStore:
     def property_at_index(self, index):
         """
         Finds the property with the given property index
+
         :param index: Index of property
         :type index: int
         :return: Property with given index
@@ -88,6 +91,7 @@ class PropertyStore:
     def write_property(self, db_property):
         """
         Writes the given property to the PropertyStore file
+
         :param db_property: Property to write
         :type db_property: Property
         :return: Nothing
@@ -101,6 +105,7 @@ class PropertyStore:
     def delete_property(self, db_property):
         """
         Deletes the given property from the PropertyStore
+
         :param db_property: Property to delete
         :type db_property: Property
         :return: Nothing
@@ -112,6 +117,7 @@ class PropertyStore:
     def delete_property_at_index(self, index):
         """
         Deletes the property at the given index from the PropertyStore
+
         :param index: Index of the property
         :type index: int
         :return: Nothing
@@ -125,6 +131,7 @@ class PropertyStore:
     def write_to_index_packed_data(self, index, packed_data):
         """
         Writes the packed data to the given index
+
         :param index: Index to write to
         :type index: int
         :param packed_data: Packed data to write
@@ -145,6 +152,7 @@ class PropertyStore:
     def property_from_packed_data(cls, index, packed_data):
         """
         Creates a property from the given packed data
+
         :param index: Index of the property the packed data belongs to
         :type index: int
         :param packed_data: Packed binary data
@@ -172,6 +180,7 @@ class PropertyStore:
     def packed_data_from_property(cls, db_property):
         """
         Creates packed data with the property structure to be written out
+
         :param db_property: Property to convert into packed data
         :type db_property: Property
         :return: Packed data
@@ -193,6 +202,7 @@ class PropertyStore:
     def empty_struct_data(cls):
         """
         Creates a packed struct of 0s
+
         :return: Packed class struct of 0s
         """
         empty_struct = struct.Struct(cls.STRUCT_FORMAT_STR)

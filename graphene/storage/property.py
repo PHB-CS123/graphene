@@ -30,6 +30,7 @@ class Property:
                  next_prop_id=0):
         """
         Initializes a property with the given values
+
         :param index: Index of the property to initialize
         :type index: int
         :param in_use: Whether the property is in use
@@ -62,6 +63,7 @@ class Property:
     def __eq__(self, other):
         """
         Overload the == operator
+
         :param other: Other property
         :type other: Property
         :return: True if equivalent, false otherwise

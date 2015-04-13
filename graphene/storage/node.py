@@ -9,6 +9,7 @@ class Node:
     def __init__(self, index=0, in_use=True, rel_id=0, prop_id=0):
         """
         Initializes a Node with the given values
+
         :param index: Index of the node to initialize
         :type index: int
         :param in_use: Whether the database is using the node
@@ -30,6 +31,7 @@ class Node:
     def __eq__(self, other):
         """
         Overload the == operator
+
         :param other: Other node
         :type other: Node
         :return: True if equivalent, false otherwise

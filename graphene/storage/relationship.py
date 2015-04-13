@@ -14,6 +14,7 @@ class Relationship:
                  prop_id=0):
         """
         Initializes a relationship with the given values
+
         :param index: Index of the relationship to initialize
         :type index: int
         :param in_use:  Whether the database is using the relationship
@@ -56,6 +57,7 @@ class Relationship:
     def __eq__(self, other):
         """
         Overload the == operator
+
         :param other: Other relationship
         :type other: Relationship
         :return: True if equivalent, false otherwise

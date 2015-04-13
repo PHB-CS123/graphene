@@ -30,6 +30,7 @@ class NodeStore:
         """
         Creates a NodeStore instance which handles reading/writing to the
         file containing Node values.
+
         :return: NodeStore instance for handling Node records
         :rtype NodeStore
         """
@@ -56,6 +57,7 @@ class NodeStore:
         """
         Called when the NodeStore file is first created, pads the NodeStore
         file with 9 bytes of 0s
+
         :return: Nothing
         :rtype: None
         """
@@ -67,6 +69,7 @@ class NodeStore:
     def node_at_index(self, index):
         """
         Finds the Node with the given Node index
+
         :param index: Index of node
         :type index: int
         :return: Node with given index
@@ -88,6 +91,7 @@ class NodeStore:
     def write_node(self, node):
         """
         Writes the given Node to the NodeStore file
+
         :param node: Node to write
         :type: node: Node
         :return: Nothing
@@ -101,6 +105,7 @@ class NodeStore:
     def delete_node(self, node):
         """
         Deletes the given node from the NodeStore
+
         :param node: Node to delete
         :type node: Node
         :return: Nothing
@@ -111,6 +116,7 @@ class NodeStore:
     def delete_node_at_index(self, index):
         """
         Deletes the node at the given index from the NodeStore
+
         :param index: Index of the node
         :type index: int
         :return: Nothing
@@ -124,6 +130,7 @@ class NodeStore:
     def write_to_index_packed_data(self, index, packed_data):
         """
         Writes the packed data to the given index
+
         :param index: Index to write to
         :type index: int
         :param packed_data: Packed data to write
@@ -144,6 +151,7 @@ class NodeStore:
     def node_from_packed_data(cls, index, packed_data):
         """
         Creates a node from the given packed data
+
         :param index: Index of the node that the packed data belongs to
         :type index: int
         :param packed_data: Packed binary data
@@ -167,6 +175,7 @@ class NodeStore:
     def packed_data_from_node(cls, node):
         """
         Creates packed data with Node structure to be written to a file
+
         :param node: Node to convert into packed data
         :type node: Node
         :return: Packed data
@@ -182,6 +191,7 @@ class NodeStore:
     def empty_struct_data(cls):
         """
         Creates a packed struct of 0s
+
         :return: Packed class struct of 0s
         """
         empty_struct = struct.Struct(cls.STRUCT_FORMAT_STR)
@@ -191,6 +201,7 @@ class NodeStore:
     def __del__(self):
         """
         Closes the NodeStore file
+
         :return: Nothing
         :rtype: None
         """
