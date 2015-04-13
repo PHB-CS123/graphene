@@ -57,8 +57,8 @@ class RelationshipStore:
                 # Pad its first 9 bytes with 0s
                 self.pad_file_header()
         except IOError:
-            print("ERROR: unable to open RelationshipStore file: ", file_path)
-            raise IOError
+            raise IOError("ERROR: unable to open RelationshipStore file: " +
+                          file_path)
 
     def pad_file_header(self):
         """
@@ -255,8 +255,6 @@ class RelationshipStore:
             return False, Relationship.Direction.right
         elif enum == cls.InUseAndDir.undefined:
             return False, Relationship.Direction.undefined
-        elif isinstance(enum, cls.InUseAndDir):
-            raise ValueError("Invalid InUseAndDir value")
         else:
             raise TypeError("Enum is not of type InUseAndDir")
 
@@ -284,7 +282,5 @@ class RelationshipStore:
                 return cls.InUseAndDir.notInUse_rightDir
         elif direction == Relationship.Direction.undefined:
             return cls.InUseAndDir.undefined
-        elif isinstance(direction, Relationship.Direction):
-            raise ValueError("Invalid Direction value")
         else:
-            raise TypeError("Given direction is not fo type Direction")
+            raise TypeError("Given direction is not of type Direction")

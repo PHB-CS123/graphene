@@ -74,5 +74,7 @@ class TestRelationshipMethods(unittest.TestCase):
         relationship3 = Relationship(9, False, Relationship.Direction.right,
                                      8, 7, 6, 5, 4, 3, 2, 1)
 
-        self.assertEquals(relationship1 == relationship2, True)
-        self.assertEquals(relationship1 == relationship3, False)
+        self.assertTrue(relationship1 == relationship2)
+        self.assertFalse(relationship1 == relationship3)
+        self.assertFalse(relationship2 == relationship3)
+        self.assertFalse(relationship1 == 1)

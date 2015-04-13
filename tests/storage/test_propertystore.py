@@ -29,6 +29,22 @@ class TestPropertyStoreMethods(unittest.TestCase):
             self.fail("PropertyStore initializer failed: "
                       "db file failed to open.")
 
+    def test_double_init(self):
+        """
+        Test that initializing an empty PropertyStore succeeds when
+        repeated; i.e. the old file is reopened and no errors occur.
+        """
+        try:
+            PropertyStore()
+        except IOError:
+            self.fail("PropertyStore initializer failed: "
+                      "db file failed to open.")
+        try:
+            PropertyStore()
+        except IOError:
+            self.fail("PropertyStore initializer failed on second attempt: "
+                      "db file failed to open.")
+
     def test_invalid_write(self):
         """
         Test that writing a property to offset 0 raises an error

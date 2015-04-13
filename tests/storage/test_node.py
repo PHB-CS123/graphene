@@ -35,5 +35,7 @@ class TestNodeMethods(unittest.TestCase):
         node2 = Node(24, True, 31, 21)
         node3 = Node(24, False, 31, 21)
 
-        self.assertEquals(node1 == node2, True)
-        self.assertEquals(node1 == node3, False)
+        self.assertTrue(node1 == node2)
+        self.assertFalse(node1 == node3)
+        self.assertFalse(node2 == node3)
+        self.assertFalse(node1 == 1)
