@@ -37,7 +37,8 @@ class Property:
         :type in_use: bool
         :param prop_type: Type of property (int, long, string, etc.)
         :type prop_type: PropertyType
-        :param key_index_id: TODO determine purpose
+        :param key_index_id: Pointer to the PropertyIndex record holding the
+                             property count and a pointer to the property name
         :type key_index_id: int
         :param prop_block_id: ID to a dynamic store (string or array) or the
                               value if the property is a primitive (int, long,

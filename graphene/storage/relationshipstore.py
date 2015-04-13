@@ -54,11 +54,11 @@ class RelationshipStore:
                 open(file_path, "w+").close()
                 # Open it so that it can be read/written
                 self.storeFile = open(file_path, "r+b")
-                # Pad its first 9 bytes with 0s
+                # Pad its first 33 bytes with 0s
                 self.pad_file_header()
         except IOError:
-            print("ERROR: unable to open RelationshipStore file: ", file_path)
-            raise IOError
+            raise IOError("ERROR: unable to open RelationshipStore file: " +
+                          file_path)
 
     def pad_file_header(self):
         """

@@ -50,8 +50,8 @@ class PropertyStore:
                 # Pad its first 9 bytes with 0s
                 self.pad_file_header()
         except IOError:
-            print("ERROR: unable to open PropertyStore file: ", file_path)
-            raise IOError
+            raise IOError("ERROR: unable to open PropertyStore file: " +
+                          file_path)
 
     def pad_file_header(self):
         """
