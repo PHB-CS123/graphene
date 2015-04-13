@@ -1,6 +1,5 @@
-pip2 install -r lib/pip-reqs.txt
-cd lib/antlr4-python2
-python2 setup.py install
-cd ../enum34-1.0.4
+cd lib
+pip2 install -r pip-reqs.txt
+cd antlr4-python2
 python2 setup.py install
 cd ../../

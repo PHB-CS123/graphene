@@ -1,0 +1,7 @@
+[report]
+show_missing = true
+report = html term-missing
+omit = */__init__.py, graphene/parser/GQL*.py
+
+[html]
+directory = build/htmlcov

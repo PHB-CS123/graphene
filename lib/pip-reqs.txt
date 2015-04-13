@@ -1,3 +1,5 @@
 pytest
 pytest-sugar
+pytest-cov
 Sphinx
+enum34
