@@ -1,6 +1,6 @@
 import unittest
 
-from graphene.storage.relationshipstore import *
+from graphene.storage.relationship_store import *
 
 
 class TestRelationshipStoreMethods(unittest.TestCase):
@@ -29,6 +29,22 @@ class TestRelationshipStoreMethods(unittest.TestCase):
             self.fail("RelationshipStore initializer failed: "
                       "db file failed to open.")
 
+    def test_double_init(self):
+        """
+        Test that initializing an empty RelationshipStore succeeds when
+        repeated; i.e. the old file is reopened and no errors occur.
+        """
+        try:
+            RelationshipStore()
+        except IOError:
+            self.fail("RelationshipStore initializer failed: "
+                      "db file failed to open.")
+        try:
+            RelationshipStore()
+        except IOError:
+            self.fail("RelationshipStore initializer failed on second attempt: "
+                      "db file failed to open.")
+
     def test_invalid_write(self):
         """
         Test that writing a relationship to offset 0 raises an error
@@ -38,6 +54,11 @@ class TestRelationshipStoreMethods(unittest.TestCase):
         empty_relationship = Relationship()
         with self.assertRaises(ValueError):
             relationship_store.write_relationship(empty_relationship)
+
+        bad_direction = Relationship(1, False, "bad_dir",
+                                    2, 3, 4, 5, 6, 7, 8, 9)
+        with self.assertRaises(TypeError):
+            relationship_store.write_relationship(bad_direction)
 
     def test_invalid_read(self):
         """

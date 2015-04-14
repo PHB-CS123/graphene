@@ -55,5 +55,7 @@ class TestPropertyMethods(unittest.TestCase):
         property2 = Property(1, True, Property.PropertyType.int, 2, 3, 4, 5)
         property3 = Property(9, False, Property.PropertyType.long, 8, 7, 6, 5)
 
-        self.assertEquals(property1 == property2, True)
-        self.assertEquals(property1 == property3, False)
+        self.assertTrue(property1 == property2)
+        self.assertFalse(property1 == property3)
+        self.assertFalse(property2 == property3)
+        self.assertFalse(property1 == 1)

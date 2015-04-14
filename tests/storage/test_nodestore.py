@@ -1,6 +1,6 @@
 import unittest
 
-from graphene.storage.nodestore import *
+from graphene.storage.node_store import *
 
 class TestNodeStoreMethods(unittest.TestCase):
     def setUp(self):
@@ -21,6 +21,22 @@ class TestNodeStoreMethods(unittest.TestCase):
             NodeStore()
         except IOError:
             self.fail("NodeStore initializer failed: db file failed to open.")
+
+    def test_double_init(self):
+        """
+        Test that initializing an empty NodeStore succeeds when
+        repeated; i.e. the old file is reopened and no errors occur.
+        """
+        try:
+            NodeStore()
+        except IOError:
+            self.fail("NodeStore initializer failed: "
+                      "db file failed to open.")
+        try:
+            NodeStore()
+        except IOError:
+            self.fail("NodeStore initializer failed on second attempt: "
+                      "db file failed to open.")
 
     def test_invalid_write(self):
         """

@@ -1,3 +1,9 @@
 #!/bin/bash
 
-python2 -m graphene.client.client
+testrl=$(which rlwrap)
+if [ -z "$testrl" ]
+then
+    python2 -m graphene.client.client
+else
+    rlwrap -a python2 -m graphene.client.client
+fi

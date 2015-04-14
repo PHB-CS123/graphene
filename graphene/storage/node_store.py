@@ -1,6 +1,6 @@
 import struct
 
-from graphene.storage.graphenestore import *
+from graphene.storage.graphene_store import *
 from graphene.storage.node import *
 
 
@@ -66,7 +66,7 @@ class NodeStore:
 
     def node_at_index(self, index):
         """
-        Finds the Node with the given Node index
+        Finds the node with the given index
 
         :param index: Index of node
         :type index: int
@@ -144,6 +144,14 @@ class NodeStore:
         self.storeFile.seek(file_offset)
         self.storeFile.write(packed_data)
 
+    def __del__(self):
+        """
+        Closes the NodeStore file
+
+        :return: Nothing
+        :rtype: None
+        """
+        self.storeFile.close()
 
     @classmethod
     def node_from_packed_data(cls, index, packed_data):
@@ -195,13 +203,3 @@ class NodeStore:
         empty_struct = struct.Struct(cls.STRUCT_FORMAT_STR)
         packed_data = empty_struct.pack(0, 0, 0)
         return packed_data
-
-    def __del__(self):
-        """
-        Closes the NodeStore file
-
-        :return: Nothing
-        :rtype: None
-        """
-        self.storeFile.close()
-

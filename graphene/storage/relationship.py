@@ -18,7 +18,7 @@ class Relationship:
         :param index: Index of the relationship to initialize
         :type index: int
         :param in_use:  Whether the database is using the relationship
-        :type in_use: int
+        :type in_use: bool
         :param direction: Direction of the relationship (right, left)
         :type direction: Direction
         :param first_node_id: ID of the first node in the relation

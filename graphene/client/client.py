@@ -5,4 +5,7 @@ if __name__ == "__main__":
     server = GrapheneServer()
 
     shell = Shell(server)
-    shell.cmdloop()
+    try:
+        shell.cmdloop()
+    except KeyboardInterrupt:
+        pass

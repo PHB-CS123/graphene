@@ -1,6 +1,6 @@
 import struct
 
-from graphene.storage.graphenestore import *
+from graphene.storage.graphene_store import *
 from graphene.storage.relationship import *
 
 
@@ -153,6 +153,15 @@ class RelationshipStore:
         self.storeFile.seek(file_offset)
         self.storeFile.write(packed_data)
 
+    def __del__(self):
+        """
+        Closes the RelationshipStore file
+
+        :return: Nothing
+        :rtype: None
+        """
+        self.storeFile.close()
+
 
     @classmethod
     def relationship_from_packed_data(cls, index, packed_data):
@@ -255,8 +264,6 @@ class RelationshipStore:
             return False, Relationship.Direction.right
         elif enum == cls.InUseAndDir.undefined:
             return False, Relationship.Direction.undefined
-        elif isinstance(enum, cls.InUseAndDir):
-            raise ValueError("Invalid InUseAndDir value")
         else:
             raise TypeError("Enum is not of type InUseAndDir")
 
@@ -284,7 +291,5 @@ class RelationshipStore:
                 return cls.InUseAndDir.notInUse_rightDir
         elif direction == Relationship.Direction.undefined:
             return cls.InUseAndDir.undefined
-        elif isinstance(direction, Relationship.Direction):
-            raise ValueError("Invalid Direction value")
         else:
-            raise TypeError("Given direction is not fo type Direction")
+            raise TypeError("Given direction is not of type Direction")

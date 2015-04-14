@@ -13,7 +13,7 @@ class Node:
         :param index: Index of the node to initialize
         :type index: int
         :param in_use: Whether the database is using the node
-        :type in_use: int
+        :type in_use: bool
         :param rel_id: ID of the first relation the node has
         :type rel_id: int
         :param prop_id: ID of the first property the node has

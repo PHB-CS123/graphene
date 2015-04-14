@@ -1,6 +1,6 @@
 import struct
 
-from graphene.storage.graphenestore import *
+from graphene.storage.graphene_store import *
 from graphene.storage.property import *
 
 
@@ -147,6 +147,14 @@ class PropertyStore:
         self.storeFile.seek(file_offset)
         self.storeFile.write(packed_data)
 
+    def __del__(self):
+        """
+        Closes the PropertyStore file
+
+        :return: Nothing
+        :rtype: None
+        """
+        self.storeFile.close()
 
     @classmethod
     def property_from_packed_data(cls, index, packed_data):

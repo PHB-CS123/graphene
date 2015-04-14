@@ -1,4 +1,6 @@
-class CreateTypeCommand:
+from graphene.commands.Command import Command
+
+class CreateTypeCommand(Command):
     def __init__(self, ctx):
         self.type_name = ctx.t
         self.type_list = ctx.tl
