@@ -4,8 +4,8 @@ from antlr4 import InputStream, CommonTokenStream
 from graphene.parser.GQLLexer import GQLLexer
 from graphene.parser.GQLParser import GQLParser
 from graphene.commands import *
-from graphene.errors.ParserError import ParserError
-from graphene.errors.ParserErrorListener import ParserErrorListener
+from graphene.errors.parser_error import ParserError
+from graphene.errors.parser_error_listener import ParserErrorListener
 
 class ParserWrapper:
     def __init__(self):

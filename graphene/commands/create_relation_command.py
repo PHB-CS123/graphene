@@ -1,4 +1,4 @@
-from graphene.commands.Command import Command
+from graphene.commands.command import Command
 
 class CreateRelationCommand(Command):
     def __init__(self, ctx):

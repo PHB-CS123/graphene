@@ -1,5 +1,5 @@
 from antlr4.error.ErrorListener import ErrorListener
-from graphene.errors.ParserError import ParserError
+from graphene.errors.parser_error import ParserError
 
 class ParserErrorListener(ErrorListener):
 
