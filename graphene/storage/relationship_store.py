@@ -93,6 +93,10 @@ class RelationshipStore:
         # Get the packed data from the file
         packed_data = self.storeFile.read(self.RECORD_SIZE)
 
+        # This occurs when we've reached the end of the file.
+        if packed_data == '':
+            return None
+
         return self.relationship_from_packed_data(index, packed_data)
 
     def write_relationship(self, relationship):

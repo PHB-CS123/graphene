@@ -4,12 +4,15 @@ from graphene.parser.GQLParser import GQLParser
 from graphene.commands import *
 from graphene.errors.ParserError import ParserError
 from graphene.errors.ParserErrorListener import ParserErrorListener
+from graphene.storage.StorageManager import StorageManager
 
 class GrapheneServer:
     """
     This class handles execution of commands as the server. It uses the parser
     and dispatches the execution of commands through those classes.
     """
+    def __init__(self):
+        self.storage_manager = StorageManager()
 
     def parseCommands(self, commands):
         """
@@ -61,8 +64,9 @@ class GrapheneServer:
             if not cmds:
                 return False
             for cmd in cmds:
-                cmd.execute()
+                cmd.execute(self.storage_manager)
             return True
         except ParserError as e:
             print e
             return True
+

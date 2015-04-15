@@ -8,6 +8,11 @@ class MatchCommand(Command):
         lst = ["\t%s" % chain for chain in self.data]
         return "[Match\n%s\n]" % "\n".join(lst)
 
-    def execute(self):
-        for chain_element in self.data:
-            print chain_element
+    def execute(self, storage_manager):
+        i = 1
+        while True:
+            node = storage_manager.nodeprop[i]
+            if node is None:
+                break
+            print node
+            i += 1

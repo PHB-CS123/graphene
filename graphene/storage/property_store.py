@@ -86,6 +86,10 @@ class PropertyStore:
         # Get the packed data from the file
         packed_data = self.storeFile.read(self.RECORD_SIZE)
 
+        # This occurs when we've reached the end of the file.
+        if packed_data == '':
+            return None
+
         return self.property_from_packed_data(index, packed_data)
 
     def write_property(self, db_property):

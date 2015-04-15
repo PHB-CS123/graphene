@@ -5,5 +5,5 @@ class Command(object):
     def __repr__(self):
         return "[Command]"
 
-    def execute(self):
+    def execute(self, storage_manager):
         print "executing..."
