@@ -1,10 +1,9 @@
 from antlr4 import InputStream, CommonTokenStream
-from graphene.parser.GQLLexer import GQLLexer
-from graphene.parser.GQLParser import GQLParser
+from graphene.parser import (GQLLexer, GQLParser)
 from graphene.commands import *
-from graphene.errors.ParserError import ParserError
-from graphene.errors.ParserErrorListener import ParserErrorListener
-from graphene.storage.StorageManager import StorageManager
+from graphene.errors.parser_rror import ParserError
+from graphene.errors.parser_error_listener import ParserErrorListener
+from graphene.storage.storage_manager import StorageManager
 
 class GrapheneServer:
     """
