@@ -14,9 +14,10 @@ class PropertyStore:
     # Format string used to compact these values
     # '=': native byte order representation, standard size, no alignment
     # '?': boolean
-    # 'I': unsigned int
+    # 'i': signed int
     # 'Q': unsigned long long
-    STRUCT_FORMAT_STR = "= ? I I Q I I"
+    # TODO: determine how to handle signed/unsigned long long for all data types
+    STRUCT_FORMAT_STR = "= ? i i Q i i"
     ''':type: str'''
 
     # Size of an individual record (bytes)

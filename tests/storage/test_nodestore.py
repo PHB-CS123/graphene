@@ -2,6 +2,7 @@ import unittest
 
 from graphene.storage.node_store import *
 
+
 class TestNodeStoreMethods(unittest.TestCase):
     def setUp(self):
         GrapheneStore.TESTING = True
@@ -105,7 +106,7 @@ class TestNodeStoreMethods(unittest.TestCase):
         """
         node_store = NodeStore()
 
-        # Create 3 old nodes
+        # Create 3 nodes
         node1 = Node(1, False, 1, 1)
         node2 = Node(2, False, 2, 2)
         node3 = Node(3, False, 3, 3)
@@ -145,7 +146,7 @@ class TestNodeStoreMethods(unittest.TestCase):
         """
         node_store = NodeStore()
 
-        # Create 3 old nodes
+        # Create 3 nodes
         node1 = Node(1, True, 1, 1)
         node2 = Node(2, True, 2, 2)
         node3 = Node(3, True, 3, 3)

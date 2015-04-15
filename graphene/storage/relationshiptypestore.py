@@ -1,4 +1,4 @@
-from graphene.storage.graphenestore import *
+from graphene.storage.graphene_store import *
 from graphene.storage.relationshiptype import *
 
 from enum import Enum
@@ -17,9 +17,9 @@ class RelationshipTypeStore:
 
     # Format string used to compact these values
     # '=': native byte order representation, standard size, no alignment
-    # 'B': unsigned char
-    # 'I': unsigned int
-    STRUCT_FORMAT_STR = "= B I"
+    # '?': boolean
+    # 'i': signed int
+    STRUCT_FORMAT_STR = "= ? i"
     ''':type: str'''
 
     # Size of an individual record (bytes)

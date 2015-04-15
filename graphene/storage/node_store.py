@@ -13,8 +13,8 @@ class NodeStore:
     # Format string used to compact these values
     # '=': native byte order representation, standard size, no alignment
     # '?': boolean
-    # 'I': unsigned int
-    STRUCT_FORMAT_STR = "= ? I I"
+    # 'i': signed int
+    STRUCT_FORMAT_STR = "= ? i i"
     ''':type: str'''
 
     # Size of an individual record (bytes)

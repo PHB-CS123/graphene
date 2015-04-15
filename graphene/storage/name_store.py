@@ -14,11 +14,16 @@ class NameStore:
     # Format string used to compact these values
     # '=': native byte order representation, standard size, no alignment
     # '?': boolean
-    # 'I': unsigned int
-    HEADER_STRUCT_FORMAT_STR = "= ? I I I"
+    # 'i': signed int
+    HEADER_STRUCT_FORMAT_STR = "= ? i i i"
+    ''':type str'''
 
     # Size of the header struct (bytes)
     HEADER_SIZE = struct.calcsize(HEADER_STRUCT_FORMAT_STR)
+    ''':type str'''
+
+    # Character used to pad the string block
+    PAD_CHAR = "\0"
 
     def __init__(self, filename, block_size=10):
 
@@ -64,12 +69,12 @@ class NameStore:
         :rtype: None
         """
 
-        # Create a packed struct of 0s
+        # Create a packed header struct of 0s
         packed_data = self.empty_header_data()
         # File pointer should be at 0, no need to seek
         self.storeFile.write(packed_data)
         # Write an empty string with blockSize empty characters
-        self.storeFile.write(bytes(self.blockSize * ' '))
+        self.storeFile.write(bytes(self.pad_string('')))
 
     def name_at_index(self, index):
         """
@@ -91,6 +96,7 @@ class NameStore:
 
         # Get the header from the file
         packed_data_header = self.storeFile.read(self.HEADER_SIZE)
+        # Get the padded name from the file
         name_string = self.storeFile.read(self.blockSize)
 
         return self.name_from_data(index, packed_data_header, name_string)
@@ -110,6 +116,7 @@ class NameStore:
     def delete_name(self, name_data):
         """
         Deletes the given name data from the NameStore
+
         :param name_data: Name data to delete
         :type name_data: Name
         :return: Nothing
@@ -128,8 +135,10 @@ class NameStore:
         """
         # Get an empty struct to zero-out the data
         empty_header = self.empty_header_data()
+        # Padded empty string
+        empty_string = self.pad_string('')
         # Write the zeroes and empty string to the file
-        self.write_to_index_data(index, empty_header, self.blockSize * ' ')
+        self.write_to_index_data(index, empty_header, empty_string)
 
     def write_to_index_data(self, index, header_data, name):
         """
@@ -138,7 +147,7 @@ class NameStore:
         :param index: Index to write to
         :type index: int
         :param header_data: Packed data to write
-        :param name: Name string to write
+        :param name: Padded name string to write
         :type name: str
         :return: Nothing
         :rtype: None
@@ -157,34 +166,7 @@ class NameStore:
         self.storeFile.write(header_data)
         self.storeFile.write(bytes(name))
 
-
-    @classmethod
-    def name_from_data(cls, index, packed_data_header, name):
-        """
-        Creates a name type from the given header and name
-
-        :param index: Index of the name that the packed data belongs to
-        :type index: int
-        :param packed_data_header: Packed binary data header
-        :return: Name type from index, header, and name
-        :rtype: Name
-        """
-
-        # Unpack the data using the header struct format
-        header_struct = struct.Struct(cls.HEADER_STRUCT_FORMAT_STR)
-        unpacked_data = header_struct.unpack(packed_data_header)
-
-        # Get the name components
-        in_use = unpacked_data[0]
-        prev_block = unpacked_data[1]
-        length = unpacked_data[2]
-        next_block = unpacked_data[3]
-
-        # Create a name record with these components
-        return Name(index, in_use, prev_block, length, next_block, name)
-
-    @classmethod
-    def data_from_name(cls, name_data):
+    def data_from_name(self, name_data):
         """
         Creates a tuple containing header packed_data and the corresponding name
 
@@ -196,13 +178,65 @@ class NameStore:
 
         # Pack the header parts into a struct with the order:
         # (inUse, previousBlock, length, nextBlock)
-        header_struct = struct.Struct(cls.HEADER_STRUCT_FORMAT_STR)
+        header_struct = struct.Struct(self.HEADER_STRUCT_FORMAT_STR)
         packed_data = header_struct.pack(name_data.inUse,
                                          name_data.previousBlock,
                                          name_data.length,
                                          name_data.nextBlock)
+        # Pad the name to store with enough null bytes to fill the block
+        padded_name = self.pad_string(name_data.name)
 
-        return packed_data, name_data.name
+        return packed_data, padded_name
+
+    def name_from_data(self, index, packed_data_header, name):
+        """
+        Creates a name type from the given packed header and padded name
+
+        :param index: Index of the name that the packed data belongs to
+        :type index: int
+        :param packed_data_header: Packed binary data header
+        :return: Name type from index, header, and name
+        :rtype: Name
+        """
+
+        # Unpack the data using the header struct format
+        header_struct = struct.Struct(self.HEADER_STRUCT_FORMAT_STR)
+        unpacked_data = header_struct.unpack(packed_data_header)
+
+        # Get the name components
+        in_use = unpacked_data[0]
+        prev_block = unpacked_data[1]
+        length = unpacked_data[2]
+        next_block = unpacked_data[3]
+
+        # Unpad the given name string
+        name_string = self.unpad_string(name)
+
+        # Create a name record with these components
+        return Name(index, in_use, prev_block, length, next_block, name_string)
+
+    def pad_string(self, string):
+        """
+        Pads the given string with blockSize - len(string) PAD_CHARs
+
+        :param string: String to pad
+        :type string: str
+        :return: Padded string
+        :rtype: str
+        """
+        return string.ljust(self.blockSize, self.PAD_CHAR)
+
+    @classmethod
+    def unpad_string(cls, string):
+        """
+        Removes the padding from the given string
+
+        :param string: Padded String
+        :type string: str
+        :return: Unpadded string
+        :rtype: str
+        """
+        return string.rstrip(cls.PAD_CHAR)
 
     @classmethod
     def empty_header_data(cls):

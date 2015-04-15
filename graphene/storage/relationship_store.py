@@ -14,16 +14,16 @@ class RelationshipStore:
 
     class InUseAndDir(Enum):
         undefined = 0
-        inUse_rightDir = 0b0001
-        inUse_leftDir = 0b0010
-        notInUse_rightDir = 0b0100
-        notInUse_leftDir = 0b1000
+        inUse_rightDir = 1
+        inUse_leftDir = 2
+        notInUse_rightDir = 3
+        notInUse_leftDir = 4
 
     # Format string used to compact these values
     # '=': native byte order representation, standard size, no alignment
     # 'B': unsigned char
-    # 'I': unsigned int
-    STRUCT_FORMAT_STR = "= B I I I I I I I I"
+    # 'i': signed int
+    STRUCT_FORMAT_STR = "= B i i i i i i i i"
     ''':type: str'''
 
     # Size of an individual record (bytes)

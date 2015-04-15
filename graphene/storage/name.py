@@ -45,6 +45,7 @@ class Name:
                    (self.inUse == other.inUse) and \
                    (self.previousBlock == other.previousBlock) and \
                    (self.length == other.length) and \
-                   (self.nextBlock == other.nextBlock)
+                   (self.nextBlock == other.nextBlock) and \
+                   (self.name == other.name)
         else:
             return False
