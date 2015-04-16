@@ -26,7 +26,17 @@ class NameStore:
     PAD_CHAR = "\0"
 
     def __init__(self, filename, block_size=10):
+        """
+        Creates a NameStore instance which handles reading/writing to the
+        file containing name values
 
+        :param filename: Name of file where names are stored
+        :type filename: str
+        :param block_size: Maximum size of name block (chars, ASCII encoded)
+        :type block_size: int
+        :return: Name store instance for handling name records
+        :rtype: NameStore
+        """
         graphenestore = GrapheneStore()
         # Get the path of the file
         file_path = graphenestore.datafilesDir + filename
