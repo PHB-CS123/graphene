@@ -1,8 +1,8 @@
 from graphene.storage.graphene_store import *
-from graphene.storage.relationshiptype import *
+from graphene.storage.relationship_type import *
 
-from enum import Enum
 import struct
+
 
 class RelationshipTypeStore:
     """
