@@ -1,11 +1,26 @@
 import struct
+import abc
 
 from graphene.storage.graphene_store import *
 
 
-class GeneralStore:
+class GeneralStore(object):
+    # Used to indicate abstract methods
+    __metaclass__ = abc.ABCMeta
 
     def __init__(self, filename, struct_format_string):
+        """
+        Creates a GeneralStore instance which handles reading/writing
+        to store files for different value types
+
+        :param filename: Name of store file
+        :type filename: str
+        :param struct_format_string: Format string used to compact values
+        :type struct_format_string: str
+        :return: GeneralStore instance meant to be sub-classed
+        :rtype: GeneralStore
+        """
+
         graphenestore = GrapheneStore()
         # Get the path of the file
         file_path = graphenestore.datafilesDir + filename
@@ -43,17 +58,128 @@ class GeneralStore:
         # File pointer should be at 0, no need to seek
         self.storeFile.write(packed_data)
 
+    def get_last_file_index(self):
+        """
+        Get the last index of the current file (used when creating new IDs)
+
+        :return: Last index of current file
+        :rtype: int
+        """
+        # Seek to the end of the file
+        self.storeFile.seek(0, os.SEEK_END)
+
+        return self.storeFile.tell() / self.recordSize
+
+    def item_at_index(self, index):
+        """
+        Finds the item with the given index
+
+        :param index: Index of item
+        :type index: int
+        :return: Item with given index
+        """
+        if index == 0:
+            raise ValueError("Item cannot be read from index 0")
+
+        file_offset = index * self.recordSize
+
+        # Seek to the calculated offset
+        self.storeFile.seek(file_offset)
+
+        # Get the packed data from the file
+        packed_data = self.storeFile.read(self.recordSize)
+
+        # This occurs when we've reached the end of the file.
+        if packed_data == '':
+            return None
+
+        return self.item_from_packed_data(index, packed_data)
+
+    def write_item(self, item):
+        """
+        Writes the given item to the store file
+
+        :param item: Item to write
+        :return: Nothing
+        :rtype: None
+        """
+        # Pack the item data, then write it to the item index
+        packed_data = self.packed_data_from_item(item)
+        # Write the packed data to the item index
+        self.write_to_index_packed_data(item.index, packed_data)
+
+    def write_to_index_packed_data(self, index, packed_data):
+        """
+        Writes the packed data to the given index
+
+        :param index: Index to write to
+        :type index: int
+        :param packed_data: Packed data to write
+        :return: Nothing
+        :rtype: None
+        """
+        if index == 0:
+            raise ValueError("Item cannot be written to index 0")
+
+        file_offset = index * self.recordSize
+
+        # Seek to the calculated offset and write the data
+        self.storeFile.seek(file_offset)
+        self.storeFile.write(packed_data)
+
+    def delete_item(self, item):
+        """
+        Deletes the given item from the store
+
+        :param item: Item to delete
+        :return: Nothing
+        :rtype: None
+        """
+        self.delete_item_at_index(item.index)
+
+    def delete_item_at_index(self, index):
+        """
+        Deletes the item at the given index from the store
+
+        :param index: Index of the item
+        :type index: int
+        :return: Nothing
+        :rtype: None
+        """
+        # Get an empty struct to zero-out the data
+        empty_struct = self.empty_struct_data()
+        # Write the zeroes to the file
+        self.write_to_index_packed_data(index, empty_struct)
+
+    @abc.abstractmethod
+    def item_from_packed_data(self, index, packed_data):
+        """
+        Creates an item from the given packed data
+
+        :param index: Index of the item that the packed data belongs to
+        :type index: int
+        :param packed_data: Packed binary data
+        :return: Item from packed data
+        """
+        return
+
+    @abc.abstractmethod
+    def packed_data_from_item(self, item):
+        """
+        Abstract method: Creates packed data with struct format string
+        to be written to a file
+
+        :param item: Item to convert into packed data
+        :return: Packed data
+        """
+        return
+
+    @abc.abstractmethod
     def empty_struct_data(self):
         """
-        Creates a packed struct of 0s
+        Abstact method: creates packed struct of 0s
 
-        :return: Packed class struct of 0s
+        :return: Packed struct of 0s
+        :rtype: bytearray
         """
-        empty_struct = struct.Struct(self.structFormatString)
-        # Count spaces (excluding leading or trailing) to get data values
-        # i.e. "= ? I I I" => 4 data values, 4 spaces. Assuming there is
-        # a first character for byte order/size/alignment (@ = < > !)
-        data_values = self.structFormatString.strip().count()
-        data_values_tuple = data_values * (0,)
-        packed_data = empty_struct.pack(data_values_tuple)
-        return packed_data
+        return

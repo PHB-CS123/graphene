@@ -20,9 +20,9 @@ class TestNodeStoreMethods(unittest.TestCase):
         empty_node = Node()
 <<<<<<< HEAD
         with self.assertRaises(ValueError):
-            nodestore.write_node(empty_node)
+            nodestore.write_item(empty_node)
 =======
-        self.assertRaises(ValueError, nodestore.write_node, empty_node)
+        self.assertRaises(ValueError, nodestore.write_item, empty_node)
 >>>>>>> 9ac98f29eaec9c0ee71cc470c844d47bb7556f1f
 
     def test_write_read(self):
@@ -31,9 +31,9 @@ class TestNodeStoreMethods(unittest.TestCase):
         """
         nodestore = NodeStore()
         valid_node = Node(1, 0, 1, 1)
-        nodestore.write_node(valid_node)
+        nodestore.write_item(valid_node)
 <<<<<<< HEAD
-        node_from_file = nodestore.node_at_index(valid_node.index)
+        node_from_file = nodestore.item_at_index(valid_node.index)
 
         # Assert that all the values are the same
         self.assertEquals(node_from_file.index, valid_node.index)
@@ -43,6 +43,6 @@ class TestNodeStoreMethods(unittest.TestCase):
 
     
 =======
-        self.assertEquals(nodestore.node_at_index(valid_node.index),
+        self.assertEquals(nodestore.item_at_index(valid_node.index),
                           valid_node)
 >>>>>>> 9ac98f29eaec9c0ee71cc470c844d47bb7556f1f
