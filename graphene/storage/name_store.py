@@ -25,6 +25,9 @@ class NameStore:
     # Character used to pad the string block
     PAD_CHAR = "\0"
 
+    # Type stored by this class
+    STORAGE_TYPE = Name
+
     def __init__(self, filename, block_size=10):
         """
         Creates a NameStore instance which handles reading/writing to the

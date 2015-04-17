@@ -32,6 +32,9 @@ class RelationshipStore(GeneralStore):
     FILE_NAME = "graphenestore.relationshipstore.db"
     ''':type: str'''
 
+    # Type stored by this class
+    STORAGE_TYPE = Relationship
+
     def __init__(self):
         """
         Creates a RelationshipStore instance which handles reading/writing to

@@ -28,6 +28,9 @@ class RelationshipTypeStore(GeneralStore):
     FILE_NAME = "graphenestore.relationshiptypestore.db"
     ''':type: str'''
 
+    # Type stored by this class
+    STORAGE_TYPE = RelationshipType
+
     def __init__(self):
         """
         Creates a RelationshipTypeStore instance.
@@ -60,7 +63,6 @@ class RelationshipTypeStore(GeneralStore):
 
         # Create a relationship type with these contents
         return RelationshipType(index, in_use, type_block_id)
-
 
     def packed_data_from_item(self, relationship_type):
         """

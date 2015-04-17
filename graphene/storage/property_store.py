@@ -26,6 +26,9 @@ class PropertyStore(GeneralStore):
     FILE_NAME = "graphenestore.propertystore.db"
     ''':type: str'''
 
+    # Type stored by this class
+    STORAGE_TYPE = Property
+
     def __init__(self):
         """
         Creates a PropertyStore instance which handles reading/writing to

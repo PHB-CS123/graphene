@@ -5,6 +5,10 @@ from graphene.storage.graphene_store import *
 
 
 class GeneralStore(object):
+    """
+    Handles the general storage operations of different types.
+    """
+
     # Used to indicate abstract methods
     __metaclass__ = abc.ABCMeta
 

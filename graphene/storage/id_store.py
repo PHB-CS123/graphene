@@ -21,6 +21,9 @@ class IdStore:
     # Return value when no ID is available
     NO_ID = -1
 
+    # Type stored by this class
+    STORAGE_TYPE = int
+
     def __init__(self, filename):
         """
         Creates an IdStore instance which handles reading/writing to the

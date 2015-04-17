@@ -23,6 +23,9 @@ class NodeStore(GeneralStore):
     FILE_NAME = "graphenestore.nodestore.db"
     ''':type: str'''
 
+    # Type stored by this class
+    STORAGE_TYPE = Node
+
     def __init__(self):
         """
         Creates a NodeStore instance which handles reading/writing to the
