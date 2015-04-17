@@ -17,7 +17,7 @@ class GeneralStoreManager:
         self.store = store
         self.idStore = IdStore(store.FILE_NAME + ".id")
 
-    def create_item(self):
+    def create_item(self, **kwargs):
         """
         Creates an item with the type of the store being managed
 
@@ -29,7 +29,7 @@ class GeneralStoreManager:
         if available_id == IdStore.NO_ID:
             available_id = self.store.get_last_file_index()
         # Create a type based on the type our store stores
-        return self.store.STORAGE_TYPE(available_id)
+        return self.store.STORAGE_TYPE(available_id, **kwargs)
 
     def delete_item(self, item):
         """
