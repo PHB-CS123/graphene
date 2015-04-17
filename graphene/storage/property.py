@@ -26,7 +26,7 @@ class Property:
         stringArray = 16
 
     def __init__(self, index=0, in_use=True, prop_type=PropertyType.undefined,
-                 key_index_id=0, prop_block_id=0, prev_prop_id=0,
+                 name_id=0, prop_block_id=0, prev_prop_id=0,
                  next_prop_id=0):
         """
         Initializes a property with the given values
@@ -37,9 +37,8 @@ class Property:
         :type in_use: bool
         :param prop_type: Type of property (int, long, string, etc.)
         :type prop_type: PropertyType
-        :param key_index_id: Pointer to the PropertyIndex record holding the
-                             property count and a pointer to the property name
-        :type key_index_id: int
+        :param name_id: Pointer to the record holding the property name
+        :type name_id: int
         :param prop_block_id: ID to a dynamic store (string or array) or the
                               value if the property is a primitive (int, long,
                               float, etc.)
@@ -56,7 +55,7 @@ class Property:
         # Values stored in the PropertyStore file
         self.inUse = in_use
         self.type = prop_type
-        self.keyIndexId = key_index_id
+        self.nameId = name_id
         self.propBlockId = prop_block_id
         self.prevPropId = prev_prop_id
         self.nextPropId = next_prop_id
@@ -74,7 +73,7 @@ class Property:
             return (self.index == other.index) and \
                    (self.inUse == other.inUse) and \
                    (self.type == other.type) and \
-                   (self.keyIndexId == other.keyIndexId) and \
+                   (self.nameId == other.nameId) and \
                    (self.propBlockId == other.propBlockId) and \
                    (self.prevPropId == other.prevPropId) and\
                    (self.nextPropId == other.nextPropId)

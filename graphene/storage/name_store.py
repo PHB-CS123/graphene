@@ -15,7 +15,7 @@ class NameStore:
     # '=': native byte order representation, standard size, no alignment
     # '?': boolean
     # 'i': signed int
-    HEADER_STRUCT_FORMAT_STR = "= ? i i i"
+    HEADER_STRUCT_FORMAT_STR = "= ? I I I"
     ''':type str'''
 
     # Size of the header struct (bytes)
@@ -89,7 +89,7 @@ class NameStore:
         # Write an empty string with blockSize empty characters
         self.storeFile.write(bytes(self.pad_string('')))
 
-    def name_at_index(self, index):
+    def item_at_index(self, index):
         """
         Finds the Name with the given index
 
@@ -112,9 +112,9 @@ class NameStore:
         # Get the padded name from the file
         name_string = self.storeFile.read(self.blockSize)
 
-        return self.name_from_data(index, packed_data_header, name_string)
+        return self.item_from_data(index, packed_data_header, name_string)
 
-    def write_name(self, name_data):
+    def write_item(self, name_data):
         """
         Writes the given name to the NameStore file
 
@@ -123,10 +123,10 @@ class NameStore:
         :return: Nothing
         :rtype: None
         """
-        (header_data, name) = self.data_from_name(name_data)
+        (header_data, name) = self.data_from_item(name_data)
         self.write_to_index_data(name_data.index, header_data, name)
 
-    def delete_name(self, name_data):
+    def delete_item(self, name_data):
         """
         Deletes the given name data from the NameStore
 
@@ -135,9 +135,9 @@ class NameStore:
         :return: Nothing
         :rtype: None
         """
-        self.delete_name_at_index(name_data.index)
+        self.delete_item_at_index(name_data.index)
 
-    def delete_name_at_index(self, index):
+    def delete_item_at_index(self, index):
         """
         Deletes the name data at the given index from the NameStore
 
@@ -179,7 +179,7 @@ class NameStore:
         self.storeFile.write(header_data)
         self.storeFile.write(bytes(name))
 
-    def data_from_name(self, name_data):
+    def data_from_item(self, name_data):
         """
         Creates a tuple containing header packed_data and the corresponding name
 
@@ -201,7 +201,7 @@ class NameStore:
 
         return packed_data, padded_name
 
-    def name_from_data(self, index, packed_data_header, name):
+    def item_from_data(self, index, packed_data_header, name):
         """
         Creates a name type from the given packed header and padded name
 

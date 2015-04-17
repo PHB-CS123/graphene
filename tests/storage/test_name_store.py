@@ -47,7 +47,7 @@ class TestNameStoreMethods(unittest.TestCase):
 
         empty_name = Name()
         with self.assertRaises(ValueError):
-            name_store.write_name(empty_name)
+            name_store.write_item(empty_name)
 
     def test_invalid_read(self):
         """
@@ -56,7 +56,7 @@ class TestNameStoreMethods(unittest.TestCase):
         name_store = NameStore("graphenestore.namestore.db")
 
         with self.assertRaises(ValueError):
-            name_store.name_at_index(0)
+            name_store.item_at_index(0)
 
     def test_invalid_length_write(self):
         """
@@ -67,9 +67,9 @@ class TestNameStoreMethods(unittest.TestCase):
         name_store = NameStore("graphenestore.namestore.db", block_size)
 
         # Try to write a name that is 1 byte longer than the largest block_size
-        long_name = Name(1, True, -1, 1, -1, (block_size + 1) * "a")
+        long_name = Name(1, True, 0, 1, 0, (block_size + 1) * "a")
         with self.assertRaises(ValueError):
-            name_store.write_name(long_name)
+            name_store.write_item(long_name)
 
     def test_write_read_1_name(self):
         """
@@ -78,11 +78,11 @@ class TestNameStoreMethods(unittest.TestCase):
         name_store = NameStore("graphenestore.namestore.db")
 
         # Create a name and add it to the NameStore
-        name_data = Name(1, True, -1, 1, -1, "hello")
-        name_store.write_name(name_data)
+        name_data = Name(1, True, 0, 1, 0, "hello")
+        name_store.write_item(name_data)
 
         # Read the name from the NameStore file
-        name_data_file = name_store.name_at_index(name_data.index)
+        name_data_file = name_store.item_at_index(name_data.index)
 
         # Assert that the values are the same
         self.assertEquals(name_data, name_data_file)
@@ -94,19 +94,19 @@ class TestNameStoreMethods(unittest.TestCase):
         name_store = NameStore("graphenestore.namestore.db")
 
         # Create one name and write it to the NameStore
-        name_data1 = Name(1, True, -1, 1, -1, "hello")
-        name_store.write_name(name_data1)
+        name_data1 = Name(1, True, 0, 1, 0, "hello")
+        name_store.write_item(name_data1)
 
         # Create 2 names and add them to the NameStore
         name_data2 = Name(2, True, 2, 1, 2, "bye")
         name_data3 = Name(3, False, 3, 1, 3, "bye bye")
-        name_store.write_name(name_data2)
-        name_store.write_name(name_data3)
+        name_store.write_item(name_data2)
+        name_store.write_item(name_data3)
 
         # Read the names from the NameStore file
-        name_data1_file = name_store.name_at_index(name_data1.index)
-        name_data2 = name_store.name_at_index(name_data2.index)
-        name_data3 = name_store.name_at_index(name_data3.index)
+        name_data1_file = name_store.item_at_index(name_data1.index)
+        name_data2 = name_store.item_at_index(name_data2.index)
+        name_data3 = name_store.item_at_index(name_data3.index)
 
         # Make sure their values are the same
         self.assertEquals(name_data1, name_data1_file)
@@ -120,37 +120,37 @@ class TestNameStoreMethods(unittest.TestCase):
         name_store = NameStore("graphenestore.namestore.db")
 
         # Create 3 names
-        name_data1 = Name(1, True, -1, 1, -1, "hello")
+        name_data1 = Name(1, True, 0, 1, 0, "hello")
         name_data2 = Name(2, True, 2, 1, 2, "bye")
         name_data3 = Name(3, False, 3, 1, 3, "bye bye")
 
         # Write them to the NameStore
-        name_store.write_name(name_data1)
-        name_store.write_name(name_data2)
-        name_store.write_name(name_data3)
+        name_store.write_item(name_data1)
+        name_store.write_item(name_data2)
+        name_store.write_item(name_data3)
 
         # Verify that they are in the store as expected
-        name_data1_file = name_store.name_at_index(name_data1.index)
+        name_data1_file = name_store.item_at_index(name_data1.index)
         self.assertEquals(name_data1, name_data1_file)
 
-        name_data2_file = name_store.name_at_index(name_data2.index)
+        name_data2_file = name_store.item_at_index(name_data2.index)
         self.assertEquals(name_data2, name_data2_file)
 
-        name_data3_file = name_store.name_at_index(name_data3.index)
+        name_data3_file = name_store.item_at_index(name_data3.index)
         self.assertEquals(name_data3, name_data3_file)
 
         # Create a new name_data2 and overwrite the old name_data2
         new_name_data2 = Name(2, False, 4, 1, 4, "never mind")
-        name_store.write_name(new_name_data2)
+        name_store.write_item(new_name_data2)
 
         # Verify that the data is still as expected
-        name_data1_file = name_store.name_at_index(name_data1.index)
+        name_data1_file = name_store.item_at_index(name_data1.index)
         self.assertEquals(name_data1, name_data1_file)
 
-        new_name_data2_file = name_store.name_at_index(new_name_data2.index)
+        new_name_data2_file = name_store.item_at_index(new_name_data2.index)
         self.assertEquals(new_name_data2, new_name_data2_file)
 
-        name_data3_file = name_store.name_at_index(name_data3.index)
+        name_data3_file = name_store.item_at_index(name_data3.index)
         self.assertEquals(name_data3, name_data3_file)
 
     def test_delete_name(self):
@@ -160,42 +160,42 @@ class TestNameStoreMethods(unittest.TestCase):
         name_store = NameStore("graphenestore.namestore.db")
 
         # Create 3 names
-        name_data1 = Name(1, True, -1, 1, -1, "hello")
+        name_data1 = Name(1, True, 0, 1, 0, "hello")
         name_data2 = Name(2, True, 2, 1, 2, "bye")
         name_data3 = Name(3, False, 3, 1, 3, "bye bye")
 
         # Write them to the NameStore
-        name_store.write_name(name_data1)
-        name_store.write_name(name_data2)
-        name_store.write_name(name_data3)
+        name_store.write_item(name_data1)
+        name_store.write_item(name_data2)
+        name_store.write_item(name_data3)
 
         # Verify that they are in the store as expected
-        name_data1_file = name_store.name_at_index(name_data1.index)
+        name_data1_file = name_store.item_at_index(name_data1.index)
         self.assertEquals(name_data1, name_data1_file)
 
-        name_data2_file = name_store.name_at_index(name_data2.index)
+        name_data2_file = name_store.item_at_index(name_data2.index)
         self.assertEquals(name_data2, name_data2_file)
 
-        name_data3_file = name_store.name_at_index(name_data3.index)
+        name_data3_file = name_store.item_at_index(name_data3.index)
         self.assertEquals(name_data3, name_data3_file)
 
         # Delete names 1 and 3
-        name_store.delete_name(name_data1)
-        name_store.delete_name(name_data3)
+        name_store.delete_item(name_data1)
+        name_store.delete_item(name_data3)
 
         # Create names 1 and 3 with zeroed out values
         zero_name_data1 = Name(name_data1.index, False, 0, 0, 0, '')
         zero_name_data3 = Name(name_data3.index, False, 0, 0, 0, '')
 
         # Verify deleted name is zeroed out
-        deleted_name_data1_file = name_store.name_at_index(name_data1.index)
+        deleted_name_data1_file = name_store.item_at_index(name_data1.index)
         self.assertEquals(zero_name_data1, deleted_name_data1_file)
 
         # Verify unaffected name is as expected
-        name_data2_file = name_store.name_at_index(name_data2.index)
+        name_data2_file = name_store.item_at_index(name_data2.index)
         self.assertEquals(name_data2, name_data2_file)
 
         # Verify deleted name is zeroed out
-        deleted_name_data3_file = name_store.name_at_index(name_data3.index)
+        deleted_name_data3_file = name_store.item_at_index(name_data3.index)
         self.assertEquals(zero_name_data3, deleted_name_data3_file)
 

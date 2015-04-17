@@ -12,7 +12,7 @@ class NodeStore(GeneralStore):
     # '=': native byte order representation, standard size, no alignment
     # '?': boolean
     # 'i': signed int
-    STRUCT_FORMAT_STR = "= ? i i"
+    STRUCT_FORMAT_STR = "= ? I I I"
     ''':type: str'''
 
     # Size of an individual record (bytes)
@@ -57,9 +57,10 @@ class NodeStore(GeneralStore):
         in_use = unpacked_data[0]
         rel_id = unpacked_data[1]
         prop_id = unpacked_data[2]
+        node_type = unpacked_data[3]
 
         # Create a node record with these components
-        return Node(index, in_use, rel_id, prop_id)
+        return Node(index, in_use, rel_id, prop_id, node_type)
 
     def packed_data_from_item(self, node):
         """
@@ -72,7 +73,8 @@ class NodeStore(GeneralStore):
 
         # Pack the node into a struct with the order (inUse, relId, propId)
         node_struct = struct.Struct(self.STRUCT_FORMAT_STR)
-        packed_data = node_struct.pack(node.inUse, node.relId, node.propId)
+        packed_data = node_struct.pack(node.inUse, node.relId,
+                                       node.propId, node.nodeType)
 
         return packed_data
 
@@ -84,5 +86,5 @@ class NodeStore(GeneralStore):
         :rtype: bytearray
         """
         empty_struct = struct.Struct(self.STRUCT_FORMAT_STR)
-        packed_data = empty_struct.pack(0, 0, 0)
+        packed_data = empty_struct.pack(0, 0, 0, 0)
         return packed_data

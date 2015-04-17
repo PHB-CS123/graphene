@@ -65,7 +65,7 @@ class TestNodeStoreMethods(unittest.TestCase):
         node_store = NodeStore()
 
         # Create a node and add it to the NodeStore
-        node = Node(1, False, 1, 1)
+        node = Node(1, False, 1, 1, 1)
         node_store.write_item(node)
 
         # Read the node from the NodeStore file
@@ -81,12 +81,12 @@ class TestNodeStoreMethods(unittest.TestCase):
         node_store = NodeStore()
 
         # Create one node and write it to the NodeStore
-        node1 = Node(1, False, 1, 1)
+        node1 = Node(1, False, 1, 1, 1)
         node_store.write_item(node1)
 
         # Create 2 nodes and add them to the NodeStore
-        node2 = Node(2, False, 2, 2)
-        node3 = Node(3, False, 3, 3)
+        node2 = Node(2, False, 2, 2, 2)
+        node3 = Node(3, False, 3, 3, 3)
         node_store.write_item(node2)
         node_store.write_item(node3)
 
@@ -107,9 +107,9 @@ class TestNodeStoreMethods(unittest.TestCase):
         node_store = NodeStore()
 
         # Create 3 nodes
-        node1 = Node(1, False, 1, 1)
-        node2 = Node(2, False, 2, 2)
-        node3 = Node(3, False, 3, 3)
+        node1 = Node(1, False, 1, 1, 1)
+        node2 = Node(2, False, 2, 2, 2)
+        node3 = Node(3, False, 3, 3, 3)
 
         # Write them to the nodestore
         node_store.write_item(node1)
@@ -127,7 +127,7 @@ class TestNodeStoreMethods(unittest.TestCase):
         self.assertEquals(node3, node3_file)
 
         # Create a new node2 and overwrite the old node2
-        new_node2 = Node(2, True, 8, 8)
+        new_node2 = Node(2, True, 8, 8, 8)
         node_store.write_item(new_node2)
 
         # Verify that the data is still as expected
@@ -147,9 +147,9 @@ class TestNodeStoreMethods(unittest.TestCase):
         node_store = NodeStore()
 
         # Create 3 nodes
-        node1 = Node(1, True, 1, 1)
-        node2 = Node(2, True, 2, 2)
-        node3 = Node(3, True, 3, 3)
+        node1 = Node(1, True, 1, 1, 1)
+        node2 = Node(2, True, 2, 2, 2)
+        node3 = Node(3, True, 3, 3, 3)
 
         # Write them to the nodestore
         node_store.write_item(node1)
@@ -171,8 +171,8 @@ class TestNodeStoreMethods(unittest.TestCase):
         node_store.delete_item(node3)
 
         # Create nodes 1 and 3 with zeroed out values
-        zero_node1 = Node(node1.index, False, 0, 0)
-        zero_node3 = Node(node3.index, False, 0, 0)
+        zero_node1 = Node(node1.index, False, 0, 0, 0)
+        zero_node3 = Node(node3.index, False, 0, 0, 0)
 
         # Verify deleted node is zeroed out
         deleted_node1_file = node_store.item_at_index(node1.index)

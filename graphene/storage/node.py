@@ -6,7 +6,7 @@ class Node:
         propId: ID of the first property the node has
     Along with the index where the node is stored
     """
-    def __init__(self, index=0, in_use=True, rel_id=0, prop_id=0):
+    def __init__(self, index=0, in_use=True, rel_id=0, prop_id=0, node_type=0):
         """
         Initializes a Node with the given values
 
@@ -18,6 +18,8 @@ class Node:
         :type rel_id: int
         :param prop_id: ID of the first property the node has
         :type prop_id: int
+        :param node_type: ID of the node type
+        :type node_type: int
         :return: Node instance with the specified values
         :rtype: Node
         """
@@ -27,6 +29,7 @@ class Node:
         self.inUse = in_use
         self.relId = rel_id
         self.propId = prop_id
+        self.nodeType = node_type
 
     def __eq__(self, other):
         """
@@ -42,6 +45,7 @@ class Node:
             return (self.index == other.index) and \
                    (self.inUse == other.inUse) and \
                    (self.relId == other.relId) and \
-                   (self.propId == other.propId)
+                   (self.propId == other.propId) and \
+                   (self.nodeType == other.nodeType)
         else:
             return False

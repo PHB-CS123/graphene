@@ -45,3 +45,12 @@ class GeneralStoreManager:
         self.store.delete_item(item)
         # Add the index to the IdStore, so it can be recycled
         self.idStore.store_id(deleted_index)
+
+    def get_item_at_index(self, index):
+        """
+        Gets the item from the store at the given index
+
+        :param index: Index to get the item from
+        :type index: int
+        :return: Item at that index
+        """

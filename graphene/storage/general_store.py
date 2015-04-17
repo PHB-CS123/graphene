@@ -24,7 +24,6 @@ class GeneralStore(object):
         :return: GeneralStore instance meant to be sub-classed
         :rtype: GeneralStore
         """
-
         graphenestore = GrapheneStore()
         # Get the path of the file
         file_path = graphenestore.datafilesDir + filename

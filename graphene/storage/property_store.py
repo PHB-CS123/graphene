@@ -6,7 +6,7 @@ class PropertyStore(GeneralStore):
     """
     Handles storage of properties to a file. It stores the properties using
     the format:
-    (inUse, type, keyIndexId, propBlockId, prevPropId, nextPropId)
+    (inUse, type, nameId, propBlockId, prevPropId, nextPropId)
     """
 
     # Format string used to compact these values
@@ -84,7 +84,7 @@ class PropertyStore(GeneralStore):
 
         packed_data = property_struct.pack(db_property.inUse,
                                            db_property.type.value,
-                                           db_property.keyIndexId,
+                                           db_property.nameId,
                                            db_property.propBlockId,
                                            db_property.prevPropId,
                                            db_property.nextPropId)
