@@ -1,9 +1,14 @@
 #!/bin/bash
 
 testrl=$(which rlwrap)
+unamestr=$(uname)
+
 if [ -z "$testrl" ]
 then
     python2 -m graphene.client.client
+elif [[ "$OSTYPE" == "darwin"* ]]
+then
+    rlwrap python2 -m graphene.client.client
 else
     rlwrap -a python2 -m graphene.client.client
 fi
