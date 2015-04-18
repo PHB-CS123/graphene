@@ -41,10 +41,20 @@ class GeneralStoreManager:
         """
         # Get index of item to be deleted
         deleted_index = item.index
+        self.delete_item_at_index(deleted_index)
+
+    def delete_item_at_index(self, index):
+        """
+        Deletes the item at the given index from the store and adds
+        the index to its IdStore to be recycled
+
+        :return: Nothing
+        :rtype: None
+        """
         # Delete the item from the store
-        self.store.delete_item(item)
+        self.store.delete_item_at_index(index)
         # Add the index to the IdStore, so it can be recycled
-        self.idStore.store_id(deleted_index)
+        self.idStore.store_id(index)
 
     def get_item_at_index(self, index):
         """
@@ -54,3 +64,4 @@ class GeneralStoreManager:
         :type index: int
         :return: Item at that index
         """
+        self.store.item_at_index(index)

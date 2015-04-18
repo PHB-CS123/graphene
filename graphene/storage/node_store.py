@@ -5,7 +5,7 @@ from graphene.storage.node import *
 class NodeStore(GeneralStore):
     """
     Handles storage of nodes to a file. It stores nodes using the format
-    (inUse, nextRelId, nextPropId)
+    (inUse, nextRelId, nextPropId, nodeType)
     """
 
     # Format string used to compact these values
@@ -32,7 +32,7 @@ class NodeStore(GeneralStore):
         file containing Node values.
 
         :return: NodeStore instance for handling Node records
-        :rtype NodeStore
+        :rtype: NodeStore
         """
 
         # Initialize using generic base class
@@ -62,19 +62,20 @@ class NodeStore(GeneralStore):
         # Create a node record with these components
         return Node(index, in_use, rel_id, prop_id, node_type)
 
-    def packed_data_from_item(self, node):
+    def packed_data_from_item(self, item):
         """
         Creates packed data with Node structure to be written to a file
 
-        :param node: Node to convert into packed data
-        :type node: Node
+        :param item: Node to convert into packed data
+        :type item: Node
         :return: Packed data
+        :rtype: bytes
         """
 
         # Pack the node into a struct with the order (inUse, relId, propId)
         node_struct = struct.Struct(self.STRUCT_FORMAT_STR)
-        packed_data = node_struct.pack(node.inUse, node.relId,
-                                       node.propId, node.nodeType)
+        packed_data = node_struct.pack(item.inUse, item.relId,
+                                       item.propId, item.nodeType)
 
         return packed_data
 
@@ -83,7 +84,7 @@ class NodeStore(GeneralStore):
         Creates a packed struct of 0s
 
         :return: Packed class struct of 0s
-        :rtype: bytearray
+        :rtype: bytes
         """
         empty_struct = struct.Struct(self.STRUCT_FORMAT_STR)
         packed_data = empty_struct.pack(0, 0, 0, 0)

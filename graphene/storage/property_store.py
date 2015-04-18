@@ -15,7 +15,7 @@ class PropertyStore(GeneralStore):
     # 'i': signed int
     # 'Q': unsigned long long
     # TODO: determine how to handle signed/unsigned long long for all data types
-    STRUCT_FORMAT_STR = "= ? i i Q i i"
+    STRUCT_FORMAT_STR = "= ? I I Q I I"
     ''':type: str'''
 
     # Size of an individual record (bytes)

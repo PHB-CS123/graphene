@@ -12,7 +12,7 @@ class IdStore:
     # Format string used to compact these values
     # '=': native byte order representation, standard size, no alignment
     # 'i': signed int
-    STRUCT_FORMAT_STR = "= i"
+    STRUCT_FORMAT_STR = "= I"
     ''':type: str'''
 
     # Size of an individual record (bytes)

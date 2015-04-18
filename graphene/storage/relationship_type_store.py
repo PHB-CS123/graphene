@@ -17,7 +17,7 @@ class RelationshipTypeStore(GeneralStore):
     # '=': native byte order representation, standard size, no alignment
     # '?': boolean
     # 'i': signed int
-    STRUCT_FORMAT_STR = "= ? i"
+    STRUCT_FORMAT_STR = "= ? I"
     ''':type: str'''
 
     # Size of an individual record (bytes)
