@@ -64,20 +64,20 @@ class TestGeneralTypeStoreMethods(unittest.TestCase):
 
     def test_write_read_1_type(self):
         """
-        Tests that the type written to the GeneralTypeStore is the type
-        that is read.
+        Tests that the type_value written to the GeneralTypeStore is
+        the type_value that is read.
         """
         type_store = GeneralTypeStore(self.TEST_FILENAME)
 
-        # Create a type and add it to the GeneralTypeStore
-        type = GeneralType(1, False, 1, 1)
-        type_store.write_item(type)
+        # Create a type_value and add it to the GeneralTypeStore
+        type_value = GeneralType(1, False, 1, 1)
+        type_store.write_item(type_value)
 
-        # Read the type from the GeneralTypeStore file
-        type_file = type_store.item_at_index(type.index)
+        # Read the type_value from the GeneralTypeStore file
+        type_file = type_store.item_at_index(type_value.index)
 
         # Assert that the values are the same
-        self.assertEquals(type, type_file)
+        self.assertEquals(type_value, type_file)
 
     def test_write_read_2_types(self):
         """

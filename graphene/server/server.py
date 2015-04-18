@@ -1,7 +1,7 @@
 from antlr4 import InputStream, CommonTokenStream
 from graphene.parser import (GQLLexer, GQLParser)
-from graphene.commands import *
-from graphene.errors.parser_rror import ParserError
+from graphene.commands.exit_command import *
+from graphene.errors.parser_error import ParserError
 from graphene.errors.parser_error_listener import ParserErrorListener
 from graphene.storage.storage_manager import StorageManager
 
@@ -66,6 +66,6 @@ class GrapheneServer:
                 cmd.execute(self.storage_manager)
             return True
         except ParserError as e:
-            print e
+            print(e)
             return True
 
