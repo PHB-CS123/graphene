@@ -1,5 +1,5 @@
-from graphene.storage.general_store import *
-from graphene.storage.property import *
+from graphene.storage.base.general_store import *
+from graphene.storage.base.property import *
 
 
 class PropertyStore(GeneralStore):

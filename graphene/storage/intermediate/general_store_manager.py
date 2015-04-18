@@ -1,4 +1,4 @@
-from graphene.storage.id_store import *
+from graphene.storage.base.id_store import *
 
 
 class GeneralStoreManager:
@@ -10,12 +10,12 @@ class GeneralStoreManager:
         """
         Creates an instance of the GeneralStoreManager
 
-        :param store: Store to manage
+        :param store: Store instance to manage
         :return: General store manager to handle index recycling
         :rtype: GeneralStoreManager
         """
         self.store = store
-        self.idStore = IdStore(store.FILE_NAME + ".id")
+        self.idStore = IdStore(store.filename + ".id")
 
     def create_item(self, **kwargs):
         """

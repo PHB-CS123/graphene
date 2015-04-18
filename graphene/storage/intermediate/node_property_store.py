@@ -12,7 +12,7 @@ class NodePropertyStore:
         while cur_prop is not None:
             properties.append(cur_prop)
             cur_prop = self.prop_store.item_at_index(cur_prop.nextPropId)
-        return (cur_node, properties)
+        return cur_node, properties
 
     def __setitem__(self, key, value):
         pass

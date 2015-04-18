@@ -1,5 +1,5 @@
-from graphene.storage.general_store import *
-from graphene.storage.node import *
+from graphene.storage.base.general_store import *
+from graphene.storage.base.node import *
 
 
 class NodeStore(GeneralStore):

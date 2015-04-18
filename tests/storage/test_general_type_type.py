@@ -1,6 +1,6 @@
 import unittest
 
-from graphene.storage.general_type_type import *
+from graphene.storage.base.general_type_type import *
 
 
 class TestGeneralTypeTypeMethods(unittest.TestCase):

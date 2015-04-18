@@ -1,7 +1,7 @@
 import struct
 import abc
 
-from graphene.storage.graphene_store import *
+from graphene.storage.base.graphene_store import *
 
 
 class GeneralStore(object):
@@ -25,6 +25,9 @@ class GeneralStore(object):
         :rtype: GeneralStore
         """
         graphenestore = GrapheneStore()
+
+        # Store the given filename
+        self.filename = filename
         # Get the path of the file
         file_path = graphenestore.datafilesDir + filename
 
@@ -162,6 +165,7 @@ class GeneralStore(object):
         :param index: Index of the item that the packed data belongs to
         :type index: int
         :param packed_data: Packed binary data
+        :type packed_data: bytes
         :return: Item from packed data
         """
         return
@@ -174,15 +178,16 @@ class GeneralStore(object):
 
         :param item: Item to convert into packed data
         :return: Packed data
+        :rtype: bytes
         """
         return
 
     @abc.abstractmethod
     def empty_struct_data(self):
         """
-        Abstact method: creates packed struct of 0s
+        Abstract method: creates packed struct of 0s
 
         :return: Packed struct of 0s
-        :rtype: bytearray
+        :rtype: bytes
         """
         return

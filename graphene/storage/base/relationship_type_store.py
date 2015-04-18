@@ -1,5 +1,5 @@
-from graphene.storage.general_store import *
-from graphene.storage.relationship_type import *
+from graphene.storage.base.general_store import *
+from graphene.storage.base.relationship_type import *
 
 
 class RelationshipTypeStore(GeneralStore):

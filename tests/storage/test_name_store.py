@@ -1,6 +1,6 @@
 import unittest
 
-from graphene.storage.name_store import *
+from graphene.storage.base.name_store import *
 
 
 class TestNameStoreMethods(unittest.TestCase):

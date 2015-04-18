@@ -1,4 +1,3 @@
-
 class Name:
     def __init__(self, index=0, in_use=True, previous_block=0,
                  length=0, next_block=0, name=''):

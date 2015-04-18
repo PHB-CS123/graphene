@@ -1,6 +1,6 @@
 import unittest
 
-from graphene.storage.relationship import *
+from graphene.storage.base.relationship import *
 
 
 class TestRelationshipMethods(unittest.TestCase):

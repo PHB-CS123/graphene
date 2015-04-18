@@ -1,5 +1,5 @@
-from graphene.storage.general_store import *
-from graphene.storage.general_type import *
+from graphene.storage.base.general_store import *
+from graphene.storage.base.general_type import *
 
 
 class GeneralTypeStore(GeneralStore):

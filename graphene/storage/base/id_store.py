@@ -1,6 +1,6 @@
 import struct
 
-from graphene.storage.graphene_store import *
+from graphene.storage.base.graphene_store import *
 
 
 class IdStore:
@@ -79,7 +79,7 @@ class IdStore:
         """
         # Try to seek to RECORD_SIZE bytes before the end of the file
         try:
-            self.storeFile.seek(self.RECORD_SIZE, os.SEEK_END)
+            self.storeFile.seek(-self.RECORD_SIZE, os.SEEK_END)
         # If an IOError is thrown, the file does not have any IDs
         except IOError:
             return self.NO_ID
@@ -91,7 +91,7 @@ class IdStore:
         id_value = id_struct.unpack(self.storeFile.read(self.RECORD_SIZE))
 
         # Seek back to the position where the ID was read from
-        self.storeFile.seek(-4, os.SEEK_END)
+        self.storeFile.seek(-self.RECORD_SIZE, os.SEEK_END)
         # Truncate the file from this point on; the ID is no longer available
         self.storeFile.truncate()
 

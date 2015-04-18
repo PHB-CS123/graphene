@@ -1,6 +1,6 @@
 import unittest
 
-from graphene.storage.property import *
+from graphene.storage.base.property import *
 
 
 class TestPropertyMethods(unittest.TestCase):

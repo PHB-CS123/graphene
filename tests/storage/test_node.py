@@ -1,6 +1,6 @@
 import unittest
 
-from graphene.storage.node import *
+from graphene.storage.base.node import *
 
 
 class TestNodeMethods(unittest.TestCase):

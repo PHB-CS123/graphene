@@ -1,7 +1,7 @@
 import struct
 
-from graphene.storage.graphene_store import *
-from graphene.storage.name import *
+from graphene.storage.base.graphene_store import *
+from graphene.storage.base.name import *
 
 
 class NameStore:
@@ -41,6 +41,8 @@ class NameStore:
         :rtype: NameStore
         """
         graphenestore = GrapheneStore()
+        # Store the filename TODO: move to base class
+        self.filename = filename
         # Get the path of the file
         file_path = graphenestore.datafilesDir + filename
 
