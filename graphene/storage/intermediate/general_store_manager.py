@@ -19,7 +19,8 @@ class GeneralStoreManager:
 
     def create_item(self, **kwargs):
         """
-        Creates an item with the type of the store being managed
+        Creates an item with the type of the store being managed.
+        NOTE: Does not write the created item to the file to allow processing.
 
         :return: New item with type STORE_TYPE
         """
@@ -65,3 +66,13 @@ class GeneralStoreManager:
         :return: Item at that index
         """
         self.store.item_at_index(index)
+
+    def write_item(self, item):
+        """
+        Writes the item to its store file
+
+        :param item: Item to write to file
+        :return: Nothing
+        :rtype: None
+        """
+        self.store.write_item(item)
