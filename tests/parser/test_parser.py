@@ -31,7 +31,7 @@ class TestParser(unittest.TestCase):
                 "MATCH (A)-[r:R]->(B);",
                 "QUIT;",
                 "EXIT;",
-                "CREATE TYPE Person ( name : str );",
+                "CREATE TYPE Person ( name : string );",
                 "CREATE RELATION R Person Person",
                 # case-insensitive identifiers
                 "quit",
