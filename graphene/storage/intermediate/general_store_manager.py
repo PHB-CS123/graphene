@@ -31,8 +31,6 @@ class GeneralStoreManager:
             available_id = self.store.get_last_file_index()
         # Create a type based on the type our store stores
         item = self.store.STORAGE_TYPE(available_id, **kwargs)
-        # Write to disk so that the last available ID updates
-        self.store.write_item(item)
         # Return item for later use
         return item
 
