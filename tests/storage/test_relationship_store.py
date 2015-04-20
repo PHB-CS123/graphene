@@ -206,22 +206,14 @@ class TestRelationshipStoreMethods(unittest.TestCase):
         relationship_store.delete_item(rel1)
         relationship_store.delete_item(rel3)
 
-        # Create relationships 1 and 3 with zeroed out values
-        zero_rel1 = Relationship(rel1.index, False,
-                                 Relationship.Direction.undefined,
-                                 0, 0, 0, 0, 0, 0, 0, 0)
-        zero_rel3 = Relationship(rel3.index, False,
-                                 Relationship.Direction.undefined,
-                                 0, 0, 0, 0, 0, 0, 0, 0)
-
-        # Verify deleted relationship is zeroed out
+        # Verify deleted relationship is deleted
         del_rel1_file = relationship_store.item_at_index(rel1.index)
-        self.assertEquals(zero_rel1, del_rel1_file)
+        self.assertEquals(del_rel1_file, None)
 
         # Verify unaffected relationship is as expected
         rel2_file = relationship_store.item_at_index(rel2.index)
         self.assertEquals(rel2, rel2_file)
 
-        # Verify deleted relationship is zeroed out
+        # Verify deleted relationship is deleted
         del_rel3_file = relationship_store.item_at_index(rel3.index)
-        self.assertEquals(zero_rel3, del_rel3_file)
+        self.assertEquals(del_rel3_file, None)

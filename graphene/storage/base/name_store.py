@@ -227,8 +227,14 @@ class NameStore:
         # Unpad the given name string
         name_string = self.unpad_string(name)
 
+        # Empty data, deleted item
+        if in_use is False and prev_block == 0 and length == 0 and \
+           next_block == 0:
+            return None
         # Create a name record with these components
-        return Name(index, in_use, prev_block, length, next_block, name_string)
+        else:
+            return Name(index, in_use, prev_block, length, next_block,
+                        name_string)
 
     def pad_string(self, string):
         """

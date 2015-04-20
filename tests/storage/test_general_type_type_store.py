@@ -180,20 +180,14 @@ class TestGeneralTypeTypeStoreMethods(unittest.TestCase):
         type_type_store.delete_item(type_t1)
         type_type_store.delete_item(type_t3)
 
-        # Create types of types 1 and 3 with zeroed out values
-        zero_type_t1 = GeneralTypeType(type_t1.index, False, 0,
-                                       Property.PropertyType.undefined, 0)
-        zero_type_t3 = GeneralTypeType(type_t3.index, False, 0,
-                                       Property.PropertyType.undefined, 0)
-
-        # Verify deleted type of type is zeroed out
+        # Verify deleted type of type is deleted
         deleted_type_t1_file = type_type_store.item_at_index(type_t1.index)
-        self.assertEquals(zero_type_t1, deleted_type_t1_file)
+        self.assertEquals(deleted_type_t1_file, None)
 
         # Verify unaffected type of type is as expected
         type_t2_file = type_type_store.item_at_index(type_t2.index)
         self.assertEquals(type_t2, type_t2_file)
 
-        # Verify deleted type of type is zeroed out
+        # Verify deleted type of type is deleted
         deleted_type3_file = type_type_store.item_at_index(type_t3.index)
-        self.assertEquals(zero_type_t3, deleted_type3_file)
+        self.assertEquals(deleted_type3_file, None)

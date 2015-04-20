@@ -65,9 +65,15 @@ class PropertyStore(GeneralStore):
         prev_prop_id = unpacked_data[4]
         next_prop_id = unpacked_data[5]
 
+        # Empty data, deleted item
+        if in_use is False and prop_type == Property.PropertyType.undefined \
+           and key_index_id == 0 and prop_block_id == 0 and prev_prop_id == 0 \
+           and next_prop_id == 0:
+            return None
         # Create a property record with these components
-        return Property(index, in_use, prop_type, key_index_id,
-                        prop_block_id, prev_prop_id, next_prop_id)
+        else:
+            return Property(index, in_use, prop_type, key_index_id,
+                            prop_block_id, prev_prop_id, next_prop_id)
 
     def packed_data_from_item(self, db_property):
         """

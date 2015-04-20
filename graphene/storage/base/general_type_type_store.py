@@ -60,9 +60,14 @@ class GeneralTypeTypeStore(GeneralStore):
         prop_type = unpacked_data[2]
         next_type = unpacked_data[3]
 
+        # Empty data, deleted item
+        if in_use is False and type_name == 0 and prop_type == 0 \
+           and next_type == 0:
+            return None
         # Create a general type of type record with these components
-        return GeneralTypeType(index, in_use, type_name,
-                               Property.PropertyType(prop_type), next_type)
+        else:
+            return GeneralTypeType(index, in_use, type_name,
+                                   Property.PropertyType(prop_type), next_type)
 
     def packed_data_from_item(self, item):
         """

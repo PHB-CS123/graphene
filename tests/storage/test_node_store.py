@@ -170,18 +170,14 @@ class TestNodeStoreMethods(unittest.TestCase):
         node_store.delete_item(node1)
         node_store.delete_item(node3)
 
-        # Create nodes 1 and 3 with zeroed out values
-        zero_node1 = Node(node1.index, False, 0, 0, 0)
-        zero_node3 = Node(node3.index, False, 0, 0, 0)
-
-        # Verify deleted node is zeroed out
+        # Verify deleted node is deleted
         deleted_node1_file = node_store.item_at_index(node1.index)
-        self.assertEquals(zero_node1, deleted_node1_file)
+        self.assertEquals(deleted_node1_file, None)
 
         # Verify unaffected node is as expected
         node2_file = node_store.item_at_index(node2.index)
         self.assertEquals(node2, node2_file)
 
-        # Verify deleted node is zeroed out
+        # Verify deleted node is deleted
         deleted_node3_file = node_store.item_at_index(node3.index)
-        self.assertEquals(zero_node3, deleted_node3_file)
+        self.assertEquals(deleted_node3_file, None)

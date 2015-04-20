@@ -57,8 +57,12 @@ class GeneralTypeStore(GeneralStore):
         name_id = unpacked_data[1]
         first_type = unpacked_data[2]
 
+        # Empty data, deleted item
+        if in_use is False and name_id == 0 and first_type == 0:
+            return None
         # Create a general type record with these components
-        return GeneralType(index, in_use, name_id, first_type)
+        else:
+            return GeneralType(index, in_use, name_id, first_type)
 
     def packed_data_from_item(self, item):
         """

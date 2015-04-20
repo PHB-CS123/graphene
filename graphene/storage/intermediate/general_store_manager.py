@@ -32,6 +32,16 @@ class GeneralStoreManager:
         # Create a type based on the type our store stores
         return self.store.STORAGE_TYPE(available_id, **kwargs)
 
+    def write_item(self, item):
+        """
+        Writes the item to its store file
+
+        :param item: Item to write to file
+        :return: Nothing
+        :rtype: None
+        """
+        self.store.write_item(item)
+
     def delete_item(self, item):
         """
         Deletes the given item from the store and adds the index to its IdStore
@@ -65,14 +75,4 @@ class GeneralStoreManager:
         :type index: int
         :return: Item at that index
         """
-        self.store.item_at_index(index)
-
-    def write_item(self, item):
-        """
-        Writes the item to its store file
-
-        :param item: Item to write to file
-        :return: Nothing
-        :rtype: None
-        """
-        self.store.write_item(item)
+        return self.store.item_at_index(index)

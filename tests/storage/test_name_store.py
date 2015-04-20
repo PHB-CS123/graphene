@@ -4,6 +4,8 @@ from graphene.storage.base.name_store import *
 
 
 class TestNameStoreMethods(unittest.TestCase):
+    TEST_FILENAME = "graphenestore.namestore.db"
+
     def setUp(self):
         GrapheneStore.TESTING = True
 
@@ -14,27 +16,27 @@ class TestNameStoreMethods(unittest.TestCase):
         graphene_store = GrapheneStore()
         graphene_store.remove_test_datafiles()
 
-    def test_empty_init(self):
+    def test_init(self):
         """
-        Test that initializing an empty NameStore succeeds (file is opened)
+        Test that initializing a NameStore succeeds (file is opened)
         """
         try:
-            NameStore("graphenestore.namestore.db")
+            NameStore(self.TEST_FILENAME)
         except IOError:
             self.fail("NameStore initializer failed: db file failed to open.")
 
     def test_double_init(self):
         """
-        Test that initializing an empty NameStore succeeds when
-        repeated; i.e. the old file is reopened and no errors occur.
+        Test that initializing a NameStore succeeds when repeated;
+        i.e. the old file is reopened and no errors occur.
         """
         try:
-            NameStore("graphenestore.namestore.db")
+            NameStore(self.TEST_FILENAME)
         except IOError:
             self.fail("NameStore initializer failed: "
                       "db file failed to open.")
         try:
-            NameStore("graphenestore.namestore.db")
+            NameStore(self.TEST_FILENAME)
         except IOError:
             self.fail("NameStore initializer failed on second attempt: "
                       "db file failed to open.")
@@ -43,7 +45,7 @@ class TestNameStoreMethods(unittest.TestCase):
         """
         Test that writing a name to index 0 raises an error
         """
-        name_store = NameStore("graphenestore.namestore.db")
+        name_store = NameStore(self.TEST_FILENAME)
 
         empty_name = Name()
         with self.assertRaises(ValueError):
@@ -53,7 +55,7 @@ class TestNameStoreMethods(unittest.TestCase):
         """
         Test that reading a name from index 0 raises an error
         """
-        name_store = NameStore("graphenestore.namestore.db")
+        name_store = NameStore(self.TEST_FILENAME)
 
         with self.assertRaises(ValueError):
             name_store.item_at_index(0)
@@ -64,7 +66,7 @@ class TestNameStoreMethods(unittest.TestCase):
         raises an error
         """
         block_size = 20
-        name_store = NameStore("graphenestore.namestore.db", block_size)
+        name_store = NameStore(self.TEST_FILENAME, block_size)
 
         # Try to write a name that is 1 byte longer than the largest block_size
         long_name = Name(1, True, 0, 1, 0, (block_size + 1) * "a")
@@ -75,7 +77,7 @@ class TestNameStoreMethods(unittest.TestCase):
         """
         Tests that the name written to the NameStore is the name that is read.
         """
-        name_store = NameStore("graphenestore.namestore.db")
+        name_store = NameStore(self.TEST_FILENAME)
 
         # Create a name and add it to the NameStore
         name_data = Name(1, True, 0, 1, 0, "hello")
@@ -91,7 +93,7 @@ class TestNameStoreMethods(unittest.TestCase):
         """
         Tests when 2 names are written after 1 name to the NameStore
         """
-        name_store = NameStore("graphenestore.namestore.db")
+        name_store = NameStore(self.TEST_FILENAME)
 
         # Create one name and write it to the NameStore
         name_data1 = Name(1, True, 0, 1, 0, "hello")
@@ -117,7 +119,7 @@ class TestNameStoreMethods(unittest.TestCase):
         """
         Tests that overwriting a name in a database with 3 names works
         """
-        name_store = NameStore("graphenestore.namestore.db")
+        name_store = NameStore(self.TEST_FILENAME)
 
         # Create 3 names
         name_data1 = Name(1, True, 0, 1, 0, "hello")
@@ -157,7 +159,7 @@ class TestNameStoreMethods(unittest.TestCase):
         """
         Tests that deleting 2 names in a database with 3 names works
         """
-        name_store = NameStore("graphenestore.namestore.db")
+        name_store = NameStore(self.TEST_FILENAME)
 
         # Create 3 names
         name_data1 = Name(1, True, 0, 1, 0, "hello")
@@ -183,19 +185,15 @@ class TestNameStoreMethods(unittest.TestCase):
         name_store.delete_item(name_data1)
         name_store.delete_item(name_data3)
 
-        # Create names 1 and 3 with zeroed out values
-        zero_name_data1 = Name(name_data1.index, False, 0, 0, 0, '')
-        zero_name_data3 = Name(name_data3.index, False, 0, 0, 0, '')
-
-        # Verify deleted name is zeroed out
+        # Verify deleted name is deleted
         deleted_name_data1_file = name_store.item_at_index(name_data1.index)
-        self.assertEquals(zero_name_data1, deleted_name_data1_file)
+        self.assertEquals(deleted_name_data1_file, None)
 
         # Verify unaffected name is as expected
         name_data2_file = name_store.item_at_index(name_data2.index)
         self.assertEquals(name_data2, name_data2_file)
 
-        # Verify deleted name is zeroed out
+        # Verify deleted name is deleted
         deleted_name_data3_file = name_store.item_at_index(name_data3.index)
-        self.assertEquals(zero_name_data3, deleted_name_data3_file)
+        self.assertEquals(deleted_name_data3_file, None)
 

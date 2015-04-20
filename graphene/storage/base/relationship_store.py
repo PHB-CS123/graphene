@@ -80,11 +80,19 @@ class RelationshipStore(GeneralStore):
         second_next_rel_id = unpacked_data[7]
         prop_id = unpacked_data[8]
 
+        # Empty data, deleted item
+        if in_use is False and direction == Relationship.Direction.undefined \
+           and first_node_id == 0 and second_node_id == 0 and rel_type == 0 \
+           and first_prev_rel_id == 0 and first_next_rel_id == 0 \
+           and second_prev_rel_id == 0 and second_next_rel_id == 0 \
+           and prop_id == 0:
+            return None
         # Create a relationship record with these components
-        return Relationship(index, in_use, direction, first_node_id,
-                            second_node_id, rel_type, first_prev_rel_id,
-                            first_next_rel_id, second_prev_rel_id,
-                            second_next_rel_id, prop_id)
+        else:
+            return Relationship(index, in_use, direction, first_node_id,
+                                second_node_id, rel_type, first_prev_rel_id,
+                                first_next_rel_id, second_prev_rel_id,
+                                second_next_rel_id, prop_id)
 
     def packed_data_from_item(self, relationship):
         """

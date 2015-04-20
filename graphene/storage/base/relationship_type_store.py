@@ -61,8 +61,11 @@ class RelationshipTypeStore(GeneralStore):
         in_use = unpacked_data[0]
         type_block_id = unpacked_data[1]
 
+        if in_use is False and type_block_id == 0:
+            return None
         # Create a relationship type with these contents
-        return RelationshipType(index, in_use, type_block_id)
+        else:
+            return RelationshipType(index, in_use, type_block_id)
 
     def packed_data_from_item(self, relationship_type):
         """

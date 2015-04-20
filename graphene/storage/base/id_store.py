@@ -88,7 +88,7 @@ class IdStore:
         id_struct = struct.Struct(self.STRUCT_FORMAT_STR)
 
         # Read the ID since the seek succeeded
-        id_value = id_struct.unpack(self.storeFile.read(self.RECORD_SIZE))
+        id_value = id_struct.unpack(self.storeFile.read(self.RECORD_SIZE))[0]
 
         # Seek back to the position where the ID was read from
         self.storeFile.seek(-self.RECORD_SIZE, os.SEEK_END)

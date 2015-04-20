@@ -59,8 +59,12 @@ class NodeStore(GeneralStore):
         prop_id = unpacked_data[2]
         node_type = unpacked_data[3]
 
+        # Empty data, deleted item
+        if in_use is False and rel_id == 0 and prop_id == 0 and node_type == 0:
+            return None
         # Create a node record with these components
-        return Node(index, in_use, rel_id, prop_id, node_type)
+        else:
+            return Node(index, in_use, rel_id, prop_id, node_type)
 
     def packed_data_from_item(self, item):
         """

@@ -171,20 +171,16 @@ class TestRelationshipTypeStoreMethods(unittest.TestCase):
         relationship_type_store.delete_item(relType1)
         relationship_type_store.delete_item(relType3)
 
-        # Create nodes 1 and 3 with zeroed out values
-        zero_relType1 = RelationshipType(relType1.index, False, 0)
-        zero_relType3 = RelationshipType(relType3.index, False, 0)
-
-        # Verify deleted node is zeroed out
+        # Verify deleted node is deleted
         deleted_relType1_file = \
             relationship_type_store.item_at_index(relType1.index)
-        self.assertEquals(zero_relType1, deleted_relType1_file)
+        self.assertEquals(deleted_relType1_file, None)
 
         # Verify unaffected node is as expected
         relType2_file = relationship_type_store.item_at_index(relType2.index)
         self.assertEquals(relType2, relType2_file)
 
-        # Verify deleted node is zeroed out
+        # Verify deleted node is deleted
         deleted_relType3_file = \
             relationship_type_store.item_at_index(relType3.index)
-        self.assertEquals(zero_relType3, deleted_relType3_file)
+        self.assertEquals(deleted_relType3_file, None)

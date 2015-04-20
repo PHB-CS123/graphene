@@ -98,8 +98,8 @@ class GeneralStore(object):
         # This occurs when we've reached the end of the file.
         if packed_data == '':
             return None
-
-        return self.item_from_packed_data(index, packed_data)
+        else:
+            return self.item_from_packed_data(index, packed_data)
 
     def write_item(self, item):
         """

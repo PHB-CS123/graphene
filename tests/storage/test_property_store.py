@@ -180,22 +180,14 @@ class TestPropertyStoreMethods(unittest.TestCase):
         property_store.delete_item(property1)
         property_store.delete_item(property3)
 
-        # Create properties 1 and 3 with zeroed out values
-        zero_property1 = Property(property1.index, False,
-                                  Property.PropertyType.undefined, 0, 0, 0, 0)
-        zero_property3 = Property(property3.index, False,
-                                  Property.PropertyType.undefined, 0, 0, 0, 0)
-
-        # Verify deleted property is zeroed out
+        # Verify deleted property is deleted
         del_property1_file = property_store.item_at_index(property1.index)
-        self.assertEquals(zero_property1, del_property1_file)
+        self.assertEquals(del_property1_file, None)
 
         # Verify unaffected property is as expected
         property2_file = property_store.item_at_index(property2.index)
         self.assertEquals(property2, property2_file)
 
-        # Verify deleted property is zeroed out
+        # Verify deleted property is deleted
         del_property3_file = property_store.item_at_index(property3.index)
-        self.assertEquals(zero_property3, del_property3_file)
-
-
+        self.assertEquals(del_property3_file, None)
