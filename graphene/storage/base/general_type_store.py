@@ -35,6 +35,7 @@ class GeneralTypeStore(GeneralStore):
 
         # Initialize using generic base class
         super(GeneralTypeStore, self).__init__(filename, self.STRUCT_FORMAT_STR)
+        self.FILE_NAME = filename
 
     def item_from_packed_data(self, index, packed_data):
         """

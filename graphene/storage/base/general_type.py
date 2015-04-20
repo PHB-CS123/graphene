@@ -39,3 +39,13 @@ class GeneralType:
                    (self.firstType == other.firstType)
         else:
             return False
+
+    def __repr__(self):
+        data = ["Type", "index = %d" % self.index]
+        if self.inUse:
+            data.append("in use")
+        if self.nameId is not 0:
+            data.append("name_id = %s" % self.nameId)
+        if self.firstType != 0:
+            data.append("first_type = %d" % self.firstType)
+        return "[%s]" % " | ".join(data)

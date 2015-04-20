@@ -40,3 +40,15 @@ class GeneralTypeType:
                    (self.nextType == other.nextType)
         else:
             return False
+
+    def __repr__(self):
+        data = ["TypeType", "index = %d" % self.index]
+        if self.inUse:
+            data.append("in use")
+        if self.typeName is not 0:
+            data.append("name_id = %s" % self.typeName)
+        if self.propertyType is not Property.PropertyType.undefined:
+            data.append("type = %s" % self.propertyType)
+        if self.nextType != 0:
+            data.append("next = %d" % self.nextType)
+        return "[%s]" % " | ".join(data)

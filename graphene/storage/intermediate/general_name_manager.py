@@ -45,7 +45,7 @@ class GeneralNameManager:
                   'next_block': 0,
                   'name': name_parts[0]}
         # Create first block using kwargs
-        next_block = self.storeManager.create_item(kwargs)
+        next_block = self.storeManager.create_item(**kwargs)
         # First index in linked list
         first_index = next_block.index
 
@@ -60,7 +60,7 @@ class GeneralNameManager:
                       'next_block': 0,
                       'name': name_parts[i]}
             # Create next block
-            next_block = self.storeManager.create_item(kwargs)
+            next_block = self.storeManager.create_item(**kwargs)
             # Set the next index of the previous block to point to the new block
             prev_block.index = next_block.index
             # Write it back to the file

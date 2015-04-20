@@ -75,6 +75,18 @@ class NameStore:
         """
         self.storeFile.close()
 
+    def get_last_file_index(self):
+        """
+        Get the last index of the current file (used when creating new IDs)
+
+        :return: Last index of current file
+        :rtype: int
+        """
+        # Seek to the end of the file
+        self.storeFile.seek(0, os.SEEK_END)
+
+        return self.storeFile.tell() / self.recordSize
+
     def pad_file_header(self):
         """
         Called when the NameStore file is first created, pads the NameStore
