@@ -62,7 +62,7 @@ class GeneralNameManager:
             # Create next block
             next_block = self.storeManager.create_item(**kwargs)
             # Set the next index of the previous block to point to the new block
-            prev_block.index = next_block.index
+            prev_block.next_block = next_block.index
             # Write it back to the file
             self.storeManager.write_item(prev_block)
 

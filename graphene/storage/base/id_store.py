@@ -40,6 +40,10 @@ class IdStore:
         # Get the path of the file
         file_path = graphenestore.datafilesDir + filename
 
+        # Initialize a next ID variable to prevent multiple reads when peeking.
+        # If it is 0, then no nextID has been loaded
+        self.nextID = 0
+
         try:
             # If the file exists, simply open it
             if os.path.isfile(file_path):
@@ -96,3 +100,10 @@ class IdStore:
         self.storeFile.truncate()
 
         return id_value
+
+    def peek_id(self):
+        """
+        Returns the next ID from the file without removing it
+        :return: Next Id
+        :rtype:
+        """
