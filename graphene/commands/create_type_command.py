@@ -14,3 +14,6 @@ class CreateTypeCommand(Command):
 ]"""
         return fmt % (self.type_name,
                         ",\n".join("\t%s %s" % decl for decl in self.type_list))
+
+    def execute(self, storage_manager):
+        print storage_manager.create_type(self.type_name, self.type_list)

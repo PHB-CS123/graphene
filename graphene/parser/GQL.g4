@@ -87,8 +87,12 @@ type_list returns [tds]
   {return $tds}
   ;
 
+prop_type : (T_INT | T_LONG | T_BOOL | T_SHORT
+            | T_CHAR | T_FLOAT | T_DOUBLE | T_STRING)
+          ;
+
 type_decl
-  : (n=I_NAME) ':' (t=( T_INT | T_STR ))
+  : (n=I_NAME) ':' (t=prop_type)
   {return ($n.text, $t.text)}
   ;
 
@@ -108,7 +112,13 @@ K_QUIT : Q U I T ;
 
 // Types
 T_INT : I N T ;
-T_STR : S T R ;
+T_LONG : L O N G ;
+T_BOOL : B O O L ;
+T_SHORT : S H O R T ;
+T_CHAR : C H A R ;
+T_FLOAT : F L O A T ;
+T_DOUBLE : D O U B L E ;
+T_STRING : S T R I N G ;
 
 // Identifiers
 I_NAME : LCASE (LCASE | DIGIT | OTHER_VALID)* ;
