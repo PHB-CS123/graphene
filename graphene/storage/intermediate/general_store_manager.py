@@ -30,7 +30,11 @@ class GeneralStoreManager:
         if available_id == IdStore.NO_ID:
             available_id = self.store.get_last_file_index()
         # Create a type based on the type our store stores
-        return self.store.STORAGE_TYPE(available_id, **kwargs)
+        item = self.store.STORAGE_TYPE(available_id, **kwargs)
+        # Write to disk so that the last available ID updates
+        self.store.write_item(item)
+        # Return item for later use
+        return item
 
     def delete_item(self, item):
         """
@@ -65,7 +69,7 @@ class GeneralStoreManager:
         :type index: int
         :return: Item at that index
         """
-        self.store.item_at_index(index)
+        return self.store.item_at_index(index)
 
     def write_item(self, item):
         """
