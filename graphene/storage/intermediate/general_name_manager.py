@@ -38,14 +38,22 @@ class GeneralNameManager:
         # Number of parts
         length = len(name_parts)
         # Get IDs to store the blocks into
-        ids = self.storeManager.get_indexes()
+        ids = self.storeManager.get_indexes(length)
 
-        # First block
-        kwargs = {'in_use': False,
-                  'previous_block': 0,
-                  'length': length,
-                  'next_block': ids[1],
-                  'name': name_parts[0]}
+        # Block of length 1
+        if length == 1:
+            kwargs = {'in_use': False,
+                      'previous_block': 0,
+                      'length': length,
+                      'next_block': 0,
+                      'name': name_parts[0]}
+        else:
+            kwargs = {'in_use': False,
+                      'previous_block': 0,
+                      'length': length,
+                      'next_block': ids[1],
+                      'name': name_parts[0]}
+
         # Create first block using kwargs
         block = self.storeManager.create_item(ids[0], **kwargs)
         # Write it to the file

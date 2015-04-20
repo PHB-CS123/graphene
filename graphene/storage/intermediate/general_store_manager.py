@@ -30,7 +30,7 @@ class GeneralStoreManager:
         """
         # If no index is given, check for an available ID from the IdStore
         if index == 0:
-            index = self.get_indexes()
+            index = self.get_indexes()[0]
         # Create a type based on the type our store stores
         return self.store.STORAGE_TYPE(index, **kwargs)
 
@@ -103,8 +103,5 @@ class GeneralStoreManager:
             # Append the index from the ID store
             else:
                 ids.append(cur_index)
-        # Return list only if amount = 1
-        if amount == 1:
-            return ids[0]
-        else:
-            return ids
+        # Return list of ids
+        return ids
