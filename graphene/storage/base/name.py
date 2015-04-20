@@ -48,3 +48,16 @@ class Name:
                    (self.name == other.name)
         else:
             return False
+
+    def __repr__(self):
+        data = ["Name", "index = %d" % self.index]
+        if self.inUse:
+            data.append("in use")
+        if self.previousBlock != 0:
+            data.append("prev = %d" % self.previousBlock)
+        if self.nextBlock != 0:
+            data.append("next = %d" % self.nextBlock)
+        if self.length != 0:
+            data.append("length = %d" % self.length)
+        data.append("name = '%s'" % self.name)
+        return "[%s]" % " | ".join(data)

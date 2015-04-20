@@ -7,6 +7,8 @@ from graphene.storage.intermediate import (GeneralNameManager)
 class TestStorageManagerMethods(unittest.TestCase):
     def setUp(self):
         GrapheneStore.TESTING = True
+        graphene_store = GrapheneStore()
+        graphene_store.remove_test_datafiles()
         self.sm = StorageManager()
 
     def tearDown(self):
@@ -14,7 +16,7 @@ class TestStorageManagerMethods(unittest.TestCase):
         Clean the database so that the tests are independent of one another
         """
         graphene_store = GrapheneStore()
-        #graphene_store.remove_test_datafiles()
+        graphene_store.remove_test_datafiles()
 
     def test_create_type(self):
         schema = ( ("name", "string"), ("age", "int"), ("address", "string") )

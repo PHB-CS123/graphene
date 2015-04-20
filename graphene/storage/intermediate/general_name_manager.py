@@ -106,7 +106,7 @@ class GeneralNameManager:
             # Add the next block name to the list
             names.append(next_block.name)
             # Update index of next block
-            next_index = next_block.next
+            next_index = next_block.nextBlock
         # Done, combine the name strings
         return self.combine_names(names)
 
@@ -121,6 +121,14 @@ class GeneralNameManager:
         """
         return [name[i:i + self.blockSize]
                 for i in range(0, len(name), self.blockSize)]
+
+    def find_name(self, name):
+        last_index = self.storeManager.store.get_last_file_index()
+        for idx in range(1, last_index):
+            cur_name = self.storeManager.get_item_at_index(idx)
+            if cur_name.previousBlock == 0 and self.read_name_at_index(idx) == name:
+                return idx
+        return None
 
     @staticmethod
     def combine_names(names):

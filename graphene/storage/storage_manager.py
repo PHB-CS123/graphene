@@ -20,6 +20,10 @@ class StorageManager:
         self.type_type_name_manager = GeneralNameManager("graphenestore.typetypestore.db.names", 10)
 
     def create_type(self, type_name, schema):
+        if self.type_name_manager.find_name(type_name) is not None:
+            # The type name already exists!
+            # TODO: Specific exception should go here
+            raise Exception("Type %s already exists!" % type_name)
         name_index = self.type_name_manager.write_name(type_name)
         last_prop_id = 0
         # The reason we reverse the schema is so that when we create the linked
