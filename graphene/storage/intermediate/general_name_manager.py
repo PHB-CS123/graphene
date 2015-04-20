@@ -37,37 +37,43 @@ class GeneralNameManager:
         name_parts = self.split_name(name)
         # Number of parts
         length = len(name_parts)
+        # Get IDs to store the blocks into
+        ids = self.storeManager.get_indexes()
 
         # First block
         kwargs = {'in_use': False,
                   'previous_block': 0,
                   'length': length,
-                  'next_block': 0,
+                  'next_block': ids[1],
                   'name': name_parts[0]}
         # Create first block using kwargs
-        next_block = self.storeManager.create_item(**kwargs)
+        block = self.storeManager.create_item(ids[0], **kwargs)
+        # Write it to the file
+        self.storeManager.write_item(block)
         # First index in linked list
-        first_index = next_block.index
+        first_index = block.index
 
         # Create rest of linked list
         for i in range(1, length):
-            # Previous block is old next block
-            prev_block = next_block
-            # Create kwargs for current block
-            kwargs = {'in_use': False,
-                      'previous_block': prev_block.index,
-                      'length': length,
-                      'next_block': 0,
-                      'name': name_parts[i]}
+            # Last item in linked list
+            if i == length - 1:
+                kwargs = {'in_use': False,
+                          'previous_block': ids[i - 1],
+                          'length': length,
+                          'next_block': 0,
+                          'name': name_parts[i]}
+            # Create kwargs for middle block
+            else:
+                kwargs = {'in_use': False,
+                          'previous_block': ids[i - 1],
+                          'length': length,
+                          'next_block': ids[i + 1],
+                          'name': name_parts[i]}
             # Create next block
-            next_block = self.storeManager.create_item(**kwargs)
-            # Set the next index of the previous block to point to the new block
-            prev_block.next_block = next_block.index
-            # Write it back to the file
-            self.storeManager.write_item(prev_block)
+            block = self.storeManager.create_item(**kwargs)
+            # Write it to the file
+            self.storeManager.write_item(block)
 
-        # Write the last-created block to the file (next_block is 0)
-        self.storeManager.write_item(next_block)
         # Return the first index of the name in the store
         return first_index
 

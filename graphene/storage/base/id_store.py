@@ -100,10 +100,3 @@ class IdStore:
         self.storeFile.truncate()
 
         return id_value
-
-    def peek_id(self):
-        """
-        Returns the next ID from the file without removing it
-        :return: Next Id
-        :rtype:
-        """

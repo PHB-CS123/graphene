@@ -17,20 +17,22 @@ class GeneralStoreManager:
         self.store = store
         self.idStore = IdStore(store.filename + ".id")
 
-    def create_item(self, **kwargs):
+    def create_item(self, index=0, **kwargs):
         """
         Creates an item with the type of the store being managed.
         NOTE: Does not write the created item to the file to allow processing.
 
+        :param index: Index where the item will be created
+        :type index: int
+        :param kwargs: Arguments to pass to the created item
+        :type kwargs: dict
         :return: New item with type STORE_TYPE
         """
-        # Check for an available ID from the IdStore
-        available_id = self.idStore.get_id()
-        # If no ID is available, get the last index of the file
-        if available_id == IdStore.NO_ID:
-            available_id = self.store.get_last_file_index()
+        # If no index is given, check for an available ID from the IdStore
+        if index == 0:
+            index = self.get_indexes()
         # Create a type based on the type our store stores
-        return self.store.STORAGE_TYPE(available_id, **kwargs)
+        return self.store.STORAGE_TYPE(index, **kwargs)
 
     def write_item(self, item):
         """
@@ -76,3 +78,33 @@ class GeneralStoreManager:
         :return: Item at that index
         """
         return self.store.item_at_index(index)
+
+    def get_indexes(self, amount=1):
+        """
+        Get the requested number of indexes
+
+        :param amount: Amount of indexes to retrieve
+        :type amount: int
+        :return: List of indexes
+        :rtype: list
+        """
+        # List of IDs
+        ids = []
+        # Create list of IDs
+        for i in range(0, amount):
+            # Get ID from ID store
+            cur_index = self.idStore.get_id()
+            # No more IDs, return list with last indexes of the store file
+            if cur_index == IdStore.NO_ID:
+                last_index = self.store.get_last_file_index()
+                ids += [last_index + j for j in range(0, amount - i)]
+                # Done getting IDs, got them from the end of the file
+                break
+            # Append the index from the ID store
+            else:
+                ids.append(cur_index)
+        # Return list only if amount = 1
+        if amount == 1:
+            return ids[0]
+        else:
+            return ids
