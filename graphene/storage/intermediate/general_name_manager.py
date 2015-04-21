@@ -123,10 +123,19 @@ class GeneralNameManager:
                 for i in range(0, len(name), self.blockSize)]
 
     def find_name(self, name):
+        """
+        Finds the starting index of the given name
+
+        :param name: Name to look for
+        :type name: str
+        :return: Starting index of name
+        :rtype: int
+        """
         last_index = self.storeManager.store.get_last_file_index()
         for idx in range(1, last_index):
             cur_name = self.storeManager.get_item_at_index(idx)
-            if cur_name.previousBlock == 0 and self.read_name_at_index(idx) == name:
+            if cur_name.previousBlock == 0 and \
+               self.read_name_at_index(idx) == name:
                 return idx
         return None
 
