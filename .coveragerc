@@ -2,6 +2,46 @@
 show_missing = true
 report = html term-missing
 omit = */__init__.py, graphene/parser/GQL*.py
+exclude_lines =
+    ######### General #########
+    # Have to re-enable the standard pragma
+    pragma: no cover
+
+    # Don't complain if tests don't hit defensive assertion code:
+    raise NotImplementedError
+
+    # Exclude representations
+    def __repr__
+    # Exclude strings
+    def __str__
+
+    # Do not test import statements
+    import
+    from
+
+    ######### Storage #########
+    # Don't complain if we don't hit IOErrors since these might be defensive
+    except IOError
+    raise IOError
+
+    # This should never be reached in tests (test_datafiles should be used)
+    self.datafilesDir 
+
+    ######### Server #########
+    # Server does not need testing
+    class GrapheneServer:
+
+    ######### Client #########
+    # Client does not need testing
+    if __name__ == "__main__"
+
+    ######### Shell #########
+    # Shell does not need testing
+    class Shell
+
+    ######### Command #########
+    # Base class Command does not need testing
+    class Command
 
 [html]
 directory = build/htmlcov

@@ -7,17 +7,28 @@ from pylru import WriteBackCacheManager
 class StorageManager:
 
     MAX_CACHE_SIZE = 100
+    TYPE_STORE_FILENAME = "graphenestore.typestore.db"
+    TYPE_STORE_NAMES_FILENAME = "graphenestore.typestore.db.names"
+    TYPE_TYPE_STORE_FILENAME = "graphenestore.typetypestore.db"
+    TYPE_TYPE_STORE_NAMES_FILENAME = "graphenestore.typetypestore.db.names"
 
     def __init__(self):
         node_manager = GeneralStoreManager(NodeStore())
         property_manager = GeneralStoreManager(PropertyStore())
-        self.type_manager = GeneralStoreManager(GeneralTypeStore("graphenestore.typestore.db"))
-        self.type_type_manager = GeneralStoreManager(GeneralTypeTypeStore("graphenestore.typetypestore.db"))
-        #relationship_manager = GeneralStoreManager(RelationshipStore)
-        #relationship_type_manager = GeneralStoreManager(RelationshipTypeStore)
 
-        self.type_name_manager = GeneralNameManager("graphenestore.typestore.db.names", 10)
-        self.type_type_name_manager = GeneralNameManager("graphenestore.typetypestore.db.names", 10)
+        type_store = GeneralTypeStore(self.TYPE_STORE_FILENAME)
+        self.type_manager = GeneralStoreManager(type_store)
+
+        type_type_store = GeneralTypeTypeStore(self.TYPE_TYPE_STORE_FILENAME)
+        self.type_type_manager = GeneralStoreManager(type_type_store)
+
+        # relationship_manager = GeneralStoreManager(RelationshipStore)
+        # relationship_type_manager = GeneralStoreManager(RelationshipTypeStore)
+
+        self.type_name_manager = \
+            GeneralNameManager(self.TYPE_STORE_NAMES_FILENAME, 10)
+        self.type_type_name_manager = \
+            GeneralNameManager(self.TYPE_TYPE_STORE_NAMES_FILENAME, 10)
 
     def create_type(self, type_name, schema):
         if self.type_name_manager.find_name(type_name) is not None:

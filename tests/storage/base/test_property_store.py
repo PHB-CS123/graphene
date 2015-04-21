@@ -64,6 +64,16 @@ class TestPropertyStoreMethods(unittest.TestCase):
         with self.assertRaises(ValueError):
             property_store.item_at_index(0)
 
+    def test_empty_read(self):
+        """
+        Make sure that reading an item when the file is empty returns None
+        """
+        property_store = PropertyStore()
+        # Read an uncreated item
+        no_item = property_store.item_at_index(1)
+        # Make sure it returned None
+        self.assertEquals(no_item, None)
+
     def test_write_read_1_property(self):
         """
         Tests that the property written to the PropertyStore is the

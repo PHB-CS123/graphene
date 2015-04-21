@@ -56,7 +56,7 @@ class TestRelationshipStoreMethods(unittest.TestCase):
             relationship_store.write_item(empty_relationship)
 
         bad_direction = Relationship(1, False, "bad_dir",
-                                    2, 3, 4, 5, 6, 7, 8, 9)
+                                     2, 3, 4, 5, 6, 7, 8, 9)
         with self.assertRaises(TypeError):
             relationship_store.write_item(bad_direction)
 
@@ -68,6 +68,16 @@ class TestRelationshipStoreMethods(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             relationship_store.item_at_index(0)
+
+    def test_empty_read(self):
+        """
+        Make sure that reading an item when the file is empty returns None
+        """
+        relationship_store = RelationshipStore()
+        # Read an uncreated item
+        no_item = relationship_store.item_at_index(1)
+        # Make sure it returned None
+        self.assertEquals(no_item, None)
 
     def test_write_read_1_relationship(self):
         """

@@ -16,7 +16,8 @@ class TestRelationshipTypeStoreMethods(unittest.TestCase):
 
     def test_empty_init(self):
         """
-        Test that initializing an empty RelationshipTypeStore succeeds (file is opened)
+        Test that initializing an empty RelationshipTypeStore succeeds
+        (file is opened)
         """
         try:
             RelationshipType()
@@ -59,6 +60,16 @@ class TestRelationshipTypeStoreMethods(unittest.TestCase):
         with self.assertRaises(ValueError):
             relationship_type_store.item_at_index(0)
 
+    def test_empty_read(self):
+        """
+        Make sure that reading an item when the file is empty returns None
+        """
+        relationship_type_store = RelationshipTypeStore()
+        # Read an uncreated item
+        no_item = relationship_type_store.item_at_index(1)
+        # Make sure it returned None
+        self.assertEquals(no_item, None)
+
     def test_write_read_1_relationship_type(self):
         """
         Tests that the node written to the NodeStore is the node that is read.
@@ -66,14 +77,14 @@ class TestRelationshipTypeStoreMethods(unittest.TestCase):
         relationship_type_store = RelationshipTypeStore()
 
         # Create a node and add it to the NodeStore
-        relType = RelationshipType(1, False, 1)
-        relationship_type_store.write_item(relType)
+        rel_type = RelationshipType(1, False, 1)
+        relationship_type_store.write_item(rel_type)
 
         # Read the node from the NodeStore file
-        relType_file = relationship_type_store.item_at_index(relType.index)
+        rel_type_file = relationship_type_store.item_at_index(rel_type.index)
 
         # Assert that the values are the same
-        self.assertEquals(relType, relType_file)
+        self.assertEquals(rel_type, rel_type_file)
 
     def test_write_read_2_relationship_types(self):
         """
@@ -82,24 +93,24 @@ class TestRelationshipTypeStoreMethods(unittest.TestCase):
         relationship_type_store = RelationshipTypeStore()
 
         # Create one node and write it to the NodeStore
-        relType1 = RelationshipType(1, False, 1)
-        relationship_type_store.write_item(relType1)
+        rel_type1 = RelationshipType(1, False, 1)
+        relationship_type_store.write_item(rel_type1)
 
         # Create 2 nodes and add them to the NodeStore
-        relType2 = RelationshipType(2, False, 2)
-        relType3 = RelationshipType(3, False, 3)
-        relationship_type_store.write_item(relType2)
-        relationship_type_store.write_item(relType3)
+        rel_type2 = RelationshipType(2, False, 2)
+        rel_type3 = RelationshipType(3, False, 3)
+        relationship_type_store.write_item(rel_type2)
+        relationship_type_store.write_item(rel_type3)
 
         # Read the nodes from the NodeStore file
-        relType1_file = relationship_type_store.item_at_index(relType1.index)
-        relType2_file = relationship_type_store.item_at_index(relType2.index)
-        relType3_file = relationship_type_store.item_at_index(relType3.index)
+        rel_type1_file = relationship_type_store.item_at_index(rel_type1.index)
+        rel_type2_file = relationship_type_store.item_at_index(rel_type2.index)
+        rel_type3_file = relationship_type_store.item_at_index(rel_type3.index)
 
         # Make sure their values are the same
-        self.assertEquals(relType1, relType1_file)
-        self.assertEquals(relType2, relType2_file)
-        self.assertEquals(relType3, relType3_file)
+        self.assertEquals(rel_type1, rel_type1_file)
+        self.assertEquals(rel_type2, rel_type2_file)
+        self.assertEquals(rel_type3, rel_type3_file)
 
     def test_overwrite_relationship_type(self):
         """
@@ -108,38 +119,39 @@ class TestRelationshipTypeStoreMethods(unittest.TestCase):
         relationship_type_store = RelationshipTypeStore()
 
         # Create 3 nodes
-        relType1 = RelationshipType(1, False, 1)
-        relType2 = RelationshipType(2, False, 2)
-        relType3 = RelationshipType(3, False, 3)
+        rel_type1 = RelationshipType(1, False, 1)
+        rel_type2 = RelationshipType(2, False, 2)
+        rel_type3 = RelationshipType(3, False, 3)
 
         # Write them to the nodestore
-        relationship_type_store.write_item(relType1)
-        relationship_type_store.write_item(relType2)
-        relationship_type_store.write_item(relType3)
+        relationship_type_store.write_item(rel_type1)
+        relationship_type_store.write_item(rel_type2)
+        relationship_type_store.write_item(rel_type3)
 
         # Verify that they are in the store as expected
-        relType1_file = relationship_type_store.item_at_index(relType1.index)
-        self.assertEquals(relType1, relType1_file)
+        rel_type1_file = relationship_type_store.item_at_index(rel_type1.index)
+        self.assertEquals(rel_type1, rel_type1_file)
 
-        relType2_file = relationship_type_store.item_at_index(relType2.index)
-        self.assertEquals(relType2, relType2_file)
+        rel_type2_file = relationship_type_store.item_at_index(rel_type2.index)
+        self.assertEquals(rel_type2, rel_type2_file)
 
-        relType3_file = relationship_type_store.item_at_index(relType3.index)
-        self.assertEquals(relType3, relType3_file)
+        rel_type3_file = relationship_type_store.item_at_index(rel_type3.index)
+        self.assertEquals(rel_type3, rel_type3_file)
 
-        # Create a new relType2 and overwrite the old relType2
-        new_relType2 = RelationshipType(2, True, 8)
-        relationship_type_store.write_item(new_relType2)
+        # Create a new rel_type2 and overwrite the old rel_type2
+        new_rel_type2 = RelationshipType(2, True, 8)
+        relationship_type_store.write_item(new_rel_type2)
 
         # Verify that the data is still as expected
-        relType1_file = relationship_type_store.item_at_index(relType1.index)
-        self.assertEquals(relType1, relType1_file)
+        rel_type1_file = relationship_type_store.item_at_index(rel_type1.index)
+        self.assertEquals(rel_type1, rel_type1_file)
 
-        new_relType2_file = relationship_type_store.item_at_index(new_relType2.index)
-        self.assertEquals(new_relType2, new_relType2_file)
+        new_rel_type2_file = \
+            relationship_type_store.item_at_index(new_rel_type2.index)
+        self.assertEquals(new_rel_type2, new_rel_type2_file)
 
-        relType3_file = relationship_type_store.item_at_index(relType3.index)
-        self.assertEquals(relType3, relType3_file)
+        rel_type3_file = relationship_type_store.item_at_index(rel_type3.index)
+        self.assertEquals(rel_type3, rel_type3_file)
 
     def test_delete_relationship_type(self):
         """
@@ -148,39 +160,39 @@ class TestRelationshipTypeStoreMethods(unittest.TestCase):
         relationship_type_store = RelationshipTypeStore()
 
         # Create 3 nodes
-        relType1 = RelationshipType(1, True, 1)
-        relType2 = RelationshipType(2, True, 2)
-        relType3 = RelationshipType(3, True, 3)
+        rel_type1 = RelationshipType(1, True, 1)
+        rel_type2 = RelationshipType(2, True, 2)
+        rel_type3 = RelationshipType(3, True, 3)
 
         # Write them to the nodestore
-        relationship_type_store.write_item(relType1)
-        relationship_type_store.write_item(relType2)
-        relationship_type_store.write_item(relType3)
+        relationship_type_store.write_item(rel_type1)
+        relationship_type_store.write_item(rel_type2)
+        relationship_type_store.write_item(rel_type3)
 
         # Verify that they are in the store as expected
-        relType1_file = relationship_type_store.item_at_index(relType1.index)
-        self.assertEquals(relType1, relType1_file)
+        rel_type1_file = relationship_type_store.item_at_index(rel_type1.index)
+        self.assertEquals(rel_type1, rel_type1_file)
 
-        relType2_file = relationship_type_store.item_at_index(relType2.index)
-        self.assertEquals(relType2, relType2_file)
+        rel_type2_file = relationship_type_store.item_at_index(rel_type2.index)
+        self.assertEquals(rel_type2, rel_type2_file)
 
-        relType3_file = relationship_type_store.item_at_index(relType3.index)
-        self.assertEquals(relType3, relType3_file)
+        rel_type3_file = relationship_type_store.item_at_index(rel_type3.index)
+        self.assertEquals(rel_type3, rel_type3_file)
 
         # Delete nodes 1 and 3
-        relationship_type_store.delete_item(relType1)
-        relationship_type_store.delete_item(relType3)
+        relationship_type_store.delete_item(rel_type1)
+        relationship_type_store.delete_item(rel_type3)
 
         # Verify deleted node is deleted
-        deleted_relType1_file = \
-            relationship_type_store.item_at_index(relType1.index)
-        self.assertEquals(deleted_relType1_file, None)
+        deleted_rel_type1_file = \
+            relationship_type_store.item_at_index(rel_type1.index)
+        self.assertEquals(deleted_rel_type1_file, None)
 
         # Verify unaffected node is as expected
-        relType2_file = relationship_type_store.item_at_index(relType2.index)
-        self.assertEquals(relType2, relType2_file)
+        rel_type2_file = relationship_type_store.item_at_index(rel_type2.index)
+        self.assertEquals(rel_type2, rel_type2_file)
 
         # Verify deleted node is deleted
-        deleted_relType3_file = \
-            relationship_type_store.item_at_index(relType3.index)
-        self.assertEquals(deleted_relType3_file, None)
+        deleted_rel_type3_file = \
+            relationship_type_store.item_at_index(rel_type3.index)
+        self.assertEquals(deleted_rel_type3_file, None)

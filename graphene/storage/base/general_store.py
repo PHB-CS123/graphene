@@ -59,6 +59,12 @@ class GeneralStore(object):
         self.storeFile.close()
 
     def pad_file_header(self):
+        """
+        Pad the first RECORD_SIZE bytes of the file when it's initially created
+
+        :return: Nothing
+        :rtype: None
+        """
         # Create a packed struct of 0s
         packed_data = self.empty_struct_data()
         # File pointer should be at 0, no need to seek
@@ -87,11 +93,10 @@ class GeneralStore(object):
         if index == 0:
             raise ValueError("Item cannot be read from index 0")
 
+        # Calculate the file offset
         file_offset = index * self.recordSize
-
         # Seek to the calculated offset
         self.storeFile.seek(file_offset)
-
         # Get the packed data from the file
         packed_data = self.storeFile.read(self.recordSize)
 
@@ -168,7 +173,7 @@ class GeneralStore(object):
         :type packed_data: bytes
         :return: Item from packed data
         """
-        return
+        raise NotImplementedError
 
     @abc.abstractmethod
     def packed_data_from_item(self, item):
@@ -180,7 +185,7 @@ class GeneralStore(object):
         :return: Packed data
         :rtype: bytes
         """
-        return
+        raise NotImplementedError
 
     @abc.abstractmethod
     def empty_struct_data(self):
@@ -190,4 +195,4 @@ class GeneralStore(object):
         :return: Packed struct of 0s
         :rtype: bytes
         """
-        return
+        raise NotImplementedError

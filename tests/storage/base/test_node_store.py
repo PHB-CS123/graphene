@@ -58,6 +58,16 @@ class TestNodeStoreMethods(unittest.TestCase):
         with self.assertRaises(ValueError):
             node_store.item_at_index(0)
 
+    def test_empty_read(self):
+        """
+        Make sure that reading an item when the file is empty returns None
+        """
+        node_store = NodeStore()
+        # Read an uncreated item
+        no_item = node_store.item_at_index(1)
+        # Make sure it returned None
+        self.assertEquals(no_item, None)
+
     def test_write_read_1_node(self):
         """
         Tests that the node written to the NodeStore is the node that is read.

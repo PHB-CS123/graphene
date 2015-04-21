@@ -117,16 +117,19 @@ class NameStore:
 
         # Calculate the offset
         file_offset = index * self.recordSize
-
         # Seek to the calculated offset
         self.storeFile.seek(file_offset)
 
         # Get the header from the file
         packed_data_header = self.storeFile.read(self.HEADER_SIZE)
-        # Get the padded name from the file
-        name_string = self.storeFile.read(self.blockSize)
 
-        return self.item_from_data(index, packed_data_header, name_string)
+        # This occurs when we've reached the end of the file.
+        if packed_data_header == '':
+            return None
+        else:
+            # Get the padded name from the file
+            name_string = self.storeFile.read(self.blockSize)
+            return self.item_from_data(index, packed_data_header, name_string)
 
     def write_item(self, name_data):
         """

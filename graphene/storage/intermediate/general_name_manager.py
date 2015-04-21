@@ -115,24 +115,32 @@ class GeneralNameManager:
         """
         Deletes the name at the given index
 
-        :param index:
-        :type index:
-        :return:
-        :rtype:
+        :param index: Index of name to delete
+        :type index: int
+        :return: Whether the delete succeeded (0) or failed (-1)
+        :rtype: int
         """
+        # Store the starting index to check if deletion is
+        # starting from beginning of linked list
+        start_index = index
+        # Iterate until we reach the end of the list
         while index != 0:
             # Get current name block
             name_block = self.storeManager.get_item_at_index(index)
             # Check if either the name was deleted, or the linked list
             # was broken (only part of a block was deleted)
             if name_block is None:
-                return
+                return -1
+            # Make sure that deletion is starting from start of the linked list
+            elif index == start_index and name_block.previousBlock != 0:
+                raise IndexError("Cannot begin deletion from non-start index")
             # Get the next index
             next_index = name_block.nextBlock
             # Delete the current block
             self.storeManager.delete_item_at_index(index)
             # Update index to the next index
             index = next_index
+        return 0
 
     def split_name(self, name):
         """

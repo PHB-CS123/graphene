@@ -60,6 +60,16 @@ class TestNameStoreMethods(unittest.TestCase):
         with self.assertRaises(ValueError):
             name_store.item_at_index(0)
 
+    def test_empty_read(self):
+        """
+        Make sure that reading an item when the file is empty returns None
+        """
+        name_store = NameStore(self.TEST_FILENAME)
+        # Read an uncreated item
+        no_item = name_store.item_at_index(1)
+        # Make sure it returned None
+        self.assertEquals(no_item, None)
+
     def test_invalid_length_write(self):
         """
         Test that writing a string with length longer than blockSize

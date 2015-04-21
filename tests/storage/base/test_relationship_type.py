@@ -10,12 +10,12 @@ class TestRelationshipTypeMethods(unittest.TestCase):
         default values below.
         """
         # Create empty relationship type
-        relType = RelationshipType()
+        rel_type = RelationshipType()
 
         # Check values
-        self.assertEquals(relType.index, 0)
-        self.assertEquals(relType.inUse, True)
-        self.assertEquals(relType.typeBlockId, 0)
+        self.assertEquals(rel_type.index, 0)
+        self.assertEquals(rel_type.inUse, True)
+        self.assertEquals(rel_type.typeBlockId, 0)
 
     def test_init(self):
         """
@@ -28,23 +28,23 @@ class TestRelationshipTypeMethods(unittest.TestCase):
         type_block_id = 42
 
         # Create relationship type
-        relType = RelationshipType(index, in_use, type_block_id)
+        rel_type = RelationshipType(index, in_use, type_block_id)
 
         # Check values
-        self.assertEquals(relType.index, 1)
-        self.assertEquals(relType.inUse, False)
-        self.assertEquals(relType.typeBlockId, 42)
+        self.assertEquals(rel_type.index, 1)
+        self.assertEquals(rel_type.inUse, False)
+        self.assertEquals(rel_type.typeBlockId, 42)
 
     def test_eq(self):
         """
         Tests that == operator returns True when two relationship types are
         equal and False when they are not
         """
-        relationshipType1 = RelationshipType(1, False, 42)
-        relationshipType2 = RelationshipType(1, False, 42)
-        relationshipType3 = RelationshipType(20, True, 21)
+        relationship_type1 = RelationshipType(1, False, 42)
+        relationship_type2 = RelationshipType(1, False, 42)
+        relationship_type3 = RelationshipType(20, True, 21)
 
-        self.assertTrue(relationshipType1 == relationshipType2)
-        self.assertFalse(relationshipType1 == relationshipType3)
-        self.assertFalse(relationshipType2 == relationshipType3)
-        self.assertFalse(relationshipType1 == 1)
+        self.assertTrue(relationship_type1 == relationship_type2)
+        self.assertFalse(relationship_type1 == relationship_type3)
+        self.assertFalse(relationship_type2 == relationship_type3)
+        self.assertFalse(relationship_type1 == 1)

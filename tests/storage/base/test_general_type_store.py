@@ -62,6 +62,16 @@ class TestGeneralTypeStoreMethods(unittest.TestCase):
         with self.assertRaises(ValueError):
             type_store.item_at_index(0)
 
+    def test_empty_read(self):
+        """
+        Make sure that reading an item when the file is empty returns None
+        """
+        type_store = GeneralTypeStore(self.TEST_FILENAME)
+        # Read an uncreated item
+        no_item = type_store.item_at_index(1)
+        # Make sure it returned None
+        self.assertEquals(no_item, None)
+
     def test_write_read_1_type(self):
         """
         Tests that the type_value written to the GeneralTypeStore is

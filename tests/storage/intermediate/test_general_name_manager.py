@@ -93,6 +93,54 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         # Read the name back and make sure it is as expected
         self.assertEquals(name, name_manager.read_name_at_index(name_index))
 
+    def test_mangled_return_none(self):
+        """
+        Test that when reading a mangled string, the method returns None
+        """
+        name_manager = GeneralNameManager(self.TEST_FILENAME,
+                                          self.TEST_BLOCK_SIZE)
+
+        # Create a name with a random length (longer than one block)
+        name = "a" * self.random_length()
+        # Write the name to the name store
+        name_index = name_manager.write_name(name)
+        # Mangle the name by deleting from the second block (first block intact)
+        name_manager.storeManager.delete_item_at_index(2)
+        # Make sure that the read_name_at_index method returns None
+        self.assertEquals(name_manager.read_name_at_index(name_index), None)
+
+    def test_invalid_delete(self):
+        """
+        Test that deleting a name at a non-starting index throws an error
+        """
+        name_manager = GeneralNameManager(self.TEST_FILENAME,
+                                          self.TEST_BLOCK_SIZE)
+
+        # Create a name with a random length (longer than one block)
+        name = "a" * self.random_length()
+        # Write the name to the name store
+        name_index = name_manager.write_name(name)
+        # Try to mangle the name and expect an index error
+        with self.assertRaises(IndexError):
+            name_manager.delete_name_at_index(name_index + 1)
+
+    def test_mangled_delete(self):
+        """
+        Test that when deleting a mangled string, the method returns
+        an error (-1)
+        """
+        name_manager = GeneralNameManager(self.TEST_FILENAME,
+                                          self.TEST_BLOCK_SIZE)
+
+        # Create a name with a random length (longer than one block)
+        name = "a" * self.random_length()
+        # Write the name to the name store
+        name_index = name_manager.write_name(name)
+        # Mangle the name by deleting from the second block (first block intact)
+        name_manager.storeManager.delete_item_at_index(2)
+        # Make sure that the read_name_at_index method returns None
+        self.assertEquals(name_manager.delete_name_at_index(name_index), -1)
+
     def test_write_2_names_multiple_blocks(self):
         """
         Tests that writing 2 names that span multiple blocks succeeds

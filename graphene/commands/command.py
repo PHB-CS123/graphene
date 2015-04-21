@@ -1,6 +1,10 @@
+import abc
+
+
 class Command(object):
+    @abc.abstractmethod
     def __init__(self, ctx):
-        pass
+        raise NotImplementedError
 
     def __repr__(self):
         return "[Command]"
