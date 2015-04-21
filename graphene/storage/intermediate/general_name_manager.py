@@ -94,21 +94,45 @@ class GeneralNameManager:
         :return: Name at the index
         :rtype: str
         """
-        # Get first block from file
-        first_name_block = self.storeManager.get_item_at_index(index)
-        # Create list with the name at the first block
-        names = [first_name_block.name]
-        # Index of next block
-        next_index = first_name_block.nextBlock
+        # Create empty list where the name strings will be stored
+        names = []
         # The block index will be 0 when there are no more name blocks
-        while next_index != 0:
-            next_block = self.storeManager.get_item_at_index(next_index)
+        while index != 0:
+            # Get name block
+            name_block = self.storeManager.get_item_at_index(index)
+            # Check if either the name was deleted, or the linked list
+            # was broken (only part of a block was deleted)
+            if name_block is None:
+                return None
             # Add the next block name to the list
-            names.append(next_block.name)
-            # Update index of next block
-            next_index = next_block.nextBlock
+            names.append(name_block.name)
+            # Update index with the index of the next block
+            index = name_block.nextBlock
         # Done, combine the name strings
         return self.combine_names(names)
+
+    def delete_name_at_index(self, index):
+        """
+        Deletes the name at the given index
+
+        :param index:
+        :type index:
+        :return:
+        :rtype:
+        """
+        while index != 0:
+            # Get current name block
+            name_block = self.storeManager.get_item_at_index(index)
+            # Check if either the name was deleted, or the linked list
+            # was broken (only part of a block was deleted)
+            if name_block is None:
+                return
+            # Get the next index
+            next_index = name_block.nextBlock
+            # Delete the current block
+            self.storeManager.delete_item_at_index(index)
+            # Update index to the next index
+            index = next_index
 
     def split_name(self, name):
         """

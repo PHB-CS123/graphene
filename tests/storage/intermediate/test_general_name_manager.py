@@ -137,6 +137,78 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         self.assertEquals(name_index2, name_manager.find_name(name2))
         self.assertEquals(name_index3, name_manager.find_name(name3))
 
+    def test_delete_name_at_index(self):
+        """
+        Tests that deleting the name at a specific index works
+        """
+        name_manager = GeneralNameManager(self.TEST_FILENAME,
+                                          self.TEST_BLOCK_SIZE)
+
+        # Create a name with a random length
+        name1 = "a" * self.random_length()
+        # Write the name to the name store
+        name_index1 = name_manager.write_name(name1)
+        # Check that the name is as expected
+        self.assertEquals(name1, name_manager.read_name_at_index(name_index1))
+
+        # Delete the name from the name store
+        name_manager.delete_name_at_index(name_index1)
+        # Try to read the name, it should return None
+        self.assertEquals(name_manager.read_name_at_index(name_index1), None)
+
+    def test_delete_names_at_index_multiple(self):
+        """
+        Tests that deleting the name at a specific index works with more than
+        one item in the store
+        """
+        name_manager = GeneralNameManager(self.TEST_FILENAME,
+                                          self.TEST_BLOCK_SIZE)
+
+        # Create a name with a random length
+        name1 = "a" * self.random_length()
+        # Write the name to the name store
+        name_index1 = name_manager.write_name(name1)
+        # Check that the name is as expected
+        self.assertEquals(name1, name_manager.read_name_at_index(name_index1))
+
+        # Create a second name with a random length
+        name2 = "b" * self.random_length()
+        # Write the name to the name store
+        name_index2 = name_manager.write_name(name2)
+        # Check that the name is as expected
+        self.assertEquals(name2, name_manager.read_name_at_index(name_index2))
+
+        # Create a third name with a random length
+        name3 = "c" * self.random_length()
+        # Write the name to the name store
+        name_index3 = name_manager.write_name(name3)
+        # Check that the name is as expected
+        self.assertEquals(name3, name_manager.read_name_at_index(name_index3))
+
+        # Delete the 2nd name from the name store
+        name_manager.delete_name_at_index(name_index2)
+        # Try to read the name, it should return None
+        self.assertEquals(name_manager.read_name_at_index(name_index2), None)
+        # Check that the other two are as expected
+        self.assertEquals(name1, name_manager.read_name_at_index(name_index1))
+        self.assertEquals(name3, name_manager.read_name_at_index(name_index3))
+
+        # Delete the 1st name from the name store
+        name_manager.delete_name_at_index(name_index1)
+        # Try to read the name, it should return None
+        self.assertEquals(name_manager.read_name_at_index(name_index1), None)
+        # Check that the other two are as expected
+        self.assertEquals(name_manager.read_name_at_index(name_index2), None)
+        self.assertEquals(name3, name_manager.read_name_at_index(name_index3))
+
+        # Delete the 3rd name from the name store
+        name_manager.delete_name_at_index(name_index3)
+        # Try to read the name, it should return None
+        self.assertEquals(name_manager.read_name_at_index(name_index3), None)
+        # Check that the other two are as expected
+        self.assertEquals(name_manager.read_name_at_index(name_index2), None)
+        self.assertEquals(name_manager.read_name_at_index(name_index1), None)
+
     @classmethod
     def random_length(cls):
         """
