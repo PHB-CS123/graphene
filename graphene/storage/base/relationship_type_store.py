@@ -1,3 +1,5 @@
+import struct
+
 from graphene.storage.base.general_store import *
 from graphene.storage.base.relationship_type import *
 
@@ -16,7 +18,7 @@ class RelationshipTypeStore(GeneralStore):
     # Format string used to compact these values
     # '=': native byte order representation, standard size, no alignment
     # '?': boolean
-    # 'i': signed int
+    # 'I': unsigned int
     STRUCT_FORMAT_STR = "= ? I"
     ''':type: str'''
 
@@ -40,7 +42,7 @@ class RelationshipTypeStore(GeneralStore):
         """
         # Initialize using generic base class
         super(RelationshipTypeStore, self).__init__(self.FILE_NAME,
-                                                    self.STRUCT_FORMAT_STR)
+                                                    self.RECORD_SIZE)
 
     def item_from_packed_data(self, index, packed_data):
         """

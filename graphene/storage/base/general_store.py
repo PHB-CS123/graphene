@@ -1,4 +1,3 @@
-import struct
 import abc
 
 from graphene.storage.base.graphene_store import *
@@ -12,15 +11,15 @@ class GeneralStore(object):
     # Used to indicate abstract methods
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, filename, struct_format_string):
+    def __init__(self, filename, record_size):
         """
         Creates a GeneralStore instance which handles reading/writing
         to store files for different value types
 
         :param filename: Name of store file
         :type filename: str
-        :param struct_format_string: Format string used to compact values
-        :type struct_format_string: str
+        :param record_size: Size of record to read/write
+        :type record_size: int
         :return: GeneralStore instance meant to be sub-classed
         :rtype: GeneralStore
         """
@@ -32,8 +31,7 @@ class GeneralStore(object):
         file_path = graphenestore.datafilesDir + filename
 
         # Store struct information
-        self.structFormatString = struct_format_string
-        self.recordSize = struct.calcsize(struct_format_string)
+        self.recordSize = record_size
 
         try:
             # If the file exists, simply open it

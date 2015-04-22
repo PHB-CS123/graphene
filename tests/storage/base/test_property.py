@@ -29,13 +29,13 @@ class TestPropertyMethods(unittest.TestCase):
         in_use = False
         prop_type = Property.PropertyType.int
         key_index_id = 2
-        prop_block_id = 3
-        prev_prop_id = 4
-        next_prop_id = 5
+        prev_prop_id = 3
+        next_prop_id = 4
+        prop_block_id = 262144
 
         # Create property
         db_property = Property(index, in_use, prop_type, key_index_id,
-                               prop_block_id, prev_prop_id, next_prop_id)
+                               prev_prop_id, next_prop_id, prop_block_id)
 
         # Check values
         self.assertEquals(db_property.index, index)

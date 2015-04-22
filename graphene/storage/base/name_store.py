@@ -14,7 +14,7 @@ class NameStore:
     # Format string used to compact these values
     # '=': native byte order representation, standard size, no alignment
     # '?': boolean
-    # 'i': signed int
+    # 'I': unsigned int
     HEADER_STRUCT_FORMAT_STR = "= ? I I I"
     ''':type str'''
 

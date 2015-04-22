@@ -11,7 +11,7 @@ class IdStore:
 
     # Format string used to compact these values
     # '=': native byte order representation, standard size, no alignment
-    # 'i': signed int
+    # 'I': unsigned int
     STRUCT_FORMAT_STR = "= I"
     ''':type: str'''
 

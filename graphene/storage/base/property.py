@@ -26,8 +26,7 @@ class Property:
         stringArray = 16
 
     def __init__(self, index=0, in_use=True, prop_type=PropertyType.undefined,
-                 name_id=0, prop_block_id=0, prev_prop_id=0,
-                 next_prop_id=0):
+                 name_id=0, prev_prop_id=0, next_prop_id=0, prop_block_id=0):
         """
         Initializes a property with the given values
 
@@ -39,14 +38,13 @@ class Property:
         :type prop_type: PropertyType
         :param name_id: Pointer to the record holding the property name
         :type name_id: int
-        :param prop_block_id: ID to a dynamic store (string or array) or the
-                              value if the property is a primitive (int, long,
-                              float, etc.)
-        :type prop_block_id: long
         :param prev_prop_id: ID of the prev property owned by node or relation
         :type prev_prop_id: int
         :param next_prop_id: ID of the next property owned by node or relation
         :type next_prop_id: int
+        :param prop_block_id: ID to a dynamic store (string or array) or the
+                              value if the property is a primitive (int, long,
+                              float, etc.)
         :return: Property instance with the specified values
         :rtype: Property
         """
@@ -56,9 +54,9 @@ class Property:
         self.inUse = in_use
         self.type = prop_type
         self.nameId = name_id
-        self.propBlockId = prop_block_id
         self.prevPropId = prev_prop_id
         self.nextPropId = next_prop_id
+        self.propBlockId = prop_block_id
 
     def __eq__(self, other):
         """
@@ -74,8 +72,8 @@ class Property:
                    (self.inUse == other.inUse) and \
                    (self.type == other.type) and \
                    (self.nameId == other.nameId) and \
-                   (self.propBlockId == other.propBlockId) and \
                    (self.prevPropId == other.prevPropId) and\
-                   (self.nextPropId == other.nextPropId)
+                   (self.nextPropId == other.nextPropId) and \
+                   (self.propBlockId == other.propBlockId)
         else:
             return False

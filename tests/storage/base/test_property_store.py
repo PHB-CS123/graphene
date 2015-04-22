@@ -91,6 +91,139 @@ class TestPropertyStoreMethods(unittest.TestCase):
         # Assert that the values are the same
         self.assertEquals(db_property, db_property_file)
 
+    def test_write_read_int(self):
+        """
+        Tests that the int property written to the PropertyStore is the
+        same as the property read
+        """
+        property_store = PropertyStore()
+
+        # Create a property and add it to the PropertyStore file
+        db_property = Property(1, False, Property.PropertyType.int,
+                               2, 3, 4, 262144)
+        property_store.write_item(db_property)
+
+        # Read the property from the PropertyStore file
+        db_property_file = property_store.item_at_index(db_property.index)
+
+        # Assert that the values are the same
+        self.assertEquals(db_property, db_property_file)
+
+    def test_write_read_long(self):
+        """
+        Tests that the long property written to the PropertyStore is the
+        same as the property read
+        """
+        property_store = PropertyStore()
+
+        # Create a property and add it to the PropertyStore file
+        db_property = Property(1, False, Property.PropertyType.long, 2, 3,
+                               4, 1717986918400)
+        property_store.write_item(db_property)
+        # Read the property from the PropertyStore file
+        db_property_file = property_store.item_at_index(db_property.index)
+        # Assert that the values are the same
+        self.assertEquals(db_property, db_property_file)
+
+        # Create a signed property and add it to the PropertyStore file
+        db_property = Property(1, False, Property.PropertyType.long, 2, 3,
+                               4, -1717986918400)
+        property_store.write_item(db_property)
+        # Read the property from the PropertyStore file
+        db_property_file = property_store.item_at_index(db_property.index)
+        # Assert that the values are the same
+        self.assertEquals(db_property, db_property_file)
+
+    def test_write_read_bool(self):
+        """
+        Tests that the bool property written to the PropertyStore is the
+        same as the property read
+        """
+        property_store = PropertyStore()
+
+        # Create a property and add it to the PropertyStore file
+        db_property = Property(1, False, Property.PropertyType.bool, 2, 3,
+                               4, True)
+        property_store.write_item(db_property)
+
+        # Read the property from the PropertyStore file
+        db_property_file = property_store.item_at_index(db_property.index)
+
+        # Assert that the values are the same
+        self.assertEquals(db_property, db_property_file)
+
+    def test_write_read_short(self):
+        """
+        Tests that the short property written to the PropertyStore is the
+        same as the property read
+        """
+        property_store = PropertyStore()
+
+        # Create a property and add it to the PropertyStore file
+        db_property = Property(1, False, Property.PropertyType.short, 2, 3,
+                               4, 255)
+        property_store.write_item(db_property)
+
+        # Read the property from the PropertyStore file
+        db_property_file = property_store.item_at_index(db_property.index)
+
+        # Assert that the values are the same
+        self.assertEquals(db_property, db_property_file)
+
+    def test_write_read_char(self):
+        """
+        Tests that the character property written to the PropertyStore is the
+        same as the property read
+        """
+        property_store = PropertyStore()
+
+        # Create a property and add it to the PropertyStore file
+        db_property = Property(1, False, Property.PropertyType.char, 2, 3,
+                               4, "w")
+        property_store.write_item(db_property)
+
+        # Read the property from the PropertyStore file
+        db_property_file = property_store.item_at_index(db_property.index)
+
+        # Assert that the values are the same
+        self.assertEquals(db_property, db_property_file)
+
+    def test_write_read_float(self):
+        """
+        Tests that the float property written to the PropertyStore is the
+        same as the property read
+        """
+        property_store = PropertyStore()
+
+        # Create a property and add it to the PropertyStore file
+        db_property = Property(1, False, Property.PropertyType.float, 2, 3,
+                               4, 3.14159)
+        property_store.write_item(db_property)
+
+        # Read the property from the PropertyStore file
+        db_property_file = property_store.item_at_index(db_property.index)
+
+        # Assert that the values are the same
+        self.assertEquals(db_property, db_property_file)
+
+    def test_write_read_double(self):
+        """
+        Tests that the double property written to the PropertyStore is the
+        same as the property read
+        """
+        property_store = PropertyStore()
+
+        # Create a property and add it to the PropertyStore file
+        db_property = Property(1, False, Property.PropertyType.double, 2, 3,
+                               4, 5e-324)
+        property_store.write_item(db_property)
+
+        # Read the property from the PropertyStore file
+        db_property_file = property_store.item_at_index(db_property.index)
+
+        # Assert that the values are the same
+        self.assertEquals(db_property, db_property_file)
+
     def test_write_read_2_properties(self):
         """
         Tests when 2 properties are written after 1 property
@@ -99,12 +232,15 @@ class TestPropertyStoreMethods(unittest.TestCase):
         property_store = PropertyStore()
 
         # Create one property and write it to the PropertyStore
-        property1 = Property(1, False, Property.PropertyType.bool, 2, 3, 4, 5)
+        property1 = Property(1, False, Property.PropertyType.bool,
+                             2, 3, 4, True)
         property_store.write_item(property1)
 
         # Create 2 properties and add them to the PropertyStore
-        property2 = Property(2, False, Property.PropertyType.char, 4, 6, 8, 10)
-        property3 = Property(9, True, Property.PropertyType.float, 8, 7, 6, 5)
+        property2 = Property(2, False, Property.PropertyType.char,
+                             4, 6, 8, 'a')
+        property3 = Property(9, True, Property.PropertyType.float,
+                             8, 7, 6, 3.14159)
         property_store.write_item(property2)
         property_store.write_item(property3)
 
@@ -125,9 +261,11 @@ class TestPropertyStoreMethods(unittest.TestCase):
         property_store = PropertyStore()
 
         # Create 3 properties
-        property1 = Property(1, False, Property.PropertyType.short, 2, 3, 4, 5)
+        property1 = Property(1, False, Property.PropertyType.short,
+                             2, 3, 4, 5)
         property2 = Property(2, True, Property.PropertyType.string, 4, 6, 8, 10)
-        property3 = Property(9, False, Property.PropertyType.double, 8, 7, 6, 5)
+        property3 = Property(9, False, Property.PropertyType.double,
+                             8, 7, 6, 5e-324)
 
         # Write them to the property_store
         property_store.write_item(property1)
@@ -169,7 +307,8 @@ class TestPropertyStoreMethods(unittest.TestCase):
         # Create 3 properties
         property1 = Property(1, False, Property.PropertyType.short, 2, 3, 4, 5)
         property2 = Property(2, True, Property.PropertyType.string, 4, 6, 8, 10)
-        property3 = Property(9, False, Property.PropertyType.double, 8, 7, 6, 5)
+        property3 = Property(9, False, Property.PropertyType.double,
+                             8, 7, 6, 5e-324)
 
         # Write them to the property_store
         property_store.write_item(property1)
