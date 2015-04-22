@@ -152,9 +152,8 @@ class PropertyStore(GeneralStore):
         general_value = general_struct.unpack(packed_data)[0]
 
         # Character type stored as ASCII value
-        # TODO: support unichar?
         if prop_type is Property.PropertyType.char:
-            return chr(general_value)
+            return unichr(general_value)
         # Convert to boolean value
         elif prop_type is Property.PropertyType.bool:
             return bool(general_value)
@@ -185,7 +184,6 @@ class PropertyStore(GeneralStore):
         general_struct = struct.Struct(cls.STRUCT_REGULAR_FORMAT_STR)
 
         # Convert character into ASCII value
-        # TODO: support unichar?
         if prop_type is Property.PropertyType.char:
             return general_struct.pack(ord(value))
         # Convert boolean value to long

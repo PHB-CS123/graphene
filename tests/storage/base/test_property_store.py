@@ -109,6 +109,17 @@ class TestPropertyStoreMethods(unittest.TestCase):
         # Assert that the values are the same
         self.assertEquals(db_property, db_property_file)
 
+        # Create a signed property and add it to the PropertyStore file
+        db_property = Property(1, False, Property.PropertyType.int,
+                               2, 3, 4, -262144)
+        property_store.write_item(db_property)
+
+        # Read the property from the PropertyStore file
+        db_property_file = property_store.item_at_index(db_property.index)
+
+        # Assert that the values are the same
+        self.assertEquals(db_property, db_property_file)
+
     def test_write_read_long(self):
         """
         Tests that the long property written to the PropertyStore is the
@@ -161,7 +172,18 @@ class TestPropertyStoreMethods(unittest.TestCase):
 
         # Create a property and add it to the PropertyStore file
         db_property = Property(1, False, Property.PropertyType.short, 2, 3,
-                               4, 255)
+                               4, 127)
+        property_store.write_item(db_property)
+
+        # Read the property from the PropertyStore file
+        db_property_file = property_store.item_at_index(db_property.index)
+
+        # Assert that the values are the same
+        self.assertEquals(db_property, db_property_file)
+
+        # Create a signed property and add it to the PropertyStore file
+        db_property = Property(1, False, Property.PropertyType.short, 2, 3,
+                               4, -127)
         property_store.write_item(db_property)
 
         # Read the property from the PropertyStore file
@@ -188,6 +210,18 @@ class TestPropertyStoreMethods(unittest.TestCase):
         # Assert that the values are the same
         self.assertEquals(db_property, db_property_file)
 
+        # Test unicode:
+        # Create a property and add it to the PropertyStore file
+        db_property = Property(1, False, Property.PropertyType.char, 2, 3,
+                               4, unichr(57344))
+        property_store.write_item(db_property)
+
+        # Read the property from the PropertyStore file
+        db_property_file = property_store.item_at_index(db_property.index)
+
+        # Assert that the values are the same
+        self.assertEquals(db_property, db_property_file)
+
     def test_write_read_float(self):
         """
         Tests that the float property written to the PropertyStore is the
@@ -198,6 +232,17 @@ class TestPropertyStoreMethods(unittest.TestCase):
         # Create a property and add it to the PropertyStore file
         db_property = Property(1, False, Property.PropertyType.float, 2, 3,
                                4, 3.14159)
+        property_store.write_item(db_property)
+
+        # Read the property from the PropertyStore file
+        db_property_file = property_store.item_at_index(db_property.index)
+
+        # Assert that the values are the same
+        self.assertEquals(db_property, db_property_file)
+
+        # Create a signed property and add it to the PropertyStore file
+        db_property = Property(1, False, Property.PropertyType.float, 2, 3,
+                               4, -3.14159)
         property_store.write_item(db_property)
 
         # Read the property from the PropertyStore file
@@ -224,6 +269,17 @@ class TestPropertyStoreMethods(unittest.TestCase):
         # Assert that the values are the same
         self.assertEquals(db_property, db_property_file)
 
+        # Create a signed property and add it to the PropertyStore file
+        db_property = Property(1, False, Property.PropertyType.double, 2, 3,
+                               4, -5e-324)
+        property_store.write_item(db_property)
+
+        # Read the property from the PropertyStore file
+        db_property_file = property_store.item_at_index(db_property.index)
+
+        # Assert that the values are the same
+        self.assertEquals(db_property, db_property_file)
+
     def test_write_read_2_properties(self):
         """
         Tests when 2 properties are written after 1 property
@@ -238,7 +294,7 @@ class TestPropertyStoreMethods(unittest.TestCase):
 
         # Create 2 properties and add them to the PropertyStore
         property2 = Property(2, False, Property.PropertyType.char,
-                             4, 6, 8, 'a')
+                             4, 6, 8, unichr(57344))
         property3 = Property(9, True, Property.PropertyType.float,
                              8, 7, 6, 3.14159)
         property_store.write_item(property2)
