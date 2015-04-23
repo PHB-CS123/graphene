@@ -15,6 +15,10 @@ class StorageManager:
     def __init__(self):
         node_manager = GeneralStoreManager(NodeStore())
         property_manager = GeneralStoreManager(PropertyStore())
+        relationship_manager = GeneralStoreManager(RelationshipStore())
+
+        self.nodeprop = NodePropertyStore(node_manager, property_manager)
+        self.relprop = RelationshipPropertyStore(relationship_manager, property_manager)
 
         type_store = GeneralTypeStore(self.TYPE_STORE_FILENAME)
         self.type_manager = GeneralStoreManager(type_store)
