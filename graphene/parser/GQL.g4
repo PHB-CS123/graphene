@@ -17,6 +17,7 @@ stmt
   : ( c=match_stmt
     | c=create_stmt
     | c=exit_stmt
+    | c=show_stmt
     )
   ;
 
@@ -102,6 +103,14 @@ create_relation
     (t1=I_TYPE {$t1=$t1.text})
     (t2=I_TYPE {$t2=$t2.text});
 
+// SHOW command
+show_stmt returns [cmd]
+  @init {$cmd = None}
+  : K_SHOW (K_TYPES {t = ShowCommand.ShowType.TYPES}
+           | K_RELATIONS {t = ShowCommand.ShowType.RELATIONS})
+  {$cmd = ShowCommand(t)}
+  ;
+
 // Keywords
 K_MATCH : M A T C H ;
 K_CREATE : C R E A T E ;
@@ -109,6 +118,9 @@ K_TYPE : T Y P E ;
 K_RELATION : R E L A T I O N ;
 K_EXIT : E X I T ;
 K_QUIT : Q U I T ;
+K_SHOW : S H O W ;
+K_TYPES : T Y P E S ;
+K_RELATIONS : R E L A T I O N S ;
 
 // Types
 T_INT : I N T ;
