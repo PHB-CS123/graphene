@@ -31,7 +31,7 @@ class GrapheneServer:
             result.append(command)
         return result
 
-    def doCommands(self, data):
+    def doCommands(self, data, eat_errors=True):
         """
         Executes a series of commands.
 
@@ -66,6 +66,9 @@ class GrapheneServer:
                 cmd.execute(self.storage_manager)
             return True
         except ParserError as e:
-            print(e)
+            if eat_errors:
+                print(e)
+            else:
+                raise e
             return True
 
