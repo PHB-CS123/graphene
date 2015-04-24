@@ -18,6 +18,7 @@ stmt
     | c=create_stmt
     | c=exit_stmt
     | c=show_stmt
+    | c=insert_stmt
     )
   ;
 
@@ -81,7 +82,6 @@ create_type
     '(' (tl=type_list) ')'
   ;
 
-
 type_list returns [tds]
   : td1=type_decl {$tds = [$td1.ctx]}
     (',' (tdi=type_decl {$tds.append($tdi.ctx)}))*
@@ -111,14 +111,58 @@ show_stmt returns [cmd]
   {$cmd = ShowCommand(t)}
   ;
 
+// INSERT command
+insert_stmt returns [cmd]
+  @init {$cmd = None}
+  : K_INSERT ( inode=insert_node
+             //| irel=insert_relation
+             //| igraph=insert_graph
+             )
+  {
+if $inode.ctx is not None:
+    $cmd = InsertNodeCommand($inode.ctx)
+  }
+  ;
+
+insert_node returns [nodeprops]
+  : K_NODE np1=node_with_props {$nodeprops = [$np1.ctx]}
+    (',' (npi=node_with_props {$nodeprops.append($npi.ctx)}))*
+  {return $nodeprops}
+  ;
+
+node_with_props
+  : (t=I_TYPE {$t=$t.text})
+    '(' (pl=prop_list) ')'
+  ;
+
+prop_list returns [props]
+  : p1=prop_value {$props = [$p1.ctx]}
+    (',' (pi=prop_value {$props.append($pi.ctx)}))*
+  {return $props}
+  ;
+
+prop_value
+  : (v=Literal)
+  {return $v.text}
+  ;
+
+// Literals
+Literal : (StringLiteral | IntLiteral | BooleanLiteral) ;
+IntLiteral : DIGIT+;
+StringLiteral : '"' StringChars? '"' ;
+BooleanLiteral : (T R U E | F A L S E) ;
+
 // Keywords
 K_MATCH : M A T C H ;
 K_CREATE : C R E A T E ;
-K_TYPE : T Y P E ;
-K_RELATION : R E L A T I O N ;
 K_EXIT : E X I T ;
 K_QUIT : Q U I T ;
 K_SHOW : S H O W ;
+K_INSERT : I N S E R T ;
+
+K_TYPE : T Y P E ;
+K_RELATION : R E L A T I O N ;
+K_NODE : N O D E ;
 K_TYPES : T Y P E S ;
 K_RELATIONS : R E L A T I O N S ;
 
@@ -182,3 +226,7 @@ fragment W : [wW];
 fragment X : [xX];
 fragment Y : [yY];
 fragment Z : [zZ];
+
+fragment StringChars : StringChar+ ;
+fragment StringChar : ~["\\] | EscapeSeq ;
+fragment EscapeSeq : '\\' [btnfr"'\\] ;
