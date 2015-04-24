@@ -115,3 +115,11 @@ class StorageManager:
         new_node = self.node_manager.create_item(prop_id=prop_ids[0],
             node_type=node_type.index)
         self.node_manager.write_item(new_node)
+
+    def get_node_type(self, node):
+        return self.type_manager.get_item_at_index(node.nodeType)
+
+    def get_property_value(self, prop):
+        if prop.type == Property.PropertyType.string:
+            return self.prop_string_manager.read_name_at_index(prop.propBlockId)
+        return prop.propBlockId

@@ -40,6 +40,9 @@ class GeneralType:
         else:
             return False
 
+    def __ne__(self, other):
+        return not (self == other)
+
     def __repr__(self):
         data = ["Type", "index = %d" % self.index]
         if self.inUse:
