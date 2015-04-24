@@ -93,7 +93,6 @@ class StorageManager:
         return cur_type, schema
 
     def insert_node(self, node_type, node_properties):
-        print "Insert node of type %s with properties %s" % (node_type, node_properties)
         prop_ids = self.property_manager.get_indexes(len(node_properties))
         for i, idx in enumerate(prop_ids):
             prop_type, prop_val = node_properties[i]
