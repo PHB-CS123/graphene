@@ -1,3 +1,5 @@
+from graphene.storage.intermediate.node_property import NodeProperty
+
 class NodePropertyStore:
     def __init__(self, node_manager, prop_manager):
         self.node_manager = node_manager

@@ -2,3 +2,4 @@ from graphene.storage.intermediate.general_store_manager import GeneralStoreMana
 from graphene.storage.intermediate.general_name_manager import GeneralNameManager
 from graphene.storage.intermediate.node_property_store import NodePropertyStore
 from graphene.storage.intermediate.relationship_property_store import RelationshipPropertyStore
+from graphene.storage.intermediate.node_property import NodeProperty

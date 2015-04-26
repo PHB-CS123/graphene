@@ -88,7 +88,9 @@ class StorageManager:
         schema = []
         while cur_type_type_id != 0:
             cur_type_type = self.type_type_manager.get_item_at_index(cur_type_type_id)
-            schema.append(cur_type_type)
+            cur_type_type_name = self.type_type_name_manager \
+                                    .read_name_at_index(cur_type_type.typeName)
+            schema.append((cur_type_type, cur_type_type_name, cur_type_type.propertyType))
             cur_type_type_id = cur_type_type.nextType
         return cur_type, schema
 
@@ -122,3 +124,13 @@ class StorageManager:
         if prop.type == Property.PropertyType.string:
             return self.prop_string_manager.read_name_at_index(prop.propBlockId)
         return prop.propBlockId
+
+    def get_node(self, index):
+        nodeprop = self.nodeprop[index]
+        if nodeprop is None:
+            return None
+        node, properties = nodeprop
+        node_type = self.type_manager.get_item_at_index(node.nodeType)
+        type_name = self.type_name_manager.read_name_at_index(node_type.nameId)
+        properties = map(self.get_property_value, properties)
+        return NodeProperty(node, properties, node_type, type_name)
