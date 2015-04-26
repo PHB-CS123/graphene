@@ -35,7 +35,7 @@ class TestGeneralTypeMethods(unittest.TestCase):
         gen_type2 = GeneralType(32, False, 42, 21)
         gen_type3 = GeneralType(15, True, 12, 18)
 
-        self.assertTrue(gen_type1 == gen_type2)
-        self.assertFalse(gen_type1 == gen_type3)
-        self.assertFalse(gen_type2 == gen_type3)
-        self.assertFalse(gen_type1 == 1)
+        assert gen_type1 == gen_type2
+        assert gen_type1 != gen_type3
+        assert gen_type2 != gen_type3
+        assert gen_type1 != 1

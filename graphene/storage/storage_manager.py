@@ -93,13 +93,16 @@ class StorageManager:
         cur_type = None
         while True:
             cur_type = self.type_manager.get_item_at_index(idx)
-            if cur_type is None:
+            if cur_type is GeneralStore.EOF:
+                cur_type = None
                 break
-            if self.type_name_manager.read_name_at_index(cur_type.nameId) == type_name:
+            if cur_type is not None and \
+                self.type_name_manager.read_name_at_index(cur_type.nameId) == type_name:
                 break
             idx += 1
         if cur_type is None:
-            raise Exception("Type %s does not exist." % type_name)
+            # TODO: Create custom error here
+            raise NameError("Type %s does not exist." % type_name)
         cur_type_type_id = cur_type.firstType
         schema = []
         while cur_type_type_id != 0:
@@ -134,6 +137,7 @@ class StorageManager:
             node_type=node_type.index)
         self.nodeprop[new_node.index] = (new_node, properties)
         self.nodeprop.sync()
+        return self.nodeprop[new_node.index]
 
     def get_node_type(self, node):
         return self.type_manager.get_item_at_index(node.nodeType)
