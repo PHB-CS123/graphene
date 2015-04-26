@@ -18,8 +18,10 @@ class StorageManager:
         self.property_manager = GeneralStoreManager(PropertyStore())
         self.relationship_manager = GeneralStoreManager(RelationshipStore())
 
-        self.nodeprop = NodePropertyStore(self.node_manager, self.property_manager)
-        self.relprop = RelationshipPropertyStore(self.relationship_manager, self.property_manager)
+        nodeprop = NodePropertyStore(self.node_manager, self.property_manager)
+        relprop = RelationshipPropertyStore(self.relationship_manager, self.property_manager)
+        self.nodeprop = WriteBackCacheManager(nodeprop, self.MAX_CACHE_SIZE)
+        self.relprop = WriteBackCacheManager(relprop, self.MAX_CACHE_SIZE)
 
         type_store = GeneralTypeStore(self.TYPE_STORE_FILENAME)
         self.type_manager = GeneralStoreManager(type_store)
@@ -79,6 +81,7 @@ class StorageManager:
             self.delete_type_type(tt)
         for node in self.get_nodes_of_type(type_data):
             del self.nodeprop[node.index]
+        self.nodeprop.sync() # Sync nodeprop cache
         self.type_name_manager.delete_name_at_index(type_data.nameId)
         self.type_manager.delete_item(type_data)
 
