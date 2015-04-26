@@ -112,6 +112,7 @@ class StorageManager:
 
     def insert_node(self, node_type, node_properties):
         prop_ids = self.property_manager.get_indexes(len(node_properties))
+        properties = []
         for i, idx in enumerate(prop_ids):
             prop_type, prop_val = node_properties[i]
             kwargs = {
@@ -128,10 +129,11 @@ class StorageManager:
             else:
                 kwargs["prop_block_id"] = prop_val
             stored_prop = self.property_manager.create_item(**kwargs)
-            self.property_manager.write_item(stored_prop)
+            properties.append(stored_prop)
         new_node = self.node_manager.create_item(prop_id=prop_ids[0],
             node_type=node_type.index)
-        self.node_manager.write_item(new_node)
+        self.nodeprop[new_node.index] = (new_node, properties)
+        self.nodeprop.sync()
 
     def get_node_type(self, node):
         return self.type_manager.get_item_at_index(node.nodeType)
@@ -143,8 +145,8 @@ class StorageManager:
 
     def get_node(self, index):
         nodeprop = self.nodeprop[index]
-        if nodeprop is None:
-            return None
+        if nodeprop is None or nodeprop == GeneralStore.EOF:
+            return nodeprop
         node, properties = nodeprop
         node_type = self.type_manager.get_item_at_index(node.nodeType)
         type_name = self.type_name_manager.read_name_at_index(node_type.nameId)
@@ -155,8 +157,8 @@ class StorageManager:
         i = 1
         while True:
             node = self.get_node(i)
-            if node is None:
+            if node == GeneralStore.EOF:
                 break
             i += 1
-            if node.type == node_type:
+            if node is not None and node.type == node_type:
                 yield node

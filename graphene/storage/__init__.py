@@ -4,6 +4,7 @@ from base.property import Property
 from base.relationship import Relationship
 
 from base.graphene_store import GrapheneStore
+from base.general_store import GeneralStore
 from base.name_store import NameStore
 from base.node_store import NodeStore
 from base.property_store import PropertyStore

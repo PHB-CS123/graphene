@@ -8,6 +8,9 @@ class GeneralStore(object):
     Handles the general storage operations of different types.
     """
 
+    # Used to demarcate end of file
+    EOF = "EOF"
+
     # Used to indicate abstract methods
     __metaclass__ = abc.ABCMeta
 
@@ -100,7 +103,7 @@ class GeneralStore(object):
 
         # This occurs when we've reached the end of the file.
         if packed_data == '':
-            return None
+            return self.EOF
         else:
             return self.item_from_packed_data(index, packed_data)
 
