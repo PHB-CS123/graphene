@@ -22,4 +22,7 @@ class ShowCommand(Command):
                             .read_name_at_index(cur_type.nameId)
                 type_list.append(type_name)
                 i += 1
+            if len(type_list) == 0:
+                print "No types found."
+                return
             PrettyPrinter.print_list(type_list, "Type Name")
