@@ -25,7 +25,7 @@ exclude_lines =
     raise IOError
 
     # This should never be reached in tests (test_datafiles should be used)
-    self.datafilesDir 
+    self.datafilesDir
 
     ######### Server #########
     # Server does not need testing
@@ -42,6 +42,10 @@ exclude_lines =
     ######### Command #########
     # Base class Command does not need testing
     class Command
+
+    ######### PrettyPrinter #########
+    # PrettyPrinter does not need testing
+    class PrettyPrinter
 
 [html]
 directory = build/htmlcov
