@@ -30,10 +30,10 @@ class InsertNodeCommand(Command):
             type_name, prop_list = nodeprop.t, nodeprop.pl
             node_type, schema = storage_manager.get_type_data(type_name)
             properties = []
-            for prop, exp_type_type in zip(prop_list, schema):
+            for prop, schema_tt in zip(prop_list, schema):
+                tt, prop_name, exp_tt = schema_tt
                 given_type = self.get_type_type_of_string(prop)
-                expected_type = exp_type_type.propertyType
-                prop_name = storage_manager.type_type_name_manager.read_name_at_index(exp_type_type.typeName)
+                expected_type = exp_tt
                 if given_type != expected_type:
                     raise Exception("Got value of type %s, but expected value of type %s for property '%s'." %
                           (given_type, expected_type, prop_name))

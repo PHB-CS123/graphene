@@ -18,13 +18,7 @@ class MatchCommand(Command):
         header = [name.upper() for tt, name, ttype in type_schema]
         i = 1
         values = []
-        while True:
-            node = storage_manager.get_node(i)
-            if node is None:
-                break
-            i += 1
-            if node.type != type_data:
-                continue
+        for node in storage_manager.get_nodes_of_type(type_data):
             values.append(node.properties)
         if len(values) == 0:
             sys.stdout.write("No nodes found.\n")

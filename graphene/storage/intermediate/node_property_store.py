@@ -21,4 +21,13 @@ class NodePropertyStore:
         pass
 
     def __delitem__(self, key):
-        pass
+        node = self.node_manager.get_item_at_index(key)
+        if node is None:
+            raise KeyError("There is no node with index %d." % key)
+        cur_prop_id = node.propId
+        while cur_prop_id != 0:
+            cur_prop = self.prop_manager.get_item_at_index(cur_prop_id)
+            cur_prop_id = cur_prop.nextPropId
+            self.prop_manager.delete_item(cur_prop)
+        self.node_manager.delete_item(node)
+

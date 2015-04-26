@@ -69,6 +69,19 @@ class StorageManager:
         self.type_manager.write_item(new_type)
         return new_type
 
+    def delete_type_type(self, type_type):
+        self.type_type_name_manager.delete_name_at_index(type_type.typeName)
+        self.type_type_manager.delete_item(type_type)
+
+    def delete_type(self, type_name):
+        type_data, type_schema = self.get_type_data(type_name)
+        for tt, _, __ in type_schema:
+            self.delete_type_type(tt)
+        for node in self.get_nodes_of_type(type_data):
+            del self.nodeprop[node.index]
+        self.type_name_manager.delete_name_at_index(type_data.nameId)
+        self.type_manager.delete_item(type_data)
+
     def get_type_data(self, type_name):
         """
         Get the Type information (specifically, id) and schema given a Type name
@@ -134,3 +147,13 @@ class StorageManager:
         type_name = self.type_name_manager.read_name_at_index(node_type.nameId)
         properties = map(self.get_property_value, properties)
         return NodeProperty(node, properties, node_type, type_name)
+
+    def get_nodes_of_type(self, node_type):
+        i = 1
+        while True:
+            node = self.get_node(i)
+            if node is None:
+                break
+            i += 1
+            if node.type == node_type:
+                yield node

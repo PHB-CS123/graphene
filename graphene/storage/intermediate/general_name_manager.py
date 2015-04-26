@@ -166,8 +166,8 @@ class GeneralNameManager:
         last_index = self.storeManager.store.get_last_file_index()
         for idx in range(1, last_index):
             cur_name = self.storeManager.get_item_at_index(idx)
-            if cur_name.previousBlock == 0 and \
-               self.read_name_at_index(idx) == name:
+            if cur_name is not None and cur_name.previousBlock == 0 and \
+                self.read_name_at_index(idx) == name:
                 return idx
         return None
 

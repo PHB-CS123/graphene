@@ -15,7 +15,7 @@ stmt_list returns [stmts]
 
 stmt
   : ( c=match_stmt
-    | c=create_stmt
+    | c=create_stmt | c=delete_stmt
     | c=exit_stmt
     | c=show_stmt
     | c=insert_stmt
@@ -103,6 +103,22 @@ create_relation
     (t1=I_TYPE {$t1=$t1.text})
     (t2=I_TYPE {$t2=$t2.text});
 
+// DELETE command
+delete_stmt returns [cmd]
+  @init {$cmd = None}
+  : K_DELETE ( dt=delete_type
+             //| dr=delete_relation
+             )
+{
+if $dt.ctx is not None:
+    $cmd = DeleteTypeCommand($dt.ctx)
+}
+  ;
+
+delete_type
+  : K_TYPE (t=I_TYPE {$t=$t.text})
+  ;
+
 // SHOW command
 show_stmt returns [cmd]
   @init {$cmd = None}
@@ -155,6 +171,7 @@ BooleanLiteral : (T R U E | F A L S E) ;
 // Keywords
 K_MATCH : M A T C H ;
 K_CREATE : C R E A T E ;
+K_DELETE : D E L E T E ;
 K_EXIT : E X I T ;
 K_QUIT : Q U I T ;
 K_SHOW : S H O W ;
