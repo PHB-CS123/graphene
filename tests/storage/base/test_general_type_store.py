@@ -5,7 +5,7 @@ from graphene.storage.base.general_type_store import *
 
 class TestGeneralTypeStoreMethods(unittest.TestCase):
     TEST_FILENAME = "graphenestore.generaltypestore.db"
-    
+
     def setUp(self):
         GrapheneStore.TESTING = True
 
@@ -70,7 +70,7 @@ class TestGeneralTypeStoreMethods(unittest.TestCase):
         # Read an uncreated item
         no_item = type_store.item_at_index(1)
         # Make sure it returned None
-        self.assertEquals(no_item, None)
+        self.assertEquals(no_item, GeneralStore.EOF)
 
     def test_write_read_1_type(self):
         """
