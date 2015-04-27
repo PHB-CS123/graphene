@@ -31,8 +31,8 @@ exit_stmt returns [cmd]
 // MATCH command
 match_stmt returns [cmd]
   @init {$cmd = None}
-  : K_MATCH (nc=node_chain)
-  {$cmd = MatchCommand($nc.ctx)}
+  : K_MATCH (nc=node_chain) (K_WHERE (qc=query_chain))?
+  {$cmd = MatchCommand($nc.ctx, $qc.ctx)}
   ;
 
 node_chain returns [chain]
@@ -49,6 +49,17 @@ node
     (nt=I_TYPE)
     ')'
   {return MatchNode($nn.text, $nt.text)}
+  ;
+
+logic_op : (K_AND/* | K_OR*/) ;
+logic_test : (('!' | '>' | '<')? '=' | '<' | '>') ;
+
+query_chain returns [queries]
+  @init {$queries = []}
+  : (n1=I_NAME t1=logic_test v1=Literal {$queries.append(($n1.text, $t1.text, $v1.text))})
+    (op=logic_op {$queries.append($op.text)}
+     ni=I_NAME ti=logic_test vi=Literal {$queries.append(($ni.text, $ti.text, $vi.text))})*
+  {return $queries}
   ;
 
 /*
@@ -182,6 +193,12 @@ K_RELATION : R E L A T I O N ;
 K_NODE : N O D E ;
 K_TYPES : T Y P E S ;
 K_RELATIONS : R E L A T I O N S ;
+
+K_WHERE : W H E R E ;
+K_RETURN : R E T U R N;
+
+K_AND : A N D ;
+K_OR : O R ;
 
 // Types
 T_INT : I N T ;

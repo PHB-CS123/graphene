@@ -15,16 +15,6 @@ class InsertNodeCommand(Command):
             return Property.PropertyType.string
         return Property.PropertyType.undefined
 
-    def convert_to_value(self, s, given_type):
-        if given_type == Property.PropertyType.bool:
-            if s.upper() == "TRUE":
-                return True
-            return False
-        if given_type == Property.PropertyType.int:
-            return int(s)
-        if given_type == Property.PropertyType.string:
-            return s[1:-1]
-
     def execute(self, storage_manager):
         final_types, final_props = [], []
         for nodeprop in self.node_prop_list:
@@ -38,7 +28,7 @@ class InsertNodeCommand(Command):
                 if given_type != expected_type:
                     raise Exception("Got value of type %s, but expected value of type %s for property '%s'." %
                           (given_type, expected_type, prop_name))
-                properties.append((given_type, self.convert_to_value(prop, given_type)))
+                properties.append((given_type, storage_manager.convert_to_value(prop, given_type)))
             final_types.append(node_type)
             final_props.append(properties)
         for node_type, properties in zip(final_types, final_props):

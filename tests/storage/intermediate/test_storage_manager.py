@@ -86,3 +86,10 @@ class TestStorageManagerMethods(unittest.TestCase):
         assert self.sm.type_manager.get_item_at_index(idx) is None
         with self.assertRaises(NameError):
             self.sm.get_type_data("Person")
+
+    def test_convert_to_value(self):
+        assert self.sm.convert_to_value('"a"', Property.PropertyType.string) == "a"
+        assert self.sm.convert_to_value('true', Property.PropertyType.bool) == True
+        assert self.sm.convert_to_value('false', Property.PropertyType.bool) == False
+        assert self.sm.convert_to_value('34', Property.PropertyType.int) == 34
+        assert self.sm.convert_to_value('-34', Property.PropertyType.int) == -34

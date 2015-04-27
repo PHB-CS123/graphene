@@ -166,3 +166,13 @@ class StorageManager:
             i += 1
             if node is not None and node.type == node_type:
                 yield node
+
+    def convert_to_value(self, s, given_type):
+        if given_type == Property.PropertyType.bool:
+            if s.upper() == "TRUE":
+                return True
+            return False
+        if given_type == Property.PropertyType.int:
+            return int(s)
+        if given_type == Property.PropertyType.string:
+            return s[1:-1]
