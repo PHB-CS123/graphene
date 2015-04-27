@@ -48,6 +48,12 @@ class GeneralStore(object):
             # If the file exists, simply open it
             if os.path.isfile(file_path):
                 self.storeFile = open(file_path, "r+b")
+
+                # If the file is empty, we need to initialize it.. this
+                # shouldn't happen, because if the file was created by us it
+                # was padded.
+                if os.path.getsize(file_path) == 0:
+                    self.pad_file_header()
             else:
                 # Create the file
                 open(file_path, "w+").close()
