@@ -2,6 +2,8 @@ import abc
 
 from graphene.storage.base.graphene_store import *
 
+class EOF:
+    pass
 
 class GeneralStore(object):
     """
@@ -9,7 +11,7 @@ class GeneralStore(object):
     """
 
     # Used to demarcate end of file
-    EOF = "EOF"
+    EOF = EOF
 
     # Used to indicate abstract methods
     __metaclass__ = abc.ABCMeta
