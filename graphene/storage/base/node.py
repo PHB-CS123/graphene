@@ -49,3 +49,12 @@ class Node:
                    (self.nodeType == other.nodeType)
         else:
             return False
+
+    def __str__(self):
+        """
+        String representation of this node.
+
+        :return: Human-readable string representing this node.
+        """
+        return "Node: %d. rel_id: %d, prop_id: %d, node_type: %d" % \
+               (self.index, self.relId, self.propId, self.nodeType)

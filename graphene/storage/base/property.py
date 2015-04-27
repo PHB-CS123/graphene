@@ -77,3 +77,14 @@ class Property:
                    (self.propBlockId == other.propBlockId)
         else:
             return False
+
+    def __str__(self):
+        """
+        String representation of this property.
+
+        :return: Human-readable representation of this property.
+        """
+        return "Property: %d. Type: %s, nameID: %s, prevPropertyID: %s, " \
+               "nextPropertyID: %s, propBlockID: %s" % \
+               (self.index, self.type, self.nameId, self.prevPropId,
+                self.nextPropId, self.propBlockId)
