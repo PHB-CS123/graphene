@@ -1,6 +1,7 @@
 from enum import Enum
 from graphene.commands.command import Command
 from graphene.utils import PrettyPrinter
+from graphene.storage import GeneralStore
 
 class ShowCommand(Command):
     class ShowType(Enum):
@@ -16,11 +17,12 @@ class ShowCommand(Command):
             type_list = []
             while True:
                 cur_type = storage_manager.type_manager.get_item_at_index(i)
-                if cur_type is None:
+                if cur_type is GeneralStore.EOF:
                     break
-                type_name = storage_manager.type_name_manager \
-                            .read_name_at_index(cur_type.nameId)
-                type_list.append(type_name)
+                if cur_type is not None:
+                    type_name = storage_manager.type_name_manager \
+                                .read_name_at_index(cur_type.nameId)
+                    type_list.append(type_name)
                 i += 1
             if len(type_list) == 0:
                 print "No types found."
