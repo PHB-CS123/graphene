@@ -32,7 +32,8 @@ class TestParser(unittest.TestCase):
                 "QUIT;",
                 "EXIT;",
                 "CREATE TYPE Person ( name : string );",
-                "CREATE RELATION R Person Person",
+                "CREATE RELATION R",
+                "CREATE RELATION R ( name : string )",
                 # case-insensitive identifiers
                 "quit",
                 "match (a:A)"
@@ -50,8 +51,6 @@ class TestParser(unittest.TestCase):
                 "MATCH (a:A)-[r]->(b:B)", # invalid relation
                 "CREATE TYPE Person", # no type list
                 "CREATE TYPE PERSON", # invalid identifier for type
-                "CREATE RELATION R", # missing types
-                "CREATE RELATION R Person", # missing types
             )
 
         for stmt in invalidStatements:

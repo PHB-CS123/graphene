@@ -51,6 +51,8 @@ node
   {return MatchNode($nn.text, $nt.text)}
   ;
 
+// Queries
+
 logic_op : (K_AND/* | K_OR*/) ;
 logic_test : (('!' | '>' | '<')? '=' | '<' | '>') ;
 
@@ -60,6 +62,20 @@ query_chain returns [queries]
     (op=logic_op {$queries.append($op.text)}
      ni=I_NAME ti=logic_test vi=Literal {$queries.append(($ni.text, $ti.text, $vi.text))})*
   {return $queries}
+  ;
+
+node_query
+  : (t=I_TYPE {$t=$t.text})
+    ('(' (qc=query_chain) ')')?
+  {return ($t, $qc.ctx or ())}
+  ;
+
+relation_query
+  : '-' '['
+    (rel=(I_RELATION|I_TYPE) {$rel.text.isupper()}? {$rel = $rel.text})
+    ('(' (qc=query_chain) ')')?
+    ']' '->'
+  {return ($rel, $qc.ctx or ())}
   ;
 
 /*
@@ -111,8 +127,7 @@ type_decl
 create_relation
   : K_RELATION
     (r=(I_RELATION|I_TYPE) {$r.text.isupper()}? {$r=$r.text})
-    (t1=I_TYPE {$t1=$t1.text})
-    (t2=I_TYPE {$t2=$t2.text});
+    ('(' (tl=type_list) ')')?;
 
 // DELETE command
 delete_stmt returns [cmd]
@@ -142,12 +157,14 @@ show_stmt returns [cmd]
 insert_stmt returns [cmd]
   @init {$cmd = None}
   : K_INSERT ( inode=insert_node
-             //| irel=insert_relation
+             | irel=insert_relation
              //| igraph=insert_graph
              )
   {
 if $inode.ctx is not None:
     $cmd = InsertNodeCommand($inode.ctx)
+if $irel.ctx is not None:
+    $cmd = InsertRelationCommand($irel.ctx)
   }
   ;
 
@@ -171,6 +188,11 @@ prop_list returns [props]
 prop_value
   : (v=Literal)
   {return $v.text}
+  ;
+
+insert_relation
+  : K_RELATION (n1=node_query) (r=relation_query) (n2=node_query)
+  {return ($r.ctx, $n1.ctx, $n2.ctx)}
   ;
 
 // Literals

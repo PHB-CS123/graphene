@@ -22,3 +22,20 @@ class Query:
         if self.oper == '<':
             return value < self.value
         return False
+
+    @staticmethod
+    def parse_chain(storage_manager, chain, type_schema):
+        qc = []
+        for q in chain:
+            if type(q) == tuple:
+                # actual query
+                name, oper, value = q
+                tt = filter(lambda t: t[1] == name, type_schema)
+                if len(tt) == 0:
+                    # no such named property
+                    raise Exception("%s is not a valid property name." % name)
+                ttype = tt[0][2]
+                qc.append(Query(name, oper, storage_manager.convert_to_value(value, ttype)))
+            else:
+                qc.append(q)
+        return qc

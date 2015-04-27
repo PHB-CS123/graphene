@@ -16,21 +16,8 @@ class MatchCommand(Command):
     def execute(self, storage_manager, output=sys.stdout):
         # TODO: handle relationships, passes a True argument for node flag
         first_match = self.nc[0]
-        qc = []
         type_data, type_schema = storage_manager.get_node_data(first_match.type)
-
-        for q in self.qc:
-            if type(q) == tuple:
-                # actual query
-                name, oper, value = q
-                tt = filter(lambda t: t[1] == name, type_schema)
-                if len(tt) == 0:
-                    # no such named property
-                    raise Exception("%s is not a valid property name." % name)
-                ttype = tt[0][2]
-                qc.append(Query(name, oper, storage_manager.convert_to_value(value, ttype)))
-            else:
-                qc.append(q)
+        qc = Query.parse_chain(storage_manager, self.qc, type_schema)
 
         header = [name.upper() for tt, name, ttype in type_schema]
         iterator = NodeIterator(storage_manager, type_data, type_schema, qc)
