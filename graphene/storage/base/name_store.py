@@ -1,10 +1,10 @@
 import struct
 
-from graphene.storage.base.graphene_store import *
+from graphene.storage.base.general_store import *
 from graphene.storage.base.name import *
 
 
-class NameStore:
+class NameStore(GeneralStore):
     """
     Handles storage of names to a file. It stores names using the format:
     (inUse, previous, length, next, data). Everything except data is stored
@@ -40,198 +40,49 @@ class NameStore:
         :return: Name store instance for handling name records
         :rtype: NameStore
         """
-        graphenestore = GrapheneStore()
-        # Store the filename TODO: move to base class
-        self.filename = filename
-        # Get the path of the file
-        file_path = graphenestore.datafilesDir + filename
-
-        # Store the size of the data block
+        # Store the given block size
         self.blockSize = block_size
-        # Total record size
-        self.recordSize = self.HEADER_SIZE + block_size
 
-        try:
-            # If the file exists, simply open it
-            if os.path.isfile(file_path):
-                self.storeFile = open(file_path, "r+b")
-            else:
-                # Create the file
-                open(file_path, "w+").close()
-                # Open it so that it can be read/written
-                self.storeFile = open(file_path, "r+b")
-                # Pad its first 9 bytes with 0s
-                self.pad_file_header()
-        except IOError:
-            raise IOError("ERROR: unable to open NameStore file: " +
-                          file_path)
+        # Size of record will be the size of the header and the block itself
+        record_size = self.HEADER_SIZE + block_size
 
-    def __del__(self):
+        # Initialize using generic base class
+        super(NameStore, self).__init__(filename, record_size)
+
+    def write_item(self, item):
         """
-        Closes the NameStore file
+        Writes the given name data to the store file
 
+        :param item: Name data to write
+        :type item: Name
         :return: Nothing
         :rtype: None
         """
-        self.storeFile.close()
-
-    def get_last_file_index(self):
-        """
-        Get the last index of the current file (used when creating new IDs)
-
-        :return: Last index of current file
-        :rtype: int
-        """
-        # Seek to the end of the file
-        self.storeFile.seek(0, os.SEEK_END)
-
-        return self.storeFile.tell() / self.recordSize
-
-    def pad_file_header(self):
-        """
-        Called when the NameStore file is first created, pads the NameStore
-        file with 13 + blockSize bytes
-
-        :return: Nothing
-        :rtype: None
-        """
-
-        # Create a packed header struct of 0s
-        packed_data = self.empty_header_data()
-        # File pointer should be at 0, no need to seek
-        self.storeFile.write(packed_data)
-        # Write an empty string with blockSize empty characters
-        self.storeFile.write(bytes(self.pad_string('')))
-
-    def item_at_index(self, index):
-        """
-        Finds the Name with the given index
-
-        :param index: Index of name
-        :type index: int
-        :return: Name with given index
-        :rtype: Name
-        """
-        if index == 0:
-            raise ValueError("Name cannot be read from index 0")
-
-        # Calculate the offset
-        file_offset = index * self.recordSize
-        # Seek to the calculated offset
-        self.storeFile.seek(file_offset)
-
-        # Get the header from the file
-        packed_data_header = self.storeFile.read(self.HEADER_SIZE)
-
-        # This occurs when we've reached the end of the file.
-        if packed_data_header == '':
-            return None
-        else:
-            # Get the padded name from the file
-            name_string = self.storeFile.read(self.blockSize)
-            return self.item_from_data(index, packed_data_header, name_string)
-
-    def write_item(self, name_data):
-        """
-        Writes the given name to the NameStore file
-
-        :param name_data: Name data to write
-        :type name_data: Name
-        :return: Nothing
-        :rtype: None
-        """
-        (header_data, name) = self.data_from_item(name_data)
-        self.write_to_index_data(name_data.index, header_data, name)
-
-    def delete_item(self, name_data):
-        """
-        Deletes the given name data from the NameStore
-
-        :param name_data: Name data to delete
-        :type name_data: Name
-        :return: Nothing
-        :rtype: None
-        """
-        self.delete_item_at_index(name_data.index)
-
-    def delete_item_at_index(self, index):
-        """
-        Deletes the name data at the given index from the NameStore
-
-        :param index: Index of the name data
-        :type index: int
-        :return: Nothing
-        :rtype: None
-        """
-        # Get an empty struct to zero-out the data
-        empty_header = self.empty_header_data()
-        # Padded empty string
-        empty_string = self.pad_string('')
-        # Write the zeroes and empty string to the file
-        self.write_to_index_data(index, empty_header, empty_string)
-
-    def write_to_index_data(self, index, header_data, name):
-        """
-        Writes the header data and name string to the given index
-
-        :param index: Index to write to
-        :type index: int
-        :param header_data: Packed data to write
-        :param name: Padded name string to write
-        :type name: str
-        :return: Nothing
-        :rtype: None
-        """
-        if index == 0:
-            raise ValueError("Name cannot be written to index 0")
-        elif len(name) > self.blockSize:
+        # Check that the length of the name is not larger than the block size
+        if len(item.name) > self.blockSize:
             raise ValueError("Name string to store cannot be larger than the "
                              "block size")
 
-        # Calculate the offset
-        file_offset = index * self.recordSize
+        super(NameStore, self).write_item(item)
 
-        # Seek to the calculated offset and write the data
-        self.storeFile.seek(file_offset)
-        self.storeFile.write(header_data)
-        self.storeFile.write(bytes(name))
-
-    def data_from_item(self, name_data):
+    def item_from_packed_data(self, index, packed_data):
         """
-        Creates a tuple containing header packed_data and the corresponding name
-
-        :param name_data: Name to convert into packed data
-        :type name_data: Name
-        :return: Tuple with packed data and the name string
-        :rtype: tuple
-        """
-
-        # Pack the header parts into a struct with the order:
-        # (inUse, previousBlock, length, nextBlock)
-        header_struct = struct.Struct(self.HEADER_STRUCT_FORMAT_STR)
-        packed_data = header_struct.pack(name_data.inUse,
-                                         name_data.previousBlock,
-                                         name_data.length,
-                                         name_data.nextBlock)
-        # Pad the name to store with enough null bytes to fill the block
-        padded_name = self.pad_string(name_data.name)
-
-        return packed_data, padded_name
-
-    def item_from_data(self, index, packed_data_header, name):
-        """
-        Creates a name type from the given packed header and padded name
+        Creates a name type from the given packed data
 
         :param index: Index of the name that the packed data belongs to
         :type index: int
-        :param packed_data_header: Packed binary data header
-        :return: Name type from index, header, and name
+        :param packed_data: Packed data containing the header and name
+        :type packed_data: bytes
+        :return: Name type from index and packed data
         :rtype: Name
         """
+        # Split the packed data into header and block
+        header_data = packed_data[:self.HEADER_SIZE]
+        block_data = packed_data[self.HEADER_SIZE:]
 
-        # Unpack the data using the header struct format
+        # Unpack the header data using the header struct format
         header_struct = struct.Struct(self.HEADER_STRUCT_FORMAT_STR)
-        unpacked_data = header_struct.unpack(packed_data_header)
+        unpacked_data = header_struct.unpack(header_data)
 
         # Get the name components
         in_use = unpacked_data[0]
@@ -239,17 +90,38 @@ class NameStore:
         length = unpacked_data[2]
         next_block = unpacked_data[3]
 
-        # Unpad the given name string
-        name_string = self.unpad_string(name)
-
         # Empty data, deleted item
         if in_use is False and prev_block == 0 and length == 0 and \
            next_block == 0:
             return None
+
+        # Unpad the given name string
+        name_string = self.unpad_string(block_data)
+
         # Create a name record with these components
-        else:
-            return Name(index, in_use, prev_block, length, next_block,
-                        name_string)
+        return Name(index, in_use, prev_block, length, next_block, name_string)
+
+    def packed_data_from_item(self, item):
+        """
+        Creates packed data containing header and the corresponding name
+
+        :param item: Item to convert into packed data
+        :type item: Name
+        :return: Packed data
+        :rtype: tuple
+        """
+
+        # Pack the header parts into a struct with the order:
+        # (inUse, previousBlock, length, nextBlock)
+        header_struct = struct.Struct(self.HEADER_STRUCT_FORMAT_STR)
+        packed_data = header_struct.pack(item.inUse,
+                                         item.previousBlock,
+                                         item.length,
+                                         item.nextBlock)
+        # Pad the name to store with enough null bytes to fill the block
+        padded_name = self.pad_string(item.name)
+
+        return packed_data + bytes(padded_name)
 
     def pad_string(self, string):
         """
@@ -261,6 +133,15 @@ class NameStore:
         :rtype: str
         """
         return string.ljust(self.blockSize, self.PAD_CHAR)
+
+    def empty_struct_data(self):
+        """
+        Creates a packed struct of 0s along with a padded block
+
+        :return: Packed struct of zeros with null padded block
+        :rtype: bytes
+        """
+        return self.empty_header_data() + bytes(self.pad_string(''))
 
     @classmethod
     def unpad_string(cls, string):
