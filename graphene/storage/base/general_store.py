@@ -2,8 +2,14 @@ import abc
 
 from graphene.storage.base.graphene_store import *
 
+
 class EOF:
-    pass
+    """
+    EOF label class for when we have reached the end of the file.
+    """
+    def __init__(self):
+        raise NotImplementedError("EOF label class should not be initialized")
+
 
 class GeneralStore(object):
     """

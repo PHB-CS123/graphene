@@ -63,11 +63,8 @@ class StorageManager:
                 kwargs["next_type"] = ids[i + 1]
             prop = self.type_type_manager.create_item(**kwargs)
             self.type_type_manager.write_item(prop)
-            # Store the most recently used index so that we can use it to chain
-            # onto the linked list
-            last_prop_id = prop.index
         new_type = self.type_manager.create_item(first_type=ids[0],
-                                                name_id=name_index)
+                                                 name_id=name_index)
         self.type_manager.write_item(new_type)
         return new_type
 
@@ -134,7 +131,7 @@ class StorageManager:
             stored_prop = self.property_manager.create_item(**kwargs)
             properties.append(stored_prop)
         new_node = self.node_manager.create_item(prop_id=prop_ids[0],
-            node_type=node_type.index)
+                                                 node_type=node_type.index)
         self.nodeprop[new_node.index] = (new_node, properties)
         self.nodeprop.sync()
         return self.nodeprop[new_node.index]

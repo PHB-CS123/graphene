@@ -73,7 +73,7 @@ class PropertyStore(GeneralStore):
         header_data = packed_data[:self.HEADER_SIZE]
         block_data = packed_data[self.HEADER_SIZE:]
 
-        # Unpack the header data using the property struct format
+        # Unpack the header data using the header struct format
         header_struct = struct.Struct(self.STRUCT_HEADER_FORMAT_STR)
         unpacked_header_data = header_struct.unpack(header_data)
 
@@ -123,7 +123,8 @@ class PropertyStore(GeneralStore):
         """
         Creates a packed struct of 0s
 
-        :return: Packed class struct of 0s
+        :return: Packed struct of 0s
+        :rtype: bytes
         """
         empty_struct = struct.Struct(self.STRUCT_HEADER_FORMAT_STR +
                                      self.STRUCT_REGULAR_FORMAT_STR)

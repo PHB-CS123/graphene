@@ -104,6 +104,8 @@ class GeneralNameManager:
             # was broken (only part of a block was deleted)
             if name_block is None:
                 return None
+            elif isinstance(name_block, EOF):
+                raise EOFError("Corrupted data, unexpected EOF.")
             # Add the next block name to the list
             names.append(name_block.name)
             # Update index with the index of the next block
@@ -167,7 +169,7 @@ class GeneralNameManager:
         for idx in range(1, last_index):
             cur_name = self.storeManager.get_item_at_index(idx)
             if cur_name is not None and cur_name.previousBlock == 0 and \
-                self.read_name_at_index(idx) == name:
+               self.read_name_at_index(idx) == name:
                 return idx
         return None
 
