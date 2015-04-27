@@ -1,7 +1,7 @@
 import unittest
 
+from graphene.errors.storage_manager_errors import *
 from graphene.storage import (StorageManager, GrapheneStore, Property)
-from graphene.storage.intermediate import (GeneralNameManager)
 
 
 class TestStorageManagerMethods(unittest.TestCase):
@@ -19,7 +19,7 @@ class TestStorageManagerMethods(unittest.TestCase):
         graphene_store.remove_test_datafiles()
 
     def test_get_empty_type_data(self):
-        with self.assertRaises(NameError):
+        with self.assertRaises(TypeDoesNotExistException):
             self.sm.get_type_data("asdf")
 
     def test_insert_node(self):
@@ -60,7 +60,7 @@ class TestStorageManagerMethods(unittest.TestCase):
         idx = t.index
         self.sm.delete_type("T")
         assert self.sm.type_manager.get_item_at_index(idx) is None
-        with self.assertRaises(NameError):
+        with self.assertRaises(TypeDoesNotExistException):
             self.sm.get_type_data("T")
         assert self.sm.node_manager.get_item_at_index(n1i) is None
         assert self.sm.node_manager.get_item_at_index(n2i) is None
@@ -74,9 +74,8 @@ class TestStorageManagerMethods(unittest.TestCase):
 
     def test_create_type_exists(self):
         self.sm.create_type("T", (("a", "int"),))
-        with self.assertRaises(Exception):
+        with self.assertRaises(TypeAlreadyExistsException):
             self.sm.create_type("T", (("a", "int"),))
-
 
     def test_delete_type(self):
         schema = ( ("name", "string"), ("age", "int"), ("address", "string") )
@@ -84,7 +83,7 @@ class TestStorageManagerMethods(unittest.TestCase):
         idx = t.index
         self.sm.delete_type("Person")
         assert self.sm.type_manager.get_item_at_index(idx) is None
-        with self.assertRaises(NameError):
+        with self.assertRaises(TypeDoesNotExistException):
             self.sm.get_type_data("Person")
 
     def test_convert_to_value(self):

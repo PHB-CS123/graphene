@@ -1,4 +1,5 @@
 from graphene.storage import *
+from graphene.errors.storage_manager_errors import *
 
 from graphene.storage.intermediate import *
 from pylru import WriteBackCacheManager
@@ -43,8 +44,7 @@ class StorageManager:
     def create_type(self, type_name, schema):
         if self.type_name_manager.find_name(type_name) is not None:
             # The type name already exists!
-            # TODO: Specific exception should go here
-            raise Exception("Type %s already exists!" % type_name)
+            raise TypeAlreadyExistsException("Type %s already exists!" % type_name)
         name_index = self.type_name_manager.write_name(type_name)
         ids = self.type_type_manager.get_indexes(len(schema))
         # The reason we reverse the schema is so that when we create the linked
@@ -98,8 +98,8 @@ class StorageManager:
                 break
             idx += 1
         if cur_type is None:
-            # TODO: Create custom error here
-            raise NameError("Type %s does not exist." % type_name)
+            # Invalid type name
+            raise TypeDoesNotExistException("Type %s does not exist." % type_name)
         cur_type_type_id = cur_type.firstType
         schema = []
         while cur_type_type_id != 0:

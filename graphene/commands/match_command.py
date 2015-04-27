@@ -1,16 +1,16 @@
 import sys
 
-from graphene.traversal import (NodeIterator, Query)
+from graphene.traversal import *
 from graphene.commands.command import Command
 from graphene.utils import PrettyPrinter
 
 class MatchCommand(Command):
     def __init__(self, node_chain, query_chain):
         self.nc = node_chain
-        self.qc = query_chain
+        self.qc = query_chain or ()
 
     def __repr__(self):
-        lst = ["\t%s" % chain for chain in self.data]
+        lst = ["\t%s" % chain for chain in self.nc]
         return "[Match\n%s\n]" % "\n".join(lst)
 
     def execute(self, storage_manager, output=sys.stdout):
@@ -26,7 +26,7 @@ class MatchCommand(Command):
                 tt = filter(lambda t: t[1] == name, type_schema)
                 if len(tt) == 0:
                     # no such named property
-                    raise Exception("%s is not a valid property name." % self.name)
+                    raise Exception("%s is not a valid property name." % name)
                 ttype = tt[0][2]
                 qc.append(Query(name, oper, storage_manager.convert_to_value(value, ttype)))
             else:
@@ -39,5 +39,6 @@ class MatchCommand(Command):
             values.append(node.properties)
         if len(values) == 0:
             output.write("No nodes found.\n")
-            return
+            return []
         PrettyPrinter.print_table(values, header, output)
+        return values

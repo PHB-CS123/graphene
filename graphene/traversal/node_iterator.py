@@ -1,3 +1,4 @@
+from graphene.traversal.query import Query
 from graphene.storage import *
 
 class NodeIterator:
@@ -21,6 +22,7 @@ class NodeIterator:
         for node in self.sm.get_nodes_of_type(self.node_type):
             matches = True
             for q in self.queries:
-                matches = matches and q.test(self.prop_to_dict(node.properties))
+                if isinstance(q, Query):
+                    matches = matches and q.test(self.prop_to_dict(node.properties))
             if matches:
                 yield node
