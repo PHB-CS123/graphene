@@ -26,11 +26,11 @@ class PrettyPrinter:
         if header is not None:
             maxes = [max(m, len(str(header[i] or ""))) for i, m in enumerate(maxes)]
             width = sum(m + 2 for m in maxes) + 2 + (len(maxes) - 1)
-            sys.stdout.write(width * "-" + "\n")
-            sys.stdout.write("|%s|" % "|".join(" %s%s " % (v, (maxes[i] - len(str(v))) * " ") \
+            output.write(width * "-" + "\n")
+            output.write("|%s|" % "|".join(" %s%s " % (v, (maxes[i] - len(str(v))) * " ") \
                    for i, v in enumerate(header)) + "\n")
-        sys.stdout.write(width * "-" + "\n")
+        output.write(width * "-" + "\n")
         for row in table:
-            sys.stdout.write("|%s|" % "|".join(" %s%s " % (v, (maxes[i] - len(str(v))) * " ") \
+            output.write("|%s|" % "|".join(" %s%s " % (v, (maxes[i] - len(str(v))) * " ") \
                    for i, v in enumerate(row)) + "\n")
-        sys.stdout.write(width * "-" + "\n")
+        output.write(width * "-" + "\n")

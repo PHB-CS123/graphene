@@ -13,6 +13,14 @@ class GrapheneServer:
     def __init__(self):
         self.storage_manager = StorageManager()
 
+    def parseString(self, s):
+        istream = InputStream.InputStream(s)
+
+        lexer, parser = self.gen_parser_lexer(istream)
+
+        tree = parser.parse()
+        return self.parseCommands(tree.stmt_list().stmts)
+
     def parseCommands(self, commands):
         """
         Parses a list of commands.
@@ -31,6 +39,20 @@ class GrapheneServer:
             result.append(command)
         return result
 
+    def gen_parser_lexer(self, stream):
+        errorListener = ParserErrorListener()
+
+        # Create lexer and remove error listeners from it
+        lexer = GQLLexer(stream)
+        lexer.removeErrorListeners()
+
+        # Create parser and attach our custom error listener to it
+        parser = GQLParser(CommonTokenStream(lexer))
+        parser.removeErrorListeners()
+        parser.addErrorListener(errorListener)
+
+        return lexer, parser
+
     def doCommands(self, data, eat_errors=True):
         """
         Executes a series of commands.
@@ -40,19 +62,10 @@ class GrapheneServer:
         :rtype: bool
         """
 
-        errorListener = ParserErrorListener()
-
         # Convert data to input stream
-        input = InputStream.InputStream(data)
+        istream = InputStream.InputStream(data)
 
-        # Create lexer and remove error listeners from it
-        lexer = GQLLexer(input)
-        lexer.removeErrorListeners()
-
-        # Create parser and attach our custom error listener to it
-        parser = GQLParser(CommonTokenStream(lexer))
-        parser.removeErrorListeners()
-        parser.addErrorListener(errorListener)
+        lexer, parser = self.gen_parser_lexer(istream)
 
         # Try to parse the tree. If the parse fails, return False to designate
         # an error. If an error occurs, print it and return True because the
