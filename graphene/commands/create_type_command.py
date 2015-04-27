@@ -12,6 +12,5 @@ class CreateTypeCommand(Command):
                       ",\n".join("\t%s %s" % decl for decl in self.type_list))
 
     def execute(self, storage_manager):
-        created_type = storage_manager.create_type(self.type_name,
-                                                   self.type_list,
-                                                   True)
+        created_type = storage_manager.create_node_type(self.type_name,
+                                                        self.type_list)

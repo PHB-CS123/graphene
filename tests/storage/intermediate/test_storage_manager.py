@@ -19,11 +19,14 @@ class TestStorageManagerMethods(unittest.TestCase):
         graphene_store.remove_test_datafiles()
 
     def test_get_empty_type_data(self):
+        """
+        Test the get_type_data method when no types exist
+        """
         with self.assertRaises(TypeDoesNotExistException):
             self.sm.get_type_data("asdf", True)
 
     def test_insert_node(self):
-        t = self.sm.create_type("T", (("a", "int"), ("b", "string")), True)
+        t = self.sm.create_node_type("T", (("a", "int"), ("b", "string")))
         node, props = self.sm.insert_node(t, ((Property.PropertyType.int, 3),
                                               (Property.PropertyType.string, "a")))
         self.assertEquals(self.sm.get_node_type(node), t)
@@ -34,9 +37,9 @@ class TestStorageManagerMethods(unittest.TestCase):
 
         self.assertEquals(node.relId, 0)
 
-    def test_create_type(self):
+    def test_create_node_type(self):
         schema = ( ("name", "string"), ("age", "int"), ("address", "string") )
-        t = self.sm.create_type("Person", schema, True)
+        t = self.sm.create_node_type("Person", schema)
         type_name = self.sm.nodeTypeNameManager.read_name_at_index(t.nameId)
         self.assertEquals(type_name, "Person")
         type_types = []
@@ -53,7 +56,7 @@ class TestStorageManagerMethods(unittest.TestCase):
             self.assertEquals(tt_type, s_type)
 
     def test_create_type_with_nodes(self):
-        t = self.sm.create_type("T", (("a", "int"),("c", "string"),), True)
+        t = self.sm.create_node_type("T", (("a", "int"),("c", "string"),))
         n1, p1 = self.sm.insert_node(t, ((Property.PropertyType.int, 1),
                                          (Property.PropertyType.string, "a")))
         n2, p2 = self.sm.insert_node(t, ((Property.PropertyType.int, 2),
@@ -64,10 +67,10 @@ class TestStorageManagerMethods(unittest.TestCase):
         n2i, p2i = n2.index, [p2[0].index, p2[1].index]
         n3i, p3i = n3.index, [p3[0].index, p3[1].index]
         idx = t.index
-        self.sm.delete_type("T", True)
+        self.sm.delete_node_type("T")
         self.assertEquals(self.sm.nodeTypeManager.get_item_at_index(idx), None)
         with self.assertRaises(TypeDoesNotExistException):
-            self.sm.get_type_data("T", True)
+            self.sm.get_node_data("T")
         self.assertEquals(self.sm.node_manager.get_item_at_index(n1i), None)
         self.assertEquals(self.sm.node_manager.get_item_at_index(n2i), None)
         self.assertEquals(self.sm.node_manager.get_item_at_index(n3i), None)
@@ -78,19 +81,19 @@ class TestStorageManagerMethods(unittest.TestCase):
         for i in p3i:
             self.assertEquals(self.sm.property_manager.get_item_at_index(i), None)
 
-    def test_create_type_exists(self):
-        self.sm.create_type("T", (("a", "int"),), True)
+    def test_create_node_type_exists(self):
+        self.sm.create_node_type("T", (("a", "int"),))
         with self.assertRaises(TypeAlreadyExistsException):
-            self.sm.create_type("T", (("a", "int"),), True)
+            self.sm.create_node_type("T", (("a", "int"),))
 
-    def test_delete_type(self):
+    def test_delete_node_type(self):
         schema = ( ("name", "string"), ("age", "int"), ("address", "string") )
-        t = self.sm.create_type("Person", schema, True)
+        t = self.sm.create_node_type("Person", schema)
         idx = t.index
-        self.sm.delete_type("Person", True)
+        self.sm.delete_node_type("Person")
         self.assertEquals(self.sm.nodeTypeManager.get_item_at_index(idx), None)
         with self.assertRaises(TypeDoesNotExistException):
-            self.sm.get_type_data("Person", True)
+            self.sm.get_node_data("Person")
 
     def test_convert_to_value(self):
         self.assertEquals(self.sm.convert_to_value('"a"', Property.PropertyType.string), "a")

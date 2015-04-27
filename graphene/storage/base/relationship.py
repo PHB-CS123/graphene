@@ -2,6 +2,20 @@ from enum import Enum
 
 
 class Relationship:
+    """
+    Stores the following information about a relationship:
+        - Index:                Index of the relationship in the store file
+        - In Use:               Whether the database is using the relationship
+        - Direction:            Direction of the relationship (right, left)
+        - First Node:           ID of the first node in the relation
+        - Second Node:          ID of the second node in the relationship
+        - Relationship Type:    ID of the relationship type
+        - First Prev. Rel. ID:  ID of the prev relation of the first node
+        - First Next Rel. ID:   ID of the next relation of the first node
+        - Second Prev. Rel. ID: ID of the prev relation of the second node
+        - Second Next Rel. ID:  ID of the next relation of the second node
+        - Next Property ID:     ID of the first property the relationship has
+    """
     class Direction(Enum):
         undefined = 0
         left = 1
@@ -25,7 +39,7 @@ class Relationship:
         :type first_node_id: int
         :param second_node_id: ID of the second node in the relationship
         :type second_node_id: int
-        :param rel_type: Id of the relationship type
+        :param rel_type: ID of the relationship type
         :type rel_type: int
         :param first_prev_rel_id: ID of the prev relation of the first node
         :type first_prev_rel_id: int

@@ -96,6 +96,80 @@ class StorageManager:
             GeneralNameManager(self.PROP_STORE_STRINGS_FILENAME,
                                self.STRING_BLOCK_SIZE)
 
+    # --- Node Storage Methods --- #
+
+    def create_node_type(self, type_name, schema):
+        """
+        Wrapper around create_type for nodes
+
+        :param type_name: Name of node type
+        :type type_name: str
+        :param schema: Schema for node type
+        :type schema: tuple
+        :return: Index of Newly created node type
+        """
+        return self.create_type(type_name, schema, True)
+
+    def delete_node_type(self, type_name):
+        """
+        Wrapper around delete_type for nodes
+
+        :param type_name: Name of node type to delete
+        :type type_name: str
+        :return Nothing
+        :rtype None
+        """
+        self.delete_type(type_name, True)
+
+    def get_node_data(self, type_name):
+        """
+        Wrapper around get_type_data for nodes
+
+        :param type_name: Name of node type to retrieve data for
+        :type type_name: str
+        :return: ID and schema for node type with given name
+        :rtype: tuple
+        """
+        return self.get_type_data(type_name, True)
+
+    # --- Relationship Storage Methods --- #
+
+    def create_relationship_type(self, type_name, schema):
+        """
+        Wrapper around create_type for relationships
+
+        :param type_name: Name of re type
+        :type type_name: str
+        :param schema: Schema for node type
+        :type schema: tuple
+        :return: Index of Newly created node type
+        """
+        return self.create_type(type_name, schema, False)
+
+    def delete_relationship_type(self, type_name):
+        """
+        Wrapper around delete_type for relationships
+
+        :param type_name: Name of relationship type to delete
+        :type type_name: str
+        :return Nothing
+        :rtype None
+        """
+        self.delete_type(type_name, False)
+
+    def get_relationship_data(self, type_name):
+        """
+        Wrapper around get_type_data for relationships
+
+        :param type_name: Name of relationship type to retrieve data for
+        :type type_name: str
+        :return: ID and schema for relationship type with given name
+        :rtype: tuple
+        """
+        return self.get_type_data(type_name, False)
+
+    # --- Private Storage Methods --- #
+
     def create_type(self, type_name, schema, node_flag):
         """
         Creates a node or relationship type with the given name and schema
@@ -129,10 +203,7 @@ class StorageManager:
                 "Type %s already exists!" % type_name)
         name_index = type_name_manager.write_name(type_name)
         ids = type_manager.get_indexes(len(schema))
-        # The reason we reverse the schema is so that when we create the linked
-        # list, the type-types come out in order; i.e. when we select the first
-        # one, it is indeed the same as the first one specified in the create
-        # statement.
+        # Create linked list of types for the created type
         for i, idx in enumerate(ids):
             tt_name, tt_type = schema[i]
             tt_name_id = type_type_name_manager.write_name(tt_name)
@@ -260,6 +331,7 @@ class StorageManager:
             cur_type_type_id = cur_type_type.nextType
         return cur_type, schema
 
+    # --- Node Specific Storage Methods --- #
     # TODO: generalize the rest of the functions for relationships as well
     def insert_node(self, node_type, node_properties):
         prop_ids = self.property_manager.get_indexes(len(node_properties))
