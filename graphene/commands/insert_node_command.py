@@ -19,7 +19,7 @@ class InsertNodeCommand(Command):
         final_types, final_props = [], []
         for nodeprop in self.node_prop_list:
             type_name, prop_list = nodeprop.t, nodeprop.pl
-            node_type, schema = storage_manager.get_type_data(type_name)
+            node_type, schema = storage_manager.get_type_data(type_name, True)
             properties = []
             for prop, schema_tt in zip(prop_list, schema):
                 tt, prop_name, exp_tt = schema_tt

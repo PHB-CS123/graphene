@@ -14,10 +14,11 @@ class MatchCommand(Command):
         return "[Match\n%s\n]" % "\n".join(lst)
 
     def execute(self, storage_manager, output=sys.stdout):
-        # We only handle the first match for now...
+        # TODO: handle relationships, passes a True argument for node flag
         first_match = self.nc[0]
         qc = []
-        type_data, type_schema = storage_manager.get_type_data(first_match.type)
+        type_data, type_schema = storage_manager.get_type_data(first_match.type,
+                                                               True)
 
         for q in self.qc:
             if type(q) == tuple:

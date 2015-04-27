@@ -13,4 +13,5 @@ class CreateTypeCommand(Command):
 
     def execute(self, storage_manager):
         created_type = storage_manager.create_type(self.type_name,
-                                                   self.type_list)
+                                                   self.type_list,
+                                                   True)

@@ -1,6 +1,7 @@
 from graphene.storage import GeneralStore
 from graphene.storage.intermediate.node_property import NodeProperty
 
+
 class NodePropertyStore:
     def __init__(self, node_manager, prop_manager):
         self.node_manager = node_manager
@@ -19,6 +20,7 @@ class NodePropertyStore:
         return cur_node, properties
 
     def __setitem__(self, key, value):
+
         node, properties = value
         self.node_manager.write_item(node)
         for prop in properties:
