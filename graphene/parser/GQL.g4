@@ -17,7 +17,7 @@ stmt
   : ( c=match_stmt
     | c=create_stmt | c=delete_stmt
     | c=exit_stmt
-    | c=show_stmt
+    | c=show_stmt | c=desc_stmt
     | c=insert_stmt
     )
   ;
@@ -153,6 +153,13 @@ show_stmt returns [cmd]
   {$cmd = ShowCommand(t)}
   ;
 
+// DESC command
+desc_stmt returns [cmd]
+  @init {$cmd = None}
+  : K_DESC (K_TYPE (t=I_TYPE {$t=$t.text}))
+  {$cmd = DescTypeCommand($t)}
+  ;
+
 // INSERT command
 insert_stmt returns [cmd]
   @init {$cmd = None}
@@ -208,6 +215,7 @@ K_DELETE : D E L E T E ;
 K_EXIT : E X I T ;
 K_QUIT : Q U I T ;
 K_SHOW : S H O W ;
+K_DESC : D E S C ;
 K_INSERT : I N S E R T ;
 
 K_TYPE : T Y P E ;

@@ -27,7 +27,7 @@ class PrettyPrinter:
             maxes = [max(m, len(str(header[i] or ""))) for i, m in enumerate(maxes)]
             width = sum(m + 2 for m in maxes) + 2 + (len(maxes) - 1)
             output.write(width * "-" + "\n")
-            output.write("|%s|" % "|".join(" %s%s " % (v, (maxes[i] - len(str(v))) * " ") \
+            output.write("|%s|" % "|".join(" %s%s " % (v.upper(), (maxes[i] - len(str(v))) * " ") \
                    for i, v in enumerate(header)) + "\n")
         output.write(width * "-" + "\n")
         for row in table:
