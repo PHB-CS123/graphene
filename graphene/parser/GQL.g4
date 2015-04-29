@@ -58,9 +58,9 @@ logic_test : (('!' | '>' | '<')? '=' | '<' | '>') ;
 
 query_chain returns [queries]
   @init {$queries = []}
-  : (n1=I_NAME t1=logic_test v1=Literal {$queries.append(($n1.text, $t1.text, $v1.text))})
+  : ( ((i1=I_NAME) '.')? n1=I_NAME t1=logic_test v1=Literal {$queries.append(($i1.text, $n1.text, $t1.text, $v1.text))})
     (op=logic_op {$queries.append($op.text)}
-     ni=I_NAME ti=logic_test vi=Literal {$queries.append(($ni.text, $ti.text, $vi.text))})*
+     ((ii=I_NAME) '.')? ni=I_NAME ti=logic_test vi=Literal {$queries.append(($ii.text, $ni.text, $ti.text, $vi.text))})*
   {return $queries}
   ;
 

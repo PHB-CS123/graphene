@@ -16,11 +16,12 @@ class MatchCommand(Command):
     def execute(self, storage_manager, output=sys.stdout):
         # TODO: handle relationships, passes a True argument for node flag
         first_match = self.nc[0]
+        alias = first_match.name
         type_data, type_schema = storage_manager.get_node_data(first_match.type)
-        qc = Query.parse_chain(storage_manager, self.qc, type_schema)
+        qc = Query.parse_chain(storage_manager, self.qc, type_schema, alias)
 
         header = [name.upper() for tt, name, ttype in type_schema]
-        iterator = NodeIterator(storage_manager, type_data, type_schema, qc)
+        iterator = NodeIterator(storage_manager, type_data, type_schema, alias, qc)
         values = []
         for node in iterator:
             values.append(node.properties)
