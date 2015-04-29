@@ -16,11 +16,11 @@ class ShowCommand(Command):
             i = 1
             type_list = []
             while True:
-                cur_type = storage_manager.type_manager.get_item_at_index(i)
+                cur_type = storage_manager.nodeTypeManager.get_item_at_index(i)
                 if cur_type is GeneralStore.EOF:
                     break
                 if cur_type is not None:
-                    type_name = storage_manager.type_name_manager \
+                    type_name = storage_manager.nodeTypeNameManager \
                                 .read_name_at_index(cur_type.nameId)
                     type_list.append(type_name)
                 i += 1
