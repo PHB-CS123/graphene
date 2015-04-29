@@ -336,6 +336,7 @@ class StorageManager:
     def insert_node(self, node_type, node_properties):
         prop_ids = self.property_manager.get_indexes(len(node_properties))
         properties = []
+        print("Node properties: %s" % node_properties)
         for i, idx in enumerate(prop_ids):
             prop_type, prop_val = node_properties[i]
             kwargs = {
@@ -354,6 +355,7 @@ class StorageManager:
                 kwargs["prop_block_id"] = prop_val
             stored_prop = self.property_manager.create_item(**kwargs)
             properties.append(stored_prop)
+        print("Final properties: %s" % properties)
         new_node = self.node_manager.create_item(prop_id=prop_ids[0],
                                                  node_type=node_type.index)
         self.nodeprop[new_node.index] = (new_node, properties)
@@ -388,6 +390,9 @@ class StorageManager:
             i += 1
             if node is not None and node.type == node_type:
                 yield node
+
+    def insert_relation(self, rel_type, rel_properties):
+        pass
 
     @staticmethod
     def convert_to_value(s, given_type):
