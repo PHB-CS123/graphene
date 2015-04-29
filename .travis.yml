@@ -5,8 +5,9 @@ install:
   "./install-deps.sh"
 script: make test
 notifications:
-  email:
-    recipients:
-      - ebulkin@caltech.edu
-      - codyhan94@gmail.com
-      - dpena@caltech.edu
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/bdbb5e789c52e8992d42
+    on_success: change
+    on_failure: always
+    on_start: false
