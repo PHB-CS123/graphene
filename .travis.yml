@@ -5,6 +5,7 @@ install:
   "./install-deps.sh"
 script: make test
 notifications:
+  email: false
   webhooks:
     urls:
       - https://webhooks.gitter.im/e/bdbb5e789c52e8992d42
