@@ -35,7 +35,7 @@ clean-build:
 	rm -rf build
 
 build-server: build-index
-	cd $(BUILD_DIR); python -m SimpleHTTPServer 12323; cd ..
+	cd $(BUILD_DIR); python2 -m SimpleHTTPServer 12323; cd ..
 
 build-index:
 	mkdir -p build
