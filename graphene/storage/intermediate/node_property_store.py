@@ -31,7 +31,7 @@ class NodePropertyStore:
         if node is None:
             raise KeyError("There is no node with index %d." % key)
         if node == GeneralStore.EOF:
-            return node
+            raise IndexError("Key %d goes past the end of the store." % key)
         cur_prop_id = node.propId
         while cur_prop_id != 0:
             cur_prop = self.prop_manager.get_item_at_index(cur_prop_id)

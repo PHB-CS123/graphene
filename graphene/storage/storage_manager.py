@@ -202,22 +202,25 @@ class StorageManager:
             raise TypeAlreadyExistsException(
                 "Type %s already exists!" % type_name)
         name_index = type_name_manager.write_name(type_name)
-        ids = type_manager.get_indexes(len(schema))
-        # Create linked list of types for the created type
-        for i, idx in enumerate(ids):
-            tt_name, tt_type = schema[i]
-            tt_name_id = type_type_name_manager.write_name(tt_name)
-            kwargs = {
-                "property_type": Property.PropertyType[tt_type],
-                "type_name": tt_name_id,
-                "index": idx
-            }
-            if i < len(ids) - 1:
-                kwargs["next_type"] = ids[i + 1]
-            prop = type_type_manager.create_item(**kwargs)
-            type_type_manager.write_item(prop)
-        new_type = type_manager.create_item(first_type=ids[0],
-                                            name_id=name_index)
+        if len(schema) > 0:
+            ids = type_manager.get_indexes(len(schema))
+            # Create linked list of types for the created type
+            for i, idx in enumerate(ids):
+                tt_name, tt_type = schema[i]
+                tt_name_id = type_type_name_manager.write_name(tt_name)
+                kwargs = {
+                    "property_type": Property.PropertyType[tt_type],
+                    "type_name": tt_name_id,
+                    "index": idx
+                }
+                if i < len(ids) - 1:
+                    kwargs["next_type"] = ids[i + 1]
+                prop = type_type_manager.create_item(**kwargs)
+                type_type_manager.write_item(prop)
+            new_type = type_manager.create_item(first_type=ids[0],
+                                                name_id=name_index)
+        else:
+            new_type = type_manager.create_item(name_id=name_index)
         type_manager.write_item(new_type)
         return new_type
 
@@ -334,33 +337,37 @@ class StorageManager:
     # --- Node Specific Storage Methods --- #
     # TODO: generalize the rest of the functions for relationships as well
     def insert_node(self, node_type, node_properties):
-        prop_ids = self.property_manager.get_indexes(len(node_properties))
         properties = []
-        print("Node properties: %s" % (node_properties,))
-        for i, idx in enumerate(prop_ids):
-            prop_type, prop_val = node_properties[i]
-            kwargs = {
-                "index": idx,
-                "prop_type": prop_type
-            }
-            if i > 0:
-                kwargs["prev_prop_id"] = prop_ids[i - 1]
-            elif i < len(prop_ids) - 1:
-                kwargs["next_prop_id"] = prop_ids[i + 1]
+        if len(node_properties) > 0:
+            prop_ids = self.property_manager.get_indexes(len(node_properties))
+            print("Node properties: %s" % (node_properties,))
+            for i, idx in enumerate(prop_ids):
+                prop_type, prop_val = node_properties[i]
+                kwargs = {
+                    "index": idx,
+                    "prop_type": prop_type
+                }
+                if i > 0:
+                    kwargs["prev_prop_id"] = prop_ids[i - 1]
+                elif i < len(prop_ids) - 1:
+                    kwargs["next_prop_id"] = prop_ids[i + 1]
 
-            if prop_type == Property.PropertyType.string:
-                kwargs["prop_block_id"] = \
-                    self.prop_string_manager.write_name(prop_val)
-            else:
-                kwargs["prop_block_id"] = prop_val
-            stored_prop = self.property_manager.create_item(**kwargs)
-            properties.append(stored_prop)
-        print("Final properties: %s" % (node_properties,))
-        new_node = self.node_manager.create_item(prop_id=prop_ids[0],
-                                                 node_type=node_type.index)
+                if prop_type == Property.PropertyType.string:
+                    kwargs["prop_block_id"] = \
+                        self.prop_string_manager.write_name(prop_val)
+                else:
+                    kwargs["prop_block_id"] = prop_val
+                stored_prop = self.property_manager.create_item(**kwargs)
+                properties.append(stored_prop)
+            print("Final properties: %s" % (node_properties,))
+            new_node = self.node_manager.create_item(prop_id=prop_ids[0],
+                                                     node_type=node_type.index)
+        else:
+            new_node = self.node_manager.create_item(node_type=node_type.index)
+        # Update cache with new values and sync with store
         self.nodeprop[new_node.index] = (new_node, properties)
         self.nodeprop.sync()
-        return self.nodeprop[new_node.index]
+        return (new_node, properties)
 
     def get_node_type(self, node):
         return self.nodeTypeManager.get_item_at_index(node.nodeType)
