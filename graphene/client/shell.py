@@ -2,6 +2,8 @@ import cmd
 import readline
 import traceback
 import sys
+import logging
+
 
 class Shell(cmd.Cmd):
     def __init__(self, server):
@@ -14,9 +16,25 @@ class Shell(cmd.Cmd):
         self.completekey = "Tab"
 
     def do_help(self, line):
-        # Help message.
-        # TODO: Actually be helpful
-        pass
+        """
+        Prints help message when the following command is executed:
+            > help [line]
+
+        :param line: Line following help command used to identify help request
+        :type line: str
+        :return: Nothing
+        :rtype: None
+        """
+        # TODO: implement for different types of commands
+        # Make the line whitespace and case insensitive
+        line = line.upper().strip()
+
+        if line == "MATCH":
+            print("MATCH help: ")
+        else:
+            print("You can type the following help topics: \n"
+                  "MATCH, INSERT, CREATE")
+            logging.debug("Unhandled help request %s" % line)
 
     def do_EOF(self, line):
         return True
