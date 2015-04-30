@@ -39,7 +39,7 @@ class InsertRelationCommand(Command):
         type2, queries2 = self.query2
         rel_name, rel_props = self.rel
         rel_type, rel_schema = storage_manager.get_relationship_data(rel_name)
-        print self.parse_properties(rel_props, rel_schema, storage_manager)
+        print(self.parse_properties(rel_props, rel_schema, storage_manager))
 
         type_data1, type_schema1 = storage_manager.get_node_data(type1)
         type_data2, type_schema2 = storage_manager.get_node_data(type2)
