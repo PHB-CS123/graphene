@@ -1,16 +1,45 @@
+from __future__ import print_function
+
 from graphene.commands.command import Command
-from graphene.storage import Property
+from graphene.storage import StorageManager
 from graphene.traversal import *
 import itertools
 
 class InsertRelationCommand(Command):
     def __init__(self, ctx):
         self.rel, self.query1, self.query2 = ctx
+        print("rel, query1, query2:", self.rel, self.query1, self.query2)
 
     def execute(self, storage_manager):
+        """
+        Inserts a relationship into the storage layer.
+
+        :type storage_manager: StorageManager
+        :param storage_manager: storage manager for this instance
+        :return: None
+        """
+        from pdb import set_trace
+        set_trace()
         type1, queries1 = self.query1
         type2, queries2 = self.query2
         rel_type, rel_queries = self.rel
+
+        # TODO: Generalize this section between insert_node and insert_relation
+        rel_type, schema = storage_manager.get_relationship_data(rel_type)
+        properties = []
+
+        for prop, schema_tt in zip(rel_queries, schema):
+            tt, prop_name, exp_tt = schema_tt
+            given_type = self.get_type_type_of_string(prop)
+            expected_type = exp_tt
+            if given_type != expected_type:
+                raise Exception("Got value of type %s, but expected value "
+                                "of type %s for property '%s'." %
+                                (given_type, expected_type, prop_name))
+            conv_value = storage_manager.convert_to_value(prop, given_type)
+            properties.append((given_type, conv_value))
+        # --- END TODO --- #
+
         type_data1, type_schema1 = storage_manager.get_node_data(type1)
         type_data2, type_schema2 = storage_manager.get_node_data(type2)
 
@@ -23,4 +52,4 @@ class InsertRelationCommand(Command):
         for node1, node2 in itertools.product(iter1, iter2):
             if node1 == node2:
                 continue
-            print node1, node2
+            print(node1, node2)
