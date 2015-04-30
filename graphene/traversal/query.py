@@ -29,7 +29,7 @@ class Query:
         return False
 
     @staticmethod
-    def parse_chain(storage_manager, chain, type_schema, alias):
+    def parse_chain(storage_manager, chain, type_schema, alias=None):
         qc = []
         for q in chain:
             if type(q) == tuple:
