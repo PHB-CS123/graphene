@@ -1,3 +1,4 @@
+from __future__ import print_function
 from graphene.commands.command import Command
 from graphene.storage import Property
 from graphene.utils.conversion import TypeConversion
@@ -8,6 +9,7 @@ class InsertNodeCommand(Command):
 
     def execute(self, storage_manager):
         final_types, final_props = [], []
+        print("node_prop_list:", self.node_prop_list)
         for nodeprop in self.node_prop_list:
             type_name, prop_list = nodeprop.t, nodeprop.pl
             node_type, schema = storage_manager.get_node_data(type_name)
@@ -25,4 +27,5 @@ class InsertNodeCommand(Command):
             final_types.append(node_type)
             final_props.append(properties)
         for node_type, properties in zip(final_types, final_props):
+            print("Node type names:", dir(node_type), "properties:", properties)
             storage_manager.insert_node(node_type, properties)

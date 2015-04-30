@@ -222,6 +222,7 @@ class StorageManager:
         else:
             new_type = type_manager.create_item(name_id=name_index)
         type_manager.write_item(new_type)
+        print("type manager wrote new type: %s" % new_type)
         return new_type
 
     def delete_type_type(self, type_type, node_flag):
@@ -398,7 +399,18 @@ class StorageManager:
             if node is not None and node.type == node_type:
                 yield node
 
-    def insert_relation(self, rel_type, rel_properties):
+    def insert_relation(self, rel_type, rel_properties, src_node, dst_node):
+        """
+        Creates a directed relationship (rel_type) from src_node to dst_node.
+
+        :param rel_type: details of the relationship
+        :param rel_properties: labels on the relationship, for example
+                               R(year = 1995)
+        :param src_node: node that points
+        :param dst_node: node that is pointed to
+        :return: (relationship, properties)
+        """
+
         pass
 
     @staticmethod
