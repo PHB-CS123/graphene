@@ -17,8 +17,8 @@ class InsertRelationCommand(Command):
         qc1 = Query.parse_chain(storage_manager, queries1, type_schema1)
         qc2 = Query.parse_chain(storage_manager, queries2, type_schema2)
 
-        iter1 = NodeIterator(storage_manager, type_data1, type_schema1, qc1)
-        iter2 = NodeIterator(storage_manager, type_data2, type_schema2, qc2)
+        iter1 = NodeIterator(storage_manager, type_data1, type_schema1, queries=qc1)
+        iter2 = NodeIterator(storage_manager, type_data2, type_schema2, queries=qc2)
 
         for node1, node2 in itertools.product(iter1, iter2):
             if node1 == node2:

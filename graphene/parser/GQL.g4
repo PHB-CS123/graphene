@@ -186,6 +186,14 @@ node_with_props
     '(' (pl=prop_list) ')'
   ;
 
+relation_with_props
+  : '-' '['
+    (rel=(I_RELATION|I_TYPE) {$rel.text.isupper()}? {$rel = $rel.text})
+    ('(' (pl=prop_list) ')')?
+    ']' '->'
+  {return ($rel, $pl.ctx)}
+  ;
+
 prop_list returns [props]
   : p1=prop_value {$props = [$p1.ctx]}
     (',' (pi=prop_value {$props.append($pi.ctx)}))*
@@ -198,7 +206,7 @@ prop_value
   ;
 
 insert_relation
-  : K_RELATION (n1=node_query) (r=relation_query) (n2=node_query)
+  : K_RELATION (n1=node_query) (r=relation_with_props) (n2=node_query)
   {return ($r.ctx, $n1.ctx, $n2.ctx)}
   ;
 
