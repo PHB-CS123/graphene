@@ -303,10 +303,10 @@ class StorageManager:
             type_type_name_manager = self.nodeTypeTypeNameManager
         # Getting data for a relationship
         else:
-            type_manager = self.nodeTypeManager
-            type_name_manager = self.nodeTypeNameManager
-            type_type_manager = self.nodeTypeTypeManager
-            type_type_name_manager = self.nodeTypeTypeNameManager
+            type_manager = self.relTypeManager
+            type_name_manager = self.relTypeNameManager
+            type_type_manager = self.relTypeTypeManager
+            type_type_name_manager = self.relTypeTypeNameManager
 
         idx = 1
         cur_type = None

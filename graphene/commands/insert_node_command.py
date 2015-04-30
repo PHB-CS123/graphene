@@ -1,5 +1,6 @@
 from graphene.commands.command import Command
 from graphene.storage import Property
+from graphene.utils.conversion import TypeConversion
 
 class InsertNodeCommand(Command):
     def __init__(self, node_prop_list):
@@ -13,7 +14,7 @@ class InsertNodeCommand(Command):
             properties = []
             for prop, schema_tt in zip(prop_list, schema):
                 tt, prop_name, exp_tt = schema_tt
-                given_type = self.get_type_type_of_string(prop)
+                given_type = TypeConversion.get_type_type_of_string(prop)
                 expected_type = exp_tt
                 if given_type != expected_type:
                     raise Exception("Got value of type %s, but expected value "
@@ -25,14 +26,3 @@ class InsertNodeCommand(Command):
             final_props.append(properties)
         for node_type, properties in zip(final_types, final_props):
             storage_manager.insert_node(node_type, properties)
-
-    @staticmethod
-    def get_type_type_of_string(s):
-        if s.upper() == "TRUE" or s.upper() == "FALSE":
-            return Property.PropertyType.bool
-        if s.isdigit() or \
-            ((s[0] == '-' or s[0] == '+') and s[1:].isdigit()):
-            return Property.PropertyType.int
-        if s[0] == '"' and s[-1] == '"':
-            return Property.PropertyType.string
-        return Property.PropertyType.undefined
