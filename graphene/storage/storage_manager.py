@@ -199,8 +199,12 @@ class StorageManager:
 
         if type_name_manager.find_name(type_name) is not None:
             # The type name already exists!
-            raise TypeAlreadyExistsException(
-                "Type %s already exists!" % type_name)
+            if node_flag:
+                raise TypeAlreadyExistsException(
+                    "Type %s already exists!" % type_name)
+            else:
+                raise TypeAlreadyExistsException(
+                    "Relation %s already exists!" % type_name)
         name_index = type_name_manager.write_name(type_name)
         if len(schema) > 0:
             ids = type_type_manager.get_indexes(len(schema))
