@@ -37,23 +37,44 @@ class TestStorageManagerMethods(unittest.TestCase):
 
         self.assertEquals(node.relId, 0)
 
-    def test_create_node_type(self):
-        schema = ( ("name", "string"), ("age", "int"), ("address", "string") )
-        t = self.sm.create_node_type("Person", schema)
-        type_name = self.sm.nodeTypeNameManager.read_name_at_index(t.nameId)
-        self.assertEquals(type_name, "Person")
-        type_types = []
-        type_types.append(self.sm.nodeTypeTypeManager.get_item_at_index(t.firstType))
+    def get_all_type_types(self, t):
+        """
+        Helper function for getting all of the type types of a certain node
+        type.
+
+        :param t: A general (Node) type
+        :return: [type_types]
+        """
+        type_types = [
+            self.sm.nodeTypeTypeManager.get_item_at_index(t.firstType)]
         while type_types[-1].nextType != 0:
             type_types.append(self.sm.nodeTypeTypeManager.
                               get_item_at_index(type_types[-1].nextType))
+        return type_types
+
+    def check_type_types_with_schema(self, type_types, schema):
+        """
+        Helper function for checking that a node's type types match its schema.
+
+        :param type_types: a given type's property types
+        :param schema: a given type's true property types
+        """
         for i, tt in enumerate(type_types):
-            tt_name = self.sm.nodeTypeTypeNameManager.\
+            tt_name = self.sm.nodeTypeTypeNameManager. \
                 read_name_at_index(tt.typeName)
             tt_type = tt.propertyType.name
             s_name, s_type = schema[i]
             self.assertEquals(tt_name, s_name)
             self.assertEquals(tt_type, s_type)
+
+    def test_create_node_type(self):
+        schema = ( ("name", "string"), ("age", "int"), ("address", "string") )
+        t = self.sm.create_node_type("Person", schema)
+        type_name = self.sm.nodeTypeNameManager.read_name_at_index(t.nameId)
+        self.assertEquals(type_name, "Person")
+
+        type_types = self.get_all_type_types(t)
+        self.check_type_types_with_schema(type_types, schema)
 
     def test_create_type_with_nodes(self):
         t = self.sm.create_node_type("T", (("a", "int"),("c", "string"),))
@@ -80,6 +101,26 @@ class TestStorageManagerMethods(unittest.TestCase):
             self.assertEquals(self.sm.property_manager.get_item_at_index(i), None)
         for i in p3i:
             self.assertEquals(self.sm.property_manager.get_item_at_index(i), None)
+
+    def test_create_multiple_types(self):
+        """
+        Make sure the first and second type names, type types, and type type
+        names are recorded correctly.
+        """
+        schema1 = (("a", "string"), ("b", "int"), )
+        schema2 = (("c", "int"), ("d", "string"), )
+
+        t1 = self.sm.create_node_type("T", schema1)
+        t2 = self.sm.create_node_type("U", schema2)
+
+        self.assertEquals(self.sm.nodeTypeNameManager.read_name_at_index(
+            t1.nameId), "T")
+        self.assertEquals(self.sm.nodeTypeNameManager.read_name_at_index(
+            t2.nameId), "U")
+
+        t1_tts, t2_tts = self.get_all_type_types(t1), self.get_all_type_types(t2)
+        self.check_type_types_with_schema(t1_tts, schema1)
+        self.check_type_types_with_schema(t2_tts, schema2)
 
     def test_create_node_type_exists(self):
         self.sm.create_node_type("T", (("a", "int"),))

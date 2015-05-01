@@ -203,7 +203,7 @@ class StorageManager:
                 "Type %s already exists!" % type_name)
         name_index = type_name_manager.write_name(type_name)
         if len(schema) > 0:
-            ids = type_manager.get_indexes(len(schema))
+            ids = type_type_manager.get_indexes(len(schema))
             # Create linked list of types for the created type
             for i, idx in enumerate(ids):
                 tt_name, tt_type = schema[i]
