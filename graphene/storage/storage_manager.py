@@ -416,46 +416,50 @@ class StorageManager:
             prop_ids = self.property_manager.get_indexes(len(rel_properties))
             for i, idx in enumerate(prop_ids):
                 prop_type, prop_val = rel_properties[i]
-                kwargs = {
+                prop_kwargs = {
                     "index": idx,
                     "prop_type": prop_type
                 }
                 if i > 0:
-                    kwargs["prev_prop_id"] = prop_ids[i - 1]
+                    prop_kwargs["prev_prop_id"] = prop_ids[i - 1]
                 elif i < len(prop_ids) - 1:
-                    kwargs["next_prop_id"] = prop_ids[i + 1]
+                    prop_kwargs["next_prop_id"] = prop_ids[i + 1]
 
                 if prop_type == Property.PropertyType.string:
-                    kwargs["prop_block_id"] = \
+                    prop_kwargs["prop_block_id"] = \
+                    # TODO: Why are new relation property names not getting
+                    # written?
                         self.prop_string_manager.write_name(prop_val)
                 else:
-                    kwargs["prop_block_id"] = prop_val
-                stored_prop = self.property_manager.create_item(**kwargs)
+                    prop_kwargs["prop_block_id"] = prop_val
+                stored_prop = self.property_manager.create_item(**prop_kwargs)
                 properties.append(stored_prop)
             print("Final properties: %s" % (rel_properties,))
-            set_trace()
-            new_rel = self.relationship_manager.create_item(
-                prop_id=prop_ids[0], rel_type=rel_type.index)
-        else:
-            set_trace()
-            new_rel = self.relationship_manager.create_item(rel_type=rel_type.index)
+            # new_rel = self.relationship_manager.create_item(
+            #     prop_id=prop_ids[0], rel_type=rel_type.index)
+        # else:
+        #     new_rel = self.relationship_manager.create_item(rel_type=rel_type.index)
+
+
+        # TODO: Relationship's first prop_id is 0 if it has no properties?
+        first_prop_idx = properties[0].index if rel_properties else 0
+
+        # Just get one index for this relationship
+        rel_idx = self.relationship_manager.get_indexes(1)[0]
+
+        # TODO: Handle setting previous rel IDs and propID
+        rel_kwargs = {
+            "index": rel_idx,
+            "direction": Relationship.Direction.right,
+            "first_node_id": src_node.node.index,
+            "second_node_id": dst_node.node.index,
+            "rel_type": rel_type.index,
+            "prop_id": first_prop_idx
+        }
+        new_rel = self.relationship_manager.create_item(**rel_kwargs)
 
         self.relprop[new_rel.index] = (new_rel, properties)
         self.relprop.sync()
-        # Just get one index for this relationship
-        # idx = self.relationship_manager.get_indexes(1)[0]
-
-        # TODO: Handle setting previous rel IDs and propID
-        # kwargs = {
-        #     "index": idx,
-        #     "direction": Relationship.Direction.right,
-        #     "first_node_id": src_node.node.index,
-        #     "second_node_id": dst_node.node.index,
-        #     "rel_type": rel_type.index,
-        # }
-        # new_rel = self.relationship_manager.create_item(**kwargs)
-        # self.relprop[new_rel.index] = (new_rel, rel_properties)
-
         # Only do this if it's their first relation
         # src_node.node.relId = new_rel.index
         # dst_node.node.relId
