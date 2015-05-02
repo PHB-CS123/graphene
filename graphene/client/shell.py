@@ -9,6 +9,7 @@ class Shell(cmd.Cmd):
     def __init__(self, server):
         cmd.Cmd.__init__(self)
         self.server = server
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def preloop(self):
         self.intro = "Graphene 0.1"
@@ -34,7 +35,7 @@ class Shell(cmd.Cmd):
         else:
             print("You can type the following help topics: \n"
                   "MATCH, INSERT, CREATE")
-            logging.debug("Unhandled help request %s" % line)
+            self.logger.debug("Unhandled help request %s" % line)
 
     def do_EOF(self, line):
         return True
