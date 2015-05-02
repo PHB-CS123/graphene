@@ -39,6 +39,7 @@ class InsertRelationCommand(Command):
         type2, queries2 = self.query2
         rel_name, rel_props = self.rel
         rel_type, rel_schema = storage_manager.get_relationship_data(rel_name)
+        # Debug information for now
         print(self.parse_properties(rel_props, rel_schema, storage_manager))
 
         type_data1, type_schema1 = storage_manager.get_node_data(type1)
@@ -50,6 +51,9 @@ class InsertRelationCommand(Command):
         iter1 = NodeIterator(storage_manager, type_data1, type_schema1, queries=qc1)
         iter2 = NodeIterator(storage_manager, type_data2, type_schema2, queries=qc2)
 
+        # Iterate over a product of the left node-set and right node-set. For
+        # each, we will create a relation. We don't care if a node appears on
+        # both sides; that's fine.
         for node1, node2 in itertools.product(iter1, iter2):
             if node1 == node2:
                 continue

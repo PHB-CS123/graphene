@@ -42,6 +42,7 @@ class TestShowCommand(unittest.TestCase):
         t = self.sm.create_node_type("T", (("a", "int"), ("b", "string")))
         cmd = ShowCommand(ShowCommand.ShowType.TYPES)
         self.assertEquals(cmd.show_type, ShowCommand.ShowType.TYPES)
+        # Dummy output stream
         out = StringIO.StringIO()
         cmd.execute(self.sm, output=out)
         self.assertEquals(out.getvalue(), expected)
