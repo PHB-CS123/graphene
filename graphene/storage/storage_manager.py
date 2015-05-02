@@ -4,6 +4,7 @@ from graphene.errors.storage_manager_errors import *
 from graphene.storage.intermediate import *
 from pylru import WriteBackCacheManager
 
+from pdb import set_trace
 
 class StorageManager:
     # Maximum size of the cache (in items)
@@ -410,8 +411,53 @@ class StorageManager:
         :param dst_node: node that is pointed to
         :return: (relationship, properties)
         """
+        properties = []
+        if rel_properties:
+            prop_ids = self.property_manager.get_indexes(len(rel_properties))
+            for i, idx in enumerate(prop_ids):
+                prop_type, prop_val = rel_properties[i]
+                kwargs = {
+                    "index": idx,
+                    "prop_type": prop_type
+                }
+                if i > 0:
+                    kwargs["prev_prop_id"] = prop_ids[i - 1]
+                elif i < len(prop_ids) - 1:
+                    kwargs["next_prop_id"] = prop_ids[i + 1]
 
-        pass
+                if prop_type == Property.PropertyType.string:
+                    kwargs["prop_block_id"] = \
+                        self.prop_string_manager.write_name(prop_val)
+                else:
+                    kwargs["prop_block_id"] = prop_val
+                stored_prop = self.property_manager.create_item(**kwargs)
+                properties.append(stored_prop)
+            print("Final properties: %s" % (rel_properties,))
+            new_rel = self.relationship_manager.create_item(
+                prop_id=prop_ids[0], rel_type=rel_type.index)
+        else:
+            new_rel = self.node_manager.create_item(rel_type=rel_type.index)
+
+        # Just get one index for this relationship
+        # idx = self.relationship_manager.get_indexes(1)[0]
+
+        # TODO: Handle setting previous rel IDs and propID
+        # kwargs = {
+        #     "index": idx,
+        #     "direction": Relationship.Direction.right,
+        #     "first_node_id": src_node.node.index,
+        #     "second_node_id": dst_node.node.index,
+        #     "rel_type": rel_type.index,
+        # }
+        # new_rel = self.relationship_manager.create_item(**kwargs)
+        # self.relprop[new_rel.index] = (new_rel, rel_properties)
+
+        # Only do this if it's their first relation
+        # src_node.node.relId = new_rel.index
+        # dst_node.node.relId
+
+        print("new rel: %s" % new_rel)
+        return
 
     @staticmethod
     def convert_to_value(s, given_type):
