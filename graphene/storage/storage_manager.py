@@ -433,11 +433,15 @@ class StorageManager:
                 stored_prop = self.property_manager.create_item(**kwargs)
                 properties.append(stored_prop)
             print("Final properties: %s" % (rel_properties,))
+            set_trace()
             new_rel = self.relationship_manager.create_item(
                 prop_id=prop_ids[0], rel_type=rel_type.index)
         else:
-            new_rel = self.node_manager.create_item(rel_type=rel_type.index)
+            set_trace()
+            new_rel = self.relationship_manager.create_item(rel_type=rel_type.index)
 
+        self.relprop[new_rel.index] = (new_rel, properties)
+        self.relprop.sync()
         # Just get one index for this relationship
         # idx = self.relationship_manager.get_indexes(1)[0]
 
