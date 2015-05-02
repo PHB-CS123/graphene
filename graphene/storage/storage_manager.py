@@ -426,9 +426,10 @@ class StorageManager:
                     prop_kwargs["next_prop_id"] = prop_ids[i + 1]
 
                 if prop_type == Property.PropertyType.string:
-                    prop_kwargs["prop_block_id"] = \
+                    # set_trace()
                     # TODO: Why are new relation property names not getting
                     # written?
+                    prop_kwargs["prop_block_id"] = \
                         self.prop_string_manager.write_name(prop_val)
                 else:
                     prop_kwargs["prop_block_id"] = prop_val
