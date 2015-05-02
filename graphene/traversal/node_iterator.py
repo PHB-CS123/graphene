@@ -2,7 +2,7 @@ from graphene.traversal.query import Query
 from graphene.storage import *
 
 class NodeIterator:
-    def __init__(self, storage_manager, node_type, type_schema, alias, queries=None):
+    def __init__(self, storage_manager, node_type, type_schema, alias=None, queries=None):
         self.sm = storage_manager
         self.node_type = node_type
         self.schema = type_schema

@@ -199,11 +199,15 @@ class StorageManager:
 
         if type_name_manager.find_name(type_name) is not None:
             # The type name already exists!
-            raise TypeAlreadyExistsException(
-                "Type %s already exists!" % type_name)
+            if node_flag:
+                raise TypeAlreadyExistsException(
+                    "Type %s already exists!" % type_name)
+            else:
+                raise TypeAlreadyExistsException(
+                    "Relation %s already exists!" % type_name)
         name_index = type_name_manager.write_name(type_name)
         if len(schema) > 0:
-            ids = type_manager.get_indexes(len(schema))
+            ids = type_type_manager.get_indexes(len(schema))
             # Create linked list of types for the created type
             for i, idx in enumerate(ids):
                 tt_name, tt_type = schema[i]
@@ -222,6 +226,7 @@ class StorageManager:
         else:
             new_type = type_manager.create_item(name_id=name_index)
         type_manager.write_item(new_type)
+        print("type manager wrote new type: %s" % new_type)
         return new_type
 
     def delete_type_type(self, type_type, node_flag):
@@ -303,10 +308,10 @@ class StorageManager:
             type_type_name_manager = self.nodeTypeTypeNameManager
         # Getting data for a relationship
         else:
-            type_manager = self.nodeTypeManager
-            type_name_manager = self.nodeTypeNameManager
-            type_type_manager = self.nodeTypeTypeManager
-            type_type_name_manager = self.nodeTypeTypeNameManager
+            type_manager = self.relTypeManager
+            type_name_manager = self.relTypeNameManager
+            type_type_manager = self.relTypeTypeManager
+            type_type_name_manager = self.relTypeTypeNameManager
 
         idx = 1
         cur_type = None
@@ -398,7 +403,18 @@ class StorageManager:
             if node is not None and node.type == node_type:
                 yield node
 
-    def insert_relation(self, rel_type, rel_properties):
+    def insert_relation(self, rel_type, rel_properties, src_node, dst_node):
+        """
+        Creates a directed relationship (rel_type) from src_node to dst_node.
+
+        :param rel_type: details of the relationship
+        :param rel_properties: labels on the relationship, for example
+                               R(year = 1995)
+        :param src_node: node that points
+        :param dst_node: node that is pointed to
+        :return: (relationship, properties)
+        """
+
         pass
 
     @staticmethod

@@ -1,4 +1,6 @@
+from graphene.storage import StorageManager
 from graphene.commands.command import Command
+
 
 class CreateRelationCommand(Command):
     def __init__(self, ctx):
@@ -6,4 +8,11 @@ class CreateRelationCommand(Command):
         self.type_list = ctx.tl or ()
 
     def execute(self, storage_manager):
+        """
+        Create the relation specified by this class.
+        :type storage_manager: StorageManager
+        :param storage_manager: manager that stores the relation to disk
+        :return: None
+        """
         print self.rel_name, self.type_list
+        storage_manager.create_relationship_type(self.rel_name, self.type_list)

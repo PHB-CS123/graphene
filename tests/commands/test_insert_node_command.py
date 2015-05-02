@@ -3,6 +3,7 @@ import unittest
 from graphene.commands import InsertNodeCommand
 from graphene.storage import (StorageManager, GrapheneStore, Property)
 from graphene.server.server import GrapheneServer
+from graphene.utils.conversion import TypeConversion
 
 class TestInsertNodeCommand(unittest.TestCase):
     def setUp(self):
@@ -26,11 +27,11 @@ class TestInsertNodeCommand(unittest.TestCase):
         cmd = InsertNodeCommand("foo")
         assert cmd.node_prop_list == "foo"
 
+    # TODO: Put this in a place where it actually belongs...
     def test_get_tt_of_string(self):
-        empty_cmd = InsertNodeCommand(None)
-        assert empty_cmd.get_type_type_of_string('"a"') == Property.PropertyType.string
-        assert empty_cmd.get_type_type_of_string('true') == Property.PropertyType.bool
-        assert empty_cmd.get_type_type_of_string('false') == Property.PropertyType.bool
-        assert empty_cmd.get_type_type_of_string('34') == Property.PropertyType.int
-        assert empty_cmd.get_type_type_of_string('3.4') == Property.PropertyType.undefined
-        assert empty_cmd.get_type_type_of_string('-34') == Property.PropertyType.int
+        assert TypeConversion.get_type_type_of_string('"a"') == Property.PropertyType.string
+        assert TypeConversion.get_type_type_of_string('true') == Property.PropertyType.bool
+        assert TypeConversion.get_type_type_of_string('false') == Property.PropertyType.bool
+        assert TypeConversion.get_type_type_of_string('34') == Property.PropertyType.int
+        assert TypeConversion.get_type_type_of_string('3.4') == Property.PropertyType.undefined
+        assert TypeConversion.get_type_type_of_string('-34') == Property.PropertyType.int
