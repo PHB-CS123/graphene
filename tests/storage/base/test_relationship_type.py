@@ -38,13 +38,13 @@ class TestRelationshipTypeMethods(unittest.TestCase):
     def test_eq(self):
         """
         Tests that == operator returns True when two relationship types are
-        equal and False when they are not
+        equal and False when they are not. Tests != when checking not equals.
         """
         relationship_type1 = RelationshipType(1, False, 42)
         relationship_type2 = RelationshipType(1, False, 42)
         relationship_type3 = RelationshipType(20, True, 21)
 
-        self.assertTrue(relationship_type1 == relationship_type2)
-        self.assertFalse(relationship_type1 == relationship_type3)
-        self.assertFalse(relationship_type2 == relationship_type3)
-        self.assertFalse(relationship_type1 == 1)
+        self.assertEqual(relationship_type1, relationship_type2)
+        self.assertNotEqual(relationship_type1, relationship_type3)
+        self.assertNotEqual(relationship_type2, relationship_type3)
+        self.assertNotEqual(relationship_type1, 1)

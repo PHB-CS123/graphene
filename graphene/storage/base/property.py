@@ -78,13 +78,24 @@ class Property:
         else:
             return False
 
+    def __ne__(self, other):
+        """
+        Overload the != operator
+
+        :param other: Other property
+        :type other: Property
+        :return: True if not equivalent, false otherwise
+        :rtype: bool
+        """
+        return not (self == other)
+
     def __str__(self):
         """
         String representation of this property.
 
         :return: Human-readable representation of this property.
         """
-        return "Property: %d. Type: %s, nameID: %s, prevPropertyID: %s, " \
-               "nextPropertyID: %s, propBlockID: %s" % \
-               (self.index, self.type, self.nameId, self.prevPropId,
+        args = (self.index, self.type, self.nameId, self.prevPropId,
                 self.nextPropId, self.propBlockId)
+        return "Property: %d. Type: %s, nameID: %s, prevPropertyID: %s, " \
+               "nextPropertyID: %s, propBlockID: %s" % args

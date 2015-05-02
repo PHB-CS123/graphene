@@ -91,3 +91,14 @@ class Relationship:
                    (self.propId == other.propId)
         else:
             return False
+
+    def __ne__(self, other):
+        """
+        Overload the != operator
+
+        :param other: Other relationship
+        :type other: Relationship
+        :return: True if not equivalent, false otherwise
+        :rtype: bool
+        """
+        return not (self == other)

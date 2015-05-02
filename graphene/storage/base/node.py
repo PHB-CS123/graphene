@@ -50,11 +50,22 @@ class Node:
         else:
             return False
 
+    def __ne__(self, other):
+        """
+        Overload the != operator
+
+        :param other: Other node
+        :type other: Node
+        :return: True if not equivalent, false otherwise
+        :rtype: bool
+        """
+        return not (self == other)
+
     def __str__(self):
         """
         String representation of this node.
 
         :return: Human-readable string representing this node.
         """
-        return "Node: %d. rel_id: %d, prop_id: %d, node_type: %d" % \
-               (self.index, self.relId, self.propId, self.nodeType)
+        args = (self.index, self.relId, self.propId, self.nodeType)
+        return "Node: %d. rel_id: %d, prop_id: %d, node_type: %d" % args

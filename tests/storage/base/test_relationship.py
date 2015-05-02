@@ -65,7 +65,7 @@ class TestRelationshipMethods(unittest.TestCase):
     def test_eq(self):
         """
         Tests that == operator returns True when two relationships are equal
-        and False when they are not
+        and False when they are not. Tests != when checking not equals.
         """
         relationship1 = Relationship(1, True, Relationship.Direction.left,
                                      2, 3, 4, 5, 6, 7, 8, 9)
@@ -74,7 +74,7 @@ class TestRelationshipMethods(unittest.TestCase):
         relationship3 = Relationship(9, False, Relationship.Direction.right,
                                      8, 7, 6, 5, 4, 3, 2, 1)
 
-        self.assertTrue(relationship1 == relationship2)
-        self.assertFalse(relationship1 == relationship3)
-        self.assertFalse(relationship2 == relationship3)
-        self.assertFalse(relationship1 == 1)
+        self.assertEqual(relationship1, relationship2)
+        self.assertNotEqual(relationship1, relationship3)
+        self.assertNotEqual(relationship2, relationship3)
+        self.assertNotEqual(relationship1, 1)

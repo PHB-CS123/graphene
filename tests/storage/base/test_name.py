@@ -33,14 +33,14 @@ class TestNameMethods(unittest.TestCase):
     def test_eq(self):
         """
         Tests that == operator returns True when two nodes are equal
-        and False when they are not
+        and False when they are not. Tests != when checking not equals.
         """
         name_data1 = Name(32, False, 42, 3, 82, "Hello there, I'm a long str")
         name_data2 = Name(32, False, 42, 3, 82, "Hello there, I'm a long str")
         name_data3 = Name(2, True, 20, 1, 40, "Hello")
 
-        self.assertTrue(name_data1 == name_data2)
-        self.assertFalse(name_data1 == name_data3)
-        self.assertFalse(name_data2 == name_data3)
-        self.assertFalse(name_data1 == 1)
+        self.assertEqual(name_data1, name_data2)
+        self.assertNotEqual(name_data1, name_data3)
+        self.assertNotEqual(name_data2, name_data3)
+        self.assertNotEqual(name_data1, 1)
 

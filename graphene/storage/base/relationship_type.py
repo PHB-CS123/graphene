@@ -42,3 +42,14 @@ class RelationshipType:
                    (self.typeBlockId == other.typeBlockId)
         else:
             return False
+
+    def __ne__(self, other):
+        """
+        Overload the != operator
+
+        :param other: Other relationship type
+        :type other: RelationshipType
+        :return: True if not equivalent, false otherwise
+        :rtype: bool
+        """
+        return not (self == other)

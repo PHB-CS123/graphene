@@ -43,9 +43,12 @@ exclude_lines =
     # Base class Command does not need testing
     class Command
 
-    ######### PrettyPrinter #########
+    ######### Utils #########
     # PrettyPrinter does not need testing
     class PrettyPrinter
+
+    # GPLogging does not need testing
+    class GPLogging
 
 [html]
 directory = build/htmlcov

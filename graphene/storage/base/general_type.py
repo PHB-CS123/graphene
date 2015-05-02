@@ -41,6 +41,14 @@ class GeneralType:
             return False
 
     def __ne__(self, other):
+        """
+        Overload the != operator
+
+        :param other: Other general type
+        :type other: GeneralType
+        :return: True if not equivalent, false otherwise
+        :rtype: bool
+        """
         return not (self == other)
 
     def __repr__(self):
