@@ -3,7 +3,7 @@ from graphene.commands.command import Command
 from graphene.utils import PrettyPrinter
 from graphene.storage import GeneralStore
 from graphene.storage import StorageManager
-
+import sys
 
 class ShowCommand(Command):
     class ShowType(Enum):
@@ -13,7 +13,7 @@ class ShowCommand(Command):
     def __init__(self, show_type):
         self.show_type = show_type
 
-    def execute(self, storage_manager):
+    def execute(self, storage_manager, output=sys.stdout):
         """
         Execute the show command.
         :param storage_manager: a storage manager.
@@ -48,6 +48,6 @@ class ShowCommand(Command):
 
         # Print the resulting name list.
         if not name_list:
-            print "No %s found." % self.show_type
+            output.write("No %s found." % self.show_type.name)
             return
-        PrettyPrinter.print_list(name_list, str(self.show_type))
+        PrettyPrinter.print_list(name_list, self.show_type.name, output=output)
