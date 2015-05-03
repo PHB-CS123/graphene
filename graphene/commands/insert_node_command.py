@@ -35,4 +35,5 @@ class InsertNodeCommand(Command):
         for node_type, properties in zip(final_types, final_props):
             self.logger.debug("Node type names: %s" % dir(node_type))
             self.logger.debug("properties: %s" % properties)
+
             storage_manager.insert_node(node_type, properties)

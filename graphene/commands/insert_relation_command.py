@@ -4,6 +4,8 @@ from graphene.commands.command import Command
 from graphene.storage import StorageManager
 from graphene.traversal import *
 from graphene.utils.conversion import TypeConversion
+from graphene.errors import TypeMismatchException
+
 import itertools
 
 class InsertRelationCommand(Command):
@@ -18,9 +20,9 @@ class InsertRelationCommand(Command):
             given_type = TypeConversion.get_type_type_of_string(prop)
             expected_type = exp_tt
             if given_type != expected_type:
-                raise Exception("Got value of type %s, but expected value "
-                                "of type %s for property '%s'." %
-                                (given_type, expected_type, prop_name))
+                raise TypeMismatchException("Got value of type %s, but"
+                            " expected value of type %s for property '%s'." %
+                            (given_type, expected_type, prop_name))
             conv_value = storage_manager.convert_to_value(prop, given_type)
             properties.append((given_type, conv_value))
         return properties
@@ -33,14 +35,11 @@ class InsertRelationCommand(Command):
         :param storage_manager: storage manager for this instance
         :return: None
         """
-        from pdb import set_trace
-        set_trace()
         type1, queries1 = self.query1
         type2, queries2 = self.query2
         rel_name, rel_props = self.rel
         rel_type, rel_schema = storage_manager.get_relationship_data(rel_name)
-        # Debug information for now
-        print(self.parse_properties(rel_props, rel_schema, storage_manager))
+        rel_props = self.parse_properties(rel_props, rel_schema, storage_manager)
 
         type_data1, type_schema1 = storage_manager.get_node_data(type1)
         type_data2, type_schema2 = storage_manager.get_node_data(type2)
@@ -51,10 +50,18 @@ class InsertRelationCommand(Command):
         iter1 = NodeIterator(storage_manager, type_data1, type_schema1, queries=qc1)
         iter2 = NodeIterator(storage_manager, type_data2, type_schema2, queries=qc2)
 
+        inserted_relations = []
+
         # Iterate over a product of the left node-set and right node-set. For
         # each, we will create a relation. We don't care if a node appears on
         # both sides; that's fine.
-        for node1, node2 in itertools.product(iter1, iter2):
-            if node1 == node2:
+        for np1, np2 in itertools.product(iter1, iter2):
+            if np1 == np2:
                 continue
-            print(node1, node2)
+
+            print("Inserting relation %s between %s and %s" %
+                (rel_name, np1.node, np2.node))
+            rel = storage_manager.insert_relation(rel_type, rel_props, np1.node, np2.node)
+            inserted_relations.append(rel)
+
+        return inserted_relations

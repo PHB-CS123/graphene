@@ -102,3 +102,16 @@ class Relationship:
         :rtype: bool
         """
         return not (self == other)
+
+    def __str__(self):
+        """
+        String representation of this node.
+
+        :return: Human-readable string representing this node.
+        """
+        return "Relation: %d. prop_id: %d, rel_type: %d\n" \
+                "\tFirst Node: %d (Prev Rel: %d, Next Rel: %d)\n" \
+                "\tSecond Node: %d (Prev Rel: %d, Next Rel: %d)" % \
+               (self.index, self.propId, self.relType,
+                self.firstNodeId, self.firstPrevRelId, self.firstNextRelId,
+                self.secondNodeId, self.secondPrevRelId, self.secondNextRelId)

@@ -417,8 +417,100 @@ class StorageManager:
         :param dst_node: node that is pointed to
         :return: (relationship, properties)
         """
+        properties = []
+        if rel_properties:
+            prop_ids = self.property_manager.get_indexes(len(rel_properties))
+            for i, idx in enumerate(prop_ids):
+                prop_type, prop_val = rel_properties[i]
+                prop_kwargs = {
+                    "index": idx,
+                    "prop_type": prop_type
+                }
+                if i > 0:
+                    prop_kwargs["prev_prop_id"] = prop_ids[i - 1]
+                elif i < len(prop_ids) - 1:
+                    prop_kwargs["next_prop_id"] = prop_ids[i + 1]
 
-        pass
+                if prop_type == Property.PropertyType.string:
+                    # set_trace()
+                    # TODO: Why are new relation property names not getting
+                    # written?
+                    prop_kwargs["prop_block_id"] = \
+                        self.prop_string_manager.write_name(prop_val)
+                else:
+                    prop_kwargs["prop_block_id"] = prop_val
+                stored_prop = self.property_manager.create_item(**prop_kwargs)
+                properties.append(stored_prop)
+            print("Final properties: %s" % (rel_properties,))
+
+
+        # TODO: Relationship's first prop_id is 0 if it has no properties?
+        first_prop_idx = properties[0].index if rel_properties else 0
+
+        # Just get one index for this relationship
+        rel_idx = self.relationship_manager.get_indexes(1)[0]
+
+        src_idx, dst_idx = src_node.index, dst_node.index
+
+        rel_kwargs = {
+            "index": rel_idx,
+            "direction": Relationship.Direction.right,
+            "first_node_id": src_idx,
+            "second_node_id": dst_idx,
+            "rel_type": rel_type.index,
+            "prop_id": first_prop_idx
+        }
+
+        # Insert into source/destination nodes' relation linked lists
+        if src_node.relId > 0:
+            # If source node already has a relation ID, we have to properly
+            # shift them. That means we update the original first relationship
+            # to say that this new one is the previous one for this given node,
+            # and add a next ID to this one of the original relationship.
+            orig_rel = self.relationship_manager.get_item_at_index(src_node.relId)
+            if src_idx == orig_rel.firstNodeId:
+                # THIS relationship's source is THE ORIGINAL'S source
+                orig_rel.firstPrevRelId = rel_idx
+                rel_kwargs["first_next_rel_id"] = orig_rel.index
+            elif src_idx == orig_rel.secondNodeId:
+                # THIS relationship's source is THE ORIGINAL'S destination
+                orig_rel.secondPrevRelId = rel_idx
+                rel_kwargs["first_next_rel_id"] = orig_rel.index
+
+            # Note that we have to pull the properties out... this is so we
+            # don't mess up the cache values
+            self.relprop[src_node.relId] = (orig_rel, self.relprop[src_node.relId][1])
+        if dst_node.relId > 0:
+            # See above. Same deal with destinations
+            orig_rel = self.relationship_manager.get_item_at_index(dst_node.relId)
+            if dst_idx == orig_rel.firstNodeId:
+                # THIS relationship's destination is THE ORIGINAL'S source
+                orig_rel.firstPrevRelId = rel_idx
+                rel_kwargs["second_next_rel_id"] = orig_rel.index
+            elif dst_idx == orig_rel.secondNodeId:
+                # THIS relationship's destination is THE ORIGINAL'S destination
+                orig_rel.secondPrevRelId = rel_idx
+                rel_kwargs["second_next_rel_id"] = orig_rel.index
+
+            self.relprop[dst_node.relId] = (orig_rel, self.relprop[dst_node.relId][1])
+        # Set src_node first relation ID to this
+        # Note that we have to pull the properties out... this is so we don't
+        # mess up the cache values
+        src_node.relId = rel_idx
+        self.nodeprop[src_idx] = (src_node, self.nodeprop[src_idx][1])
+        # Set dst_node first relation ID to this
+        dst_node.relId = rel_idx
+        self.nodeprop[dst_idx] = (dst_node, self.nodeprop[dst_idx][1])
+
+        self.nodeprop.sync()
+
+        new_rel = self.relationship_manager.create_item(**rel_kwargs)
+
+        self.relprop[new_rel.index] = (new_rel, properties)
+        self.relprop.sync()
+
+        print("new rel: %s" % new_rel)
+        return new_rel
 
     @staticmethod
     def convert_to_value(s, given_type):

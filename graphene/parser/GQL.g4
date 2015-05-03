@@ -127,22 +127,28 @@ type_decl
 create_relation
   : K_RELATION
     (r=(I_RELATION|I_TYPE) {$r.text.isupper()}? {$r=$r.text})
-    ('(' (tl=type_list) ')')?;
+    ('(' (tl=type_list)? ')')?;
 
 // DELETE command
 delete_stmt returns [cmd]
   @init {$cmd = None}
   : K_DELETE ( dt=delete_type
-             //| dr=delete_relation
+             | dr=delete_relation
              )
 {
 if $dt.ctx is not None:
     $cmd = DeleteTypeCommand($dt.ctx)
+if $dr.ctx is not None:
+    $cmd = DeleteRelationCommand($dr.ctx)
 }
   ;
 
 delete_type
   : K_TYPE (t=I_TYPE {$t=$t.text})
+  ;
+
+delete_relation
+  : K_RELATION (t=(I_RELATION|I_TYPE) {$t.text.isupper()}? {$t=$t.text})
   ;
 
 // SHOW command
