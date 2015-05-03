@@ -31,14 +31,14 @@ class TestGeneralTypeTypeMethods(unittest.TestCase):
     def test_eq(self):
         """
         Tests that == operator returns True when two types are equal
-        and False when they are not
+        and False when they are not. Tests != when checking not equals.
         """
         type_t1 = GeneralTypeType(32, False, 42, 21, 30)
         type_t2 = GeneralTypeType(32, False, 42, 21, 30)
         type_t3 = GeneralTypeType(12, True, 24, 36, 48)
 
-        self.assertTrue(type_t1 == type_t2)
-        self.assertFalse(type_t1 == type_t3)
-        self.assertFalse(type_t2 == type_t3)
-        self.assertFalse(type_t1 == 1)
+        self.assertEqual(type_t1, type_t2)
+        self.assertNotEqual(type_t1, type_t3)
+        self.assertNotEqual(type_t2, type_t3)
+        self.assertNotEqual(type_t1, 1)
 

@@ -31,13 +31,13 @@ class TestNodeMethods(unittest.TestCase):
     def test_eq(self):
         """
         Tests that == operator returns True when two nodes are equal
-        and False when they are not
+        and False when they are not. Tests != when checking not equals.
         """
         node1 = Node(24, True, 31, 21, 20)
         node2 = Node(24, True, 31, 21, 20)
         node3 = Node(24, False, 31, 21, 21)
 
-        self.assertTrue(node1 == node2)
-        self.assertFalse(node1 == node3)
-        self.assertFalse(node2 == node3)
-        self.assertFalse(node1 == 1)
+        self.assertEqual(node1, node2)
+        self.assertNotEqual(node1, node3)
+        self.assertNotEqual(node2, node3)
+        self.assertNotEqual(node1, 1)

@@ -52,6 +52,9 @@ class InsertRelationCommand(Command):
 
         inserted_relations = []
 
+        # Iterate over a product of the left node-set and right node-set. For
+        # each, we will create a relation. We don't care if a node appears on
+        # both sides; that's fine.
         for np1, np2 in itertools.product(iter1, iter2):
             if np1 == np2:
                 continue

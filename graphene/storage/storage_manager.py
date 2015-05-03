@@ -4,7 +4,7 @@ from graphene.errors.storage_manager_errors import *
 from graphene.storage.intermediate import *
 from pylru import WriteBackCacheManager
 
-from pdb import set_trace
+import logging
 
 class StorageManager:
     # Maximum size of the cache (in items)
@@ -47,6 +47,8 @@ class StorageManager:
         :return: StoreManager instance to handle general storage manipulations
         :rtype: StorageManager
         """
+        self.logger = logging.getLogger(self.__class__.__name__)
+
         # Create object managers
         self.node_manager = GeneralStoreManager(NodeStore())
         self.property_manager = GeneralStoreManager(PropertyStore())
@@ -200,8 +202,12 @@ class StorageManager:
 
         if type_name_manager.find_name(type_name) is not None:
             # The type name already exists!
-            raise TypeAlreadyExistsException(
-                "Type %s already exists!" % type_name)
+            if node_flag:
+                raise TypeAlreadyExistsException(
+                    "Type %s already exists!" % type_name)
+            else:
+                raise TypeAlreadyExistsException(
+                    "Relation %s already exists!" % type_name)
         name_index = type_name_manager.write_name(type_name)
         if len(schema) > 0:
             ids = type_type_manager.get_indexes(len(schema))
@@ -223,7 +229,7 @@ class StorageManager:
         else:
             new_type = type_manager.create_item(name_id=name_index)
         type_manager.write_item(new_type)
-        print("type manager wrote new type: %s" % new_type)
+        self.logger.debug("TypeManager wrote new type: %s" % new_type)
         return new_type
 
     def delete_type_type(self, type_type, node_flag):
@@ -342,7 +348,7 @@ class StorageManager:
         properties = []
         if len(node_properties) > 0:
             prop_ids = self.property_manager.get_indexes(len(node_properties))
-            print("Node properties: %s" % (node_properties,))
+            self.logger.debug("Node properties: %s" % (node_properties,))
             for i, idx in enumerate(prop_ids):
                 prop_type, prop_val = node_properties[i]
                 kwargs = {
@@ -361,7 +367,7 @@ class StorageManager:
                     kwargs["prop_block_id"] = prop_val
                 stored_prop = self.property_manager.create_item(**kwargs)
                 properties.append(stored_prop)
-            print("Final properties: %s" % (node_properties,))
+            self.logger.debug("Final properties: %s" % (node_properties,))
             new_node = self.node_manager.create_item(prop_id=prop_ids[0],
                                                      node_type=node_type.index)
         else:

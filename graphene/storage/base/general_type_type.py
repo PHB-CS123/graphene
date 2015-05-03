@@ -41,6 +41,17 @@ class GeneralTypeType:
         else:
             return False
 
+    def __ne__(self, other):
+        """
+        Overload the != operator
+
+        :param other: Other general type type
+        :type other: GeneralTypeType
+        :return: True if not equivalent, false otherwise
+        :rtype: bool
+        """
+        return not (self == other)
+
     def __repr__(self):
         data = ["TypeType", "index = %d" % self.index]
         if self.inUse:

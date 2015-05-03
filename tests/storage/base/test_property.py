@@ -49,13 +49,13 @@ class TestPropertyMethods(unittest.TestCase):
     def test_eq(self):
         """
         Tests that the == operator returns True when two properties are equal
-        and False when they are not
+        and False when they are not. Tests != when checking not equals.
         """
         property1 = Property(1, True, Property.PropertyType.int, 2, 3, 4, 5)
         property2 = Property(1, True, Property.PropertyType.int, 2, 3, 4, 5)
         property3 = Property(9, False, Property.PropertyType.long, 8, 7, 6, 5)
 
-        self.assertTrue(property1 == property2)
-        self.assertFalse(property1 == property3)
-        self.assertFalse(property2 == property3)
-        self.assertFalse(property1 == 1)
+        self.assertEqual(property1, property2)
+        self.assertNotEqual(property1, property3)
+        self.assertNotEqual(property2, property3)
+        self.assertNotEqual(property1, 1)
