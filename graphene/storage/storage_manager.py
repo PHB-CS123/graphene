@@ -436,10 +436,6 @@ class StorageManager:
                 stored_prop = self.property_manager.create_item(**prop_kwargs)
                 properties.append(stored_prop)
             print("Final properties: %s" % (rel_properties,))
-            # new_rel = self.relationship_manager.create_item(
-            #     prop_id=prop_ids[0], rel_type=rel_type.index)
-        # else:
-        #     new_rel = self.relationship_manager.create_item(rel_type=rel_type.index)
 
 
         # TODO: Relationship's first prop_id is 0 if it has no properties?
@@ -448,22 +444,69 @@ class StorageManager:
         # Just get one index for this relationship
         rel_idx = self.relationship_manager.get_indexes(1)[0]
 
-        # TODO: Handle setting previous rel IDs and propID
+        src_idx, dst_idx = src_node.index, dst_node.index
+
         rel_kwargs = {
             "index": rel_idx,
             "direction": Relationship.Direction.right,
-            "first_node_id": src_node.node.index,
-            "second_node_id": dst_node.node.index,
+            "first_node_id": src_idx,
+            "second_node_id": dst_idx,
             "rel_type": rel_type.index,
             "prop_id": first_prop_idx
         }
+
+        # Insert into source/destination nodes' relation linked lists
+        if src_node.relId > 0:
+            # If source node already has a relation ID, we have to properly
+            # shift them. That means we update the original first relationship
+            # to say that this new one is the previous one for this given node,
+            # and add a next ID to this one of the original relationship.
+            orig_rel = self.relationship_manager.get_item_at_index(src_node.relId)
+            print src_node.relId
+            if src_idx == orig_rel.firstNodeId:
+                # THIS relationship's source is THE ORIGINAL'S source
+                orig_rel.firstPrevRelId = rel_idx
+                rel_kwargs["first_next_rel_id"] = orig_rel.index
+            elif src_idx == orig_rel.secondNodeId:
+                # THIS relationship's source is THE ORIGINAL'S destination
+                orig_rel.secondPrevRelId = rel_idx
+                rel_kwargs["first_next_rel_id"] = orig_rel.index
+            else:
+                raise Exception("Node %d does not match nodes of its \
+                relationship, %d and %d" % (src_idx, orig_rel.firstNodeId,
+                orig_rel.secondNodeId))
+            # Note that we have to pull the properties out... this is so we
+            # don't mess up the cache values
+            self.relprop[src_node.relId] = (orig_rel, self.relprop[src_node.relId][1])
+        if dst_node.relId > 0:
+            # See above. Same deal with destinations
+            orig_rel = self.relationship_manager.get_item_at_index(dst_node.relId)
+            if dst_idx == orig_rel.firstNodeId:
+                # THIS relationship's destination is THE ORIGINAL'S source
+                orig_rel.firstPrevRelId = rel_idx
+                rel_kwargs["second_next_rel_id"] = orig_rel.index
+            elif dst_idx == orig_rel.secondNodeId:
+                # THIS relationship's destination is THE ORIGINAL'S destination
+                orig_rel.secondPrevRelId = rel_idx
+                rel_kwargs["second_next_rel_id"] = orig_rel.index
+            else:
+                raise Exception("Node %d does not match nodes of its \
+                relationship, %d and %d" % (dst_idx, orig_rel.firstNodeId,
+                orig_rel.secondNodeId))
+            self.relprop[src_node.relId] = (orig_rel, self.relprop[dst_node.relId][1])
+        # Set src_node first relation ID to this
+        # Note that we have to pull the properties out... this is so we don't
+        # mess up the cache values
+        src_node.relId = rel_idx
+        self.nodeprop[src_idx] = (src_node, self.nodeprop[src_idx][1])
+        # Set dst_node first relation ID to this
+        dst_node.relId = rel_idx
+        self.nodeprop[dst_idx] = (dst_node, self.nodeprop[dst_idx][1])
+
         new_rel = self.relationship_manager.create_item(**rel_kwargs)
 
         self.relprop[new_rel.index] = (new_rel, properties)
         self.relprop.sync()
-        # Only do this if it's their first relation
-        # src_node.node.relId = new_rel.index
-        # dst_node.node.relId
 
         print("new rel: %s" % new_rel)
         return

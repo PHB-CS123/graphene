@@ -127,7 +127,7 @@ type_decl
 create_relation
   : K_RELATION
     (r=(I_RELATION|I_TYPE) {$r.text.isupper()}? {$r=$r.text})
-    ('(' (tl=type_list) ')')?;
+    ('(' (tl=type_list)? ')')?;
 
 // DELETE command
 delete_stmt returns [cmd]

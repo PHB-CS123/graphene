@@ -27,5 +27,4 @@ class InsertNodeCommand(Command):
             final_types.append(node_type)
             final_props.append(properties)
         for node_type, properties in zip(final_types, final_props):
-            print("Node type names:", dir(node_type), "properties:", properties)
             storage_manager.insert_node(node_type, properties)

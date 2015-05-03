@@ -1,4 +1,4 @@
-from graphene.storage import GeneralStore
+from graphene.storage import GeneralStore, Relationship, Property
 from graphene.storage.intermediate import GeneralStoreManager
 
 class RelationshipPropertyStore:
@@ -28,10 +28,15 @@ class RelationshipPropertyStore:
         return (cur_relationship, properties)
 
     def __setitem__(self, key, value):
-        rel, properties = value
-        self.relationship_manager.write_item(rel)
-        for prop in properties:
-            self.prop_manager.write_item(prop)
+        if isinstance(value[0], Relationship) and \
+           all(isinstance(p, Property) for p in value[1]):
+            rel, properties = value
+            self.relationship_manager.write_item(rel)
+            for prop in properties:
+                self.prop_manager.write_item(prop)
+        else:
+            # TODO: Throw an error here
+            pass
 
     def __delitem__(self, key):
         rel = self.relationship_manager.get_item_at_index(key)

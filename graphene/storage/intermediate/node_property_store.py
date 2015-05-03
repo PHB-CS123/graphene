@@ -1,9 +1,18 @@
-from graphene.storage import GeneralStore
+from graphene.storage import GeneralStore, Node, Property
 from graphene.storage.intermediate.node_property import NodeProperty
-
 
 class NodePropertyStore:
     def __init__(self, node_manager, prop_manager):
+        """
+        Set up the node-property store, which associates
+        nodes with their properties.
+
+        :type prop_manager: GeneralStoreManager
+        :type node_manager: GeneralStoreManager
+        :param node_manager: store manager for nodes
+        :param prop_manager: store manager for properties
+        :return:
+        """
         self.node_manager = node_manager
         self.prop_manager = prop_manager
 
@@ -20,11 +29,15 @@ class NodePropertyStore:
         return cur_node, properties
 
     def __setitem__(self, key, value):
-
-        node, properties = value
-        self.node_manager.write_item(node)
-        for prop in properties:
-            self.prop_manager.write_item(prop)
+        if isinstance(value[0], Node) and \
+           all(isinstance(p, Property) for p in value[1]):
+            node, properties = value
+            self.node_manager.write_item(node)
+            for prop in properties:
+                self.prop_manager.write_item(prop)
+        else:
+            # TODO: Throw an error here
+            pass
 
     def __delitem__(self, key):
         node = self.node_manager.get_item_at_index(key)
