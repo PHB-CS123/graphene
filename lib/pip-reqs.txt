@@ -5,3 +5,4 @@ Sphinx
 enum34
 pylru
 python-coveralls
+names
