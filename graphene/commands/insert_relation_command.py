@@ -4,6 +4,8 @@ from graphene.commands.command import Command
 from graphene.storage import StorageManager
 from graphene.traversal import *
 from graphene.utils.conversion import TypeConversion
+from graphene.errors import TypeMismatchException
+
 import itertools
 
 class InsertRelationCommand(Command):
@@ -18,9 +20,9 @@ class InsertRelationCommand(Command):
             given_type = TypeConversion.get_type_type_of_string(prop)
             expected_type = exp_tt
             if given_type != expected_type:
-                raise Exception("Got value of type %s, but expected value "
-                                "of type %s for property '%s'." %
-                                (given_type, expected_type, prop_name))
+                raise TypeMismatchException("Got value of type %s, but"
+                            " expected value of type %s for property '%s'." %
+                            (given_type, expected_type, prop_name))
             conv_value = storage_manager.convert_to_value(prop, given_type)
             properties.append((given_type, conv_value))
         return properties
@@ -48,10 +50,15 @@ class InsertRelationCommand(Command):
         iter1 = NodeIterator(storage_manager, type_data1, type_schema1, queries=qc1)
         iter2 = NodeIterator(storage_manager, type_data2, type_schema2, queries=qc2)
 
+        inserted_relations = []
+
         for np1, np2 in itertools.product(iter1, iter2):
             if np1 == np2:
                 continue
 
             print("Inserting relation %s between %s and %s" %
                 (rel_name, np1.node, np2.node))
-            storage_manager.insert_relation(rel_type, rel_props, np1.node, np2.node)
+            rel = storage_manager.insert_relation(rel_type, rel_props, np1.node, np2.node)
+            inserted_relations.append(rel)
+
+        return inserted_relations

@@ -1,7 +1,7 @@
 import unittest
 
 from graphene.errors.storage_manager_errors import *
-from graphene.storage import (StorageManager, GrapheneStore, Property)
+from graphene.storage import (StorageManager, GrapheneStore, Property, Relationship, Node)
 
 
 class TestStorageManagerMethods(unittest.TestCase):
@@ -135,6 +135,119 @@ class TestStorageManagerMethods(unittest.TestCase):
         self.assertEquals(self.sm.nodeTypeManager.get_item_at_index(idx), None)
         with self.assertRaises(TypeDoesNotExistException):
             self.sm.get_node_data("Person")
+
+    def test_insert_relation(self):
+        t = self.sm.create_node_type("T", (("a", "int"),))
+        r = self.sm.create_relationship_type("R",
+            (("a", "int"), ("b", "int"), ("c", "string")))
+        n1, p1 = self.sm.insert_node(t, ((Property.PropertyType.int, 3),))
+        n2, p2 = self.sm.insert_node(t, ((Property.PropertyType.int, 4),))
+
+        inserted_rel = self.sm.insert_relation(r,
+            ((Property.PropertyType.int, 1),) * 2 + \
+            ((Property.PropertyType.string, "a"),), n1, n2)
+        rel_idx = inserted_rel.index
+        rel, props = self.sm.relprop[rel_idx]
+
+        self.assertEquals(rel.relType, r.index)
+        self.assertEquals(rel.direction, Relationship.Direction.right)
+        self.assertEquals(rel.firstNodeId, n1.index)
+        self.assertEquals(rel.secondNodeId, n2.index)
+        self.assertEquals(rel.firstPrevRelId, 0)
+        self.assertEquals(rel.firstNextRelId, 0)
+        self.assertEquals(rel.propId, props[0].index)
+
+        # Check that nodes were updated
+        self.assertEquals(n1.relId, rel_idx)
+        self.assertEquals(n2.relId, rel_idx)
+
+    def test_multiple_relations(self):
+        t = self.sm.create_node_type("T", (("a", "int"),))
+        r = self.sm.create_relationship_type("R", ())
+        n1, p1 = self.sm.insert_node(t, ((Property.PropertyType.int, 3),))
+        n2, p2 = self.sm.insert_node(t, ((Property.PropertyType.int, 4),))
+        n3, p3 = self.sm.insert_node(t, ((Property.PropertyType.int, 5),))
+        n4, p4 = self.sm.insert_node(t, ((Property.PropertyType.int, 6),))
+
+        ## Initial Relation
+        inserted_rel1 = self.sm.insert_relation(r, (), n1, n2)
+        rel1_idx = inserted_rel1.index
+        rel1, props1 = self.sm.relprop[rel1_idx]
+
+        self.assertEquals(rel1.firstPrevRelId, 0)
+        self.assertEquals(rel1.firstNextRelId, 0)
+
+        # Check that nodes were updated
+        self.assertEquals(n1.relId, rel1_idx)
+        self.assertEquals(n2.relId, rel1_idx)
+
+        ## Relation where source is source of previous relation
+        inserted_rel2 = self.sm.insert_relation(r, (), n1, n3)
+        rel2_idx = inserted_rel2.index
+        rel2, props2 = self.sm.relprop[rel2_idx]
+
+        # Update this since it was changed in the cache
+        rel1, props1 = self.sm.relprop[rel1_idx]
+
+        self.assertEquals(rel2.firstNextRelId, rel1_idx)
+        self.assertEquals(rel1.firstPrevRelId, rel2_idx)
+
+        # Check that nodes were updated
+        self.assertEquals(n1.relId, rel2_idx)
+        self.assertEquals(n3.relId, rel2_idx)
+
+        ## Relation where destination is source of previous relation
+        inserted_rel3 = self.sm.insert_relation(r, (), n4, n1)
+        rel3_idx = inserted_rel3.index
+        rel3, props3 = self.sm.relprop[rel3_idx]
+
+        # Update these since they were changed in the cache
+        rel2, props2 = self.sm.relprop[rel2_idx]
+        rel1, props1 = self.sm.relprop[rel1_idx]
+
+        self.assertEquals(rel3.secondNextRelId, rel2_idx)
+        self.assertEquals(rel2.firstNextRelId, rel1_idx)
+        self.assertEquals(rel2.firstPrevRelId, rel3_idx)
+
+        # Check that nodes were updated
+        self.assertEquals(n1.relId, rel3_idx)
+        self.assertEquals(n4.relId, rel3_idx)
+
+        ## Relation where source is destination of previous relation
+        inserted_rel4 = self.sm.insert_relation(r, (), n2, n3)
+        rel4_idx = inserted_rel4.index
+        rel4, props4 = self.sm.relprop[rel4_idx]
+
+        # Update these since they were changed in the cache
+        rel3, props3 = self.sm.relprop[rel3_idx]
+        rel2, props2 = self.sm.relprop[rel2_idx]
+        rel1, props1 = self.sm.relprop[rel1_idx]
+
+        self.assertEquals(rel4.firstNextRelId, rel1_idx)
+        self.assertEquals(rel1.secondPrevRelId, rel4_idx)
+
+        # Check that nodes were updated
+        self.assertEquals(n2.relId, rel4_idx)
+        self.assertEquals(n3.relId, rel4_idx)
+
+        ## Relation where destination is destination of previous relation
+        inserted_rel5 = self.sm.insert_relation(r, (), n4, n3)
+        rel5_idx = inserted_rel5.index
+        rel5, props5 = self.sm.relprop[rel5_idx]
+
+        # Update these since they were changed in the cache
+        rel4, props4 = self.sm.relprop[rel4_idx]
+        rel3, props3 = self.sm.relprop[rel3_idx]
+        rel2, props2 = self.sm.relprop[rel2_idx]
+        rel1, props1 = self.sm.relprop[rel1_idx]
+
+        self.assertEquals(rel5.secondNextRelId, rel4_idx)
+        self.assertEquals(rel4.secondNextRelId, rel2_idx)
+        self.assertEquals(rel4.secondPrevRelId, rel5_idx)
+
+        # Check that nodes were updated
+        self.assertEquals(n4.relId, rel5_idx)
+        self.assertEquals(n3.relId, rel5_idx)
 
     def test_convert_to_value(self):
         self.assertEquals(self.sm.convert_to_value('"a"', Property.PropertyType.string), "a")

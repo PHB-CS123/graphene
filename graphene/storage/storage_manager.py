@@ -462,7 +462,6 @@ class StorageManager:
             # to say that this new one is the previous one for this given node,
             # and add a next ID to this one of the original relationship.
             orig_rel = self.relationship_manager.get_item_at_index(src_node.relId)
-            print src_node.relId
             if src_idx == orig_rel.firstNodeId:
                 # THIS relationship's source is THE ORIGINAL'S source
                 orig_rel.firstPrevRelId = rel_idx
@@ -471,10 +470,7 @@ class StorageManager:
                 # THIS relationship's source is THE ORIGINAL'S destination
                 orig_rel.secondPrevRelId = rel_idx
                 rel_kwargs["first_next_rel_id"] = orig_rel.index
-            else:
-                raise Exception("Node %d does not match nodes of its \
-                relationship, %d and %d" % (src_idx, orig_rel.firstNodeId,
-                orig_rel.secondNodeId))
+
             # Note that we have to pull the properties out... this is so we
             # don't mess up the cache values
             self.relprop[src_node.relId] = (orig_rel, self.relprop[src_node.relId][1])
@@ -489,11 +485,8 @@ class StorageManager:
                 # THIS relationship's destination is THE ORIGINAL'S destination
                 orig_rel.secondPrevRelId = rel_idx
                 rel_kwargs["second_next_rel_id"] = orig_rel.index
-            else:
-                raise Exception("Node %d does not match nodes of its \
-                relationship, %d and %d" % (dst_idx, orig_rel.firstNodeId,
-                orig_rel.secondNodeId))
-            self.relprop[src_node.relId] = (orig_rel, self.relprop[dst_node.relId][1])
+
+            self.relprop[dst_node.relId] = (orig_rel, self.relprop[dst_node.relId][1])
         # Set src_node first relation ID to this
         # Note that we have to pull the properties out... this is so we don't
         # mess up the cache values
@@ -503,13 +496,15 @@ class StorageManager:
         dst_node.relId = rel_idx
         self.nodeprop[dst_idx] = (dst_node, self.nodeprop[dst_idx][1])
 
+        self.nodeprop.sync()
+
         new_rel = self.relationship_manager.create_item(**rel_kwargs)
 
         self.relprop[new_rel.index] = (new_rel, properties)
         self.relprop.sync()
 
         print("new rel: %s" % new_rel)
-        return
+        return new_rel
 
     @staticmethod
     def convert_to_value(s, given_type):
