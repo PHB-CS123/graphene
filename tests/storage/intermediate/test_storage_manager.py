@@ -127,6 +127,11 @@ class TestStorageManagerMethods(unittest.TestCase):
         with self.assertRaises(TypeAlreadyExistsException):
             self.sm.create_node_type("T", (("a", "int"),))
 
+    def test_create_rel_type_exists(self):
+        self.sm.create_relationship_type("R", (("a", "int"),))
+        with self.assertRaises(TypeAlreadyExistsException):
+            self.sm.create_relationship_type("R", (("a", "int"),))
+
     def test_delete_node_type(self):
         schema = ( ("name", "string"), ("age", "int"), ("address", "string") )
         t = self.sm.create_node_type("Person", schema)

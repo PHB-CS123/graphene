@@ -21,10 +21,11 @@ class RelationshipPropertyStore:
         if cur_relationship is None:
             return None
         properties = []
-        cur_prop = self.prop_manager.get_item_at_index(cur_relationship.propId)
-        while cur_prop is not None:
+        cur_prop_id = cur_relationship.propId
+        while cur_prop_id != 0:
+            cur_prop = self.prop_manager.get_item_at_index(cur_prop_id)
             properties.append(cur_prop)
-            cur_prop = self.prop_manager.get_item_at_index(cur_prop.nextPropId)
+            cur_prop_id = cur_prop.nextPropId
         return (cur_relationship, properties)
 
     def __setitem__(self, key, value):
