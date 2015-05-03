@@ -136,6 +136,15 @@ class TestStorageManagerMethods(unittest.TestCase):
         with self.assertRaises(TypeDoesNotExistException):
             self.sm.get_node_data("Person")
 
+    def test_delete_relationship_type(self):
+        schema = ( ("a", "string"), ("b", "int"), ("c", "string") )
+        t = self.sm.create_relationship_type("R", schema)
+        idx = t.index
+        self.sm.delete_relationship_type("R")
+        self.assertEquals(self.sm.relTypeManager.get_item_at_index(idx), None)
+        with self.assertRaises(TypeDoesNotExistException):
+            self.sm.get_relationship_data("R")
+
     def test_insert_relation(self):
         t = self.sm.create_node_type("T", (("a", "int"),))
         r = self.sm.create_relationship_type("R",
