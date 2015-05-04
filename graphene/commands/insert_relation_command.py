@@ -2,6 +2,7 @@ from __future__ import print_function
 
 from graphene.commands.command import Command
 from graphene.storage import StorageManager
+from graphene.expressions import *
 from graphene.traversal import *
 from graphene.utils.conversion import TypeConversion
 from graphene.errors import TypeMismatchException
@@ -41,14 +42,16 @@ class InsertRelationCommand(Command):
         rel_type, rel_schema = storage_manager.get_relationship_data(rel_name)
         rel_props = self.parse_properties(rel_props, rel_schema, storage_manager)
 
-        type_data1, type_schema1 = storage_manager.get_node_data(type1)
-        type_data2, type_schema2 = storage_manager.get_node_data(type2)
+        type_data1, type_schema_data1 = storage_manager.get_node_data(type1)
+        type_data2, type_schema_data2 = storage_manager.get_node_data(type2)
 
+        type_schema1 = [(tt_name, tt_type) for _, tt_name, tt_type in type_schema_data1]
+        type_schema2 = [(tt_name, tt_type) for _, tt_name, tt_type in type_schema_data2]
         qc1 = Query.parse_chain(storage_manager, queries1, type_schema1)
         qc2 = Query.parse_chain(storage_manager, queries2, type_schema2)
 
-        iter1 = NodeIterator(storage_manager, type_data1, type_schema1, queries=qc1)
-        iter2 = NodeIterator(storage_manager, type_data2, type_schema2, queries=qc2)
+        iter1 = NodeIterator(storage_manager, MatchNode(None, type1), type_schema1, queries=qc1)
+        iter2 = NodeIterator(storage_manager, MatchNode(None, type2), type_schema2, queries=qc2)
 
         inserted_relations = []
 

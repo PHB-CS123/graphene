@@ -106,6 +106,15 @@ class TestMatchCommand(unittest.TestCase):
         self.assertTrue(self.lists_equal_unordered(ret_vals, exp_vals))
 
     def test_match_where_badname(self):
+        # No identifier, property name doesn't exist
         cmd = self.server.parseString("MATCH (t:T) WHERE b = 1;")[0]
+        with self.assertRaises(Exception):
+            cmd.execute(self.sm, self.devnull)
+        # Correct identifier, property name still doesn't exist
+        cmd = self.server.parseString("MATCH (t:T) WHERE t.b = 1;")[0]
+        with self.assertRaises(Exception):
+            cmd.execute(self.sm, self.devnull)
+        # Incorrect identifier despite correct property name
+        cmd = self.server.parseString("MATCH (t:T) WHERE t2.a = 1;")[0]
         with self.assertRaises(Exception):
             cmd.execute(self.sm, self.devnull)

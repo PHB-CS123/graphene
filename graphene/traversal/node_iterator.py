@@ -2,11 +2,11 @@ from graphene.traversal.query import Query
 from graphene.storage import *
 
 class NodeIterator:
-    def __init__(self, storage_manager, node_type, type_schema, alias=None, queries=None):
+    def __init__(self, storage_manager, match_node, schema, queries=None):
         self.sm = storage_manager
-        self.node_type = node_type
-        self.schema = type_schema
-        self.alias = alias
+        self.alias = match_node.name
+        self.node_type, self.schema = storage_manager.get_node_data(match_node.type)
+        #self.schema = schema
         if queries is not None:
             self.queries = queries
         else:
@@ -23,9 +23,8 @@ class NodeIterator:
             # duplicates
             if self.alias is not None:
                 key = "%s.%s" % (self.alias, name)
-            else:
-                key = name
-            result[key] = (props[i], tt_type)
+                result[key] = (props[i], tt_type)
+            result[name] = (props[i], tt_type)
         return result
 
     def __iter__(self):

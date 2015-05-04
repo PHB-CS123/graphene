@@ -512,6 +512,27 @@ class StorageManager:
         print("new rel: %s" % new_rel)
         return new_rel
 
+    def get_relation(self, index):
+        relprop = self.relprop[index]
+        if relprop is None or relprop == GeneralStore.EOF:
+            return relprop
+        rel, properties = relprop
+        rel_type = self.relTypeManager.get_item_at_index(rel.relType)
+        type_name = self.relTypeNameManager.\
+            read_name_at_index(rel_type.nameId)
+        properties = map(self.get_property_value, properties)
+        return RelationProperty(rel, properties, rel_type, type_name)
+
+    def get_relations_of_type(self, relation_type):
+        i = 1
+        while True:
+            relation = self.get_relation(i)
+            if relation == GeneralStore.EOF:
+                break
+            i += 1
+            if relation is not None and relation.type == relation_type:
+                yield relation
+
     @staticmethod
     def convert_to_value(s, given_type):
         if given_type == Property.PropertyType.bool:

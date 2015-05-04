@@ -29,18 +29,17 @@ class Query:
         return False
 
     @staticmethod
-    def parse_chain(storage_manager, chain, type_schema, alias=None):
+    def parse_chain(storage_manager, chain, type_schema):
         qc = []
         for q in chain:
             if type(q) == tuple:
                 # actual query
                 ident, name, oper, value = q
-                ident = ident or alias
-                tt = filter(lambda t: t[1] == name, type_schema)
+                tt = filter(lambda t: t[0] == name or t[0].split(".")[1] == name, type_schema)
                 if len(tt) == 0:
                     # no such named property
                     raise Exception("%s is not a valid property name." % name)
-                ttype = tt[0][2]
+                ttype = tt[0][1]
                 qc.append(Query(ident, name, oper, storage_manager.convert_to_value(value, ttype)))
             else:
                 qc.append(q)
