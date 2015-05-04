@@ -48,7 +48,7 @@ class RelationIterator:
             # If the right node is not of the correct type or wasn't matched by
             # the right side's iteration, then this doesn't match
             if right_node.node.nodeType != self.right.node_type.index \
-                or right_node not in self.right:
+                or not self.right.node_matches(right_node.properties):
                 continue
 
             # If the left is a NodeIterator, our original request was one degree
@@ -61,7 +61,7 @@ class RelationIterator:
                 # If it did, return properties and the right node (so that
                 # future chains can determine whether their left node
                 # corresponds to this right node)
-                if left_node in self.left:
+                if self.left.node_matches(left_node.properties):
                     yield (left_node.properties + relprop.properties + \
                             right_node.properties, right_node)
             # Otherwise, we already chained from something else, so we just

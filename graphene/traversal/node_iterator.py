@@ -27,14 +27,17 @@ class NodeIterator:
             result[name] = (props[i], tt_type)
         return result
 
+    def node_matches(self, properties):
+        # For now we assume all the queries are ANDed together.
+        # TODO: Handle actual boolean logic. Probably will involve some
+        # recursion somewhere.
+        matches = True
+        for q in self.queries:
+            if isinstance(q, Query):
+                matches = matches and q.test(self.prop_to_dict(properties))
+        return matches
+
     def __iter__(self):
-        for node in self.sm.get_nodes_of_type(self.node_type):
-            # For now we assume all the queries are ANDed together.
-            # TODO: Handle actual boolean logic. Probably will involve some
-            # recursion somewhere.
-            matches = True
-            for q in self.queries:
-                if isinstance(q, Query):
-                    matches = matches and q.test(self.prop_to_dict(node.properties))
-            if matches:
-                yield node
+        for nodeprop in self.sm.get_nodes_of_type(self.node_type):
+            if self.node_matches(nodeprop.properties):
+                yield nodeprop

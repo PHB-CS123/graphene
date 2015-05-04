@@ -28,6 +28,12 @@ class Query:
             return value < self.value
         return False
 
+    def __repr__(self):
+        if self.ident is not None:
+            return "Query[%s.%s %s %s]" % (self.ident, self.name, self.oper, self.value)
+        else:
+            return "Query[%s %s %s]" % (self.name, self.oper, self.value)
+
     @staticmethod
     def parse_chain(storage_manager, chain, type_schema):
         qc = []
