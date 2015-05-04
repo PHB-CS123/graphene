@@ -18,7 +18,7 @@ class MatchCommand(Command):
     def execute(self, storage_manager, output=sys.stdout):
         # Create a planner and execute given a node chain and query chain
         planner = QueryPlanner(storage_manager)
-        schema, results = planner.execute(self.nc, self.qc)
+        schema, results = planner.execute(self.nc, self.qc, self.rc)
         # if len(self.rc) == 0:
         #     # If there's no return statement, we do nothing to the columns
         #     return_filter = lambda x: x

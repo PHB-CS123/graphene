@@ -1,4 +1,5 @@
 from graphene.traversal import *
+from graphene.query import ProjectStream
 from graphene.expressions import MatchNode, MatchRelation
 
 class QueryPlanner:
@@ -75,7 +76,7 @@ class QueryPlanner:
                 elif num_occur == 0:
                     raise Exception("Property name `%s` does not exist." % qc[1])
 
-    def execute(self, node_chain, query_chain):
+    def execute(self, node_chain, query_chain, return_chain):
         # Gather schema information from node chain. Collects all property names
         schema = self.get_schema(node_chain)
 
@@ -96,6 +97,11 @@ class QueryPlanner:
         else:
             for props, right in self.create_relation_tree(node_chain, query_chain):
                 results.append(props)
+
+        if len(return_chain) > 0:
+            stream = ProjectStream(return_chain, schema, results)
+            schema_names = stream.schema_names
+            results = list(stream)
 
         # TODO: Strip property columns where the node/relation was not supplied
         # an alias
