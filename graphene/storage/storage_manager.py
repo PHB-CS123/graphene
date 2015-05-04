@@ -51,13 +51,19 @@ class StorageManager:
         """
         self.logger = logging.getLogger(self.__class__.__name__)
 
+        # Create a string manager for string property types
+        self.prop_string_manager = \
+            GeneralNameManager(self.PROP_STORE_STRINGS_FILENAME,
+                               self.STRING_BLOCK_SIZE)
+
         # Create object managers
         self.node_manager = GeneralStoreManager(NodeStore())
         self.property_manager = GeneralStoreManager(PropertyStore())
         self.relationship_manager = GeneralStoreManager(RelationshipStore())
 
         # Create combined object managers along with their cache handlers
-        nodeprop = NodePropertyStore(self.node_manager, self.property_manager)
+        nodeprop = NodePropertyStore(self.node_manager, self.property_manager,
+                                     self.prop_string_manager)
         relprop = RelationshipPropertyStore(self.relationship_manager,
                                             self.property_manager)
         self.nodeprop = WriteBackCacheManager(nodeprop, self.MAX_CACHE_SIZE)
@@ -96,10 +102,6 @@ class StorageManager:
             GeneralNameManager(self.RELATIONSHIP_TYPE_TYPE_STORE_NAMES_FILENAME,
                                self.NAME_BLOCK_SIZE)
 
-        # Create a string manager for string property types
-        self.prop_string_manager = \
-            GeneralNameManager(self.PROP_STORE_STRINGS_FILENAME,
-                               self.STRING_BLOCK_SIZE)
 
     # --- Node Storage Methods --- #
 
