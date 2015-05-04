@@ -1,6 +1,8 @@
 from graphene.storage import *
 from graphene.errors.storage_manager_errors import *
 
+from graphene.storage.base.property import Property
+
 from graphene.storage.intermediate import *
 from pylru import WriteBackCacheManager
 
@@ -253,6 +255,15 @@ class StorageManager:
         else:
             type_type_manager = self.relTypeTypeManager
             type_type_name_manager = self.relTypeTypeNameManager
+
+        if type_type.propertyType == Property.PropertyType.string:
+            # TODO: Need to delete all strings of this type_type in the
+            # prop_string_manager.
+
+            # Note: type_type.typeName is the index of the type name in node type
+            # type name manager, so the following does not suffice.
+            # self.prop_string_manager.delete_name_at_index(type_type.typeName)
+            pass
 
         type_type_name_manager.delete_name_at_index(type_type.typeName)
         type_type_manager.delete_item(type_type)
