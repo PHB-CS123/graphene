@@ -3,7 +3,7 @@ from graphene.storage.intermediate import GeneralNameManager
 from graphene.storage.intermediate.node_property import NodeProperty
 
 class NodePropertyStore:
-    def __init__(self, node_manager, prop_manager, prop_string_manager):
+    def __init__(self, node_manager, prop_manager, prop_string_manager=None):
         """
         Set up the node-property store, which associates
         nodes with their properties.

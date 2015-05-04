@@ -48,6 +48,6 @@ class ShowCommand(Command):
 
         # Print the resulting name list.
         if not name_list:
-            output.write("No %s found.\n" % self.show_type.name)
+            output.write("No %s found." % self.show_type.name)
             return
         PrettyPrinter.print_list(name_list, self.show_type.name, output=output)
