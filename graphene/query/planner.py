@@ -37,24 +37,42 @@ class QueryPlanner:
             return RelationIterator(self.sm, rel,
                 self.create_relation_tree(left, query_chain), right, rel_schema, rel_qc)
 
-    def get_schema(self, node_chain):
+    def get_schema(self, node_chain, fullset=False):
         schema = []
+        sub_schemas = []
         schema_keys = []
+
+        # Pull some info out of the node chain, since we only care about the
+        # schemas
         for nc in node_chain:
             if isinstance(nc, MatchNode):
                 schema_data = self.sm.get_node_data(nc.type)[1]
             else:
                 schema_data = self.sm.get_relationship_data(nc.type)[1]
+            sub_schemas.append((schema_data, nc.name is not None, nc.name))
+
+        # Check whether everything in our query is unidentified (so we actually
+        # care about duplicates)
+        all_unidentified = not any(identified for _, identified, __ in sub_schemas)
+        for schema_data, identified, ident in sub_schemas:
             for tt, tt_name, tt_type in schema_data:
-                if nc.name is None:
+                # If the key is identified, we prefix it with the identifier
+                if not identified:
                     key = tt_name
+                    # If all nodes/relations are unidentified and there's a duplicate,
+                    # throw an error. Otherwise this is ok.
+                    if all_unidentified and key in schema_keys and fullset:
+                        raise Exception("Duplicate property name `%s` in query. " \
+                            "Try adding an identifier." % key)
                 else:
-                    key = "%s.%s" % (nc.name, tt_name)
-                if key in schema_keys:
-                    raise Exception("Duplicate property name `%s` in query. " \
-                        "Try adding an identifier." % key)
+                    key = "%s.%s" % (ident, tt_name)
+                    if key in schema_keys:
+                        raise Exception("Duplicate property name `%s` in query. " \
+                            "Try adding an identifier." % key)
+
                 schema_keys.append(key)
                 schema.append((key, tt_type))
+
         return schema
 
     def check_query(self, schema, node_chain, query_chain):
@@ -78,7 +96,7 @@ class QueryPlanner:
 
     def execute(self, node_chain, query_chain, return_chain):
         # Gather schema information from node chain. Collects all property names
-        schema = self.get_schema(node_chain)
+        schema = self.get_schema(node_chain, fullset=True)
 
         # Check query against schema to ensure no ambiguous or nonexistent properties are being queried
         schema_names = [n for n, tt in schema]
@@ -98,7 +116,12 @@ class QueryPlanner:
             for props, right in self.create_relation_tree(node_chain, query_chain):
                 results.append(props)
 
-        if len(return_chain) > 0:
+        num_unidentified = [nc.name for nc in node_chain].count(None)
+
+        # If we have explicit projects, or unidentified nodes/relations, then we
+        # will do a project. If everything is unidentified, then we just show
+        # all the base names (i.e. without identifiers)
+        if len(return_chain) > 0 or len(node_chain) > num_unidentified > 0:
             stream = ProjectStream(return_chain, schema, results)
             schema_names = stream.schema_names
             results = list(stream)
