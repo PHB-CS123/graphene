@@ -34,6 +34,18 @@ class Query:
         else:
             return "Query[%s %s %s]" % (self.name, self.oper, self.value)
 
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return (self.ident == other.ident) and \
+                   (self.name == other.name) and \
+                   (self.oper == other.oper) and \
+                   (self.value == other.value)
+        else:
+            return False
+
+    def __ne__(self, other):
+        return not (self == other)
+
     @staticmethod
     def parse_chain(storage_manager, chain, type_schema):
         qc = []
@@ -41,7 +53,7 @@ class Query:
             if type(q) == tuple:
                 # actual query
                 ident, name, oper, value = q
-                tt = filter(lambda t: t[0] == name or t[0].split(".")[1] == name, type_schema)
+                tt = filter(lambda t: t[0] == name or t[0].split(".")[-1] == name, type_schema)
                 if len(tt) == 0:
                     # no such named property
                     raise Exception("%s is not a valid property name." % name)

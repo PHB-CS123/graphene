@@ -1,6 +1,7 @@
 from graphene.traversal import *
 from graphene.query import ProjectStream
 from graphene.expressions import MatchNode, MatchRelation
+from graphene.errors import *
 
 class QueryPlanner:
     def __init__(self, storage_manager):
@@ -22,7 +23,7 @@ class QueryPlanner:
             elif (qc[0] == alias or qc[0] is None) and qc[1] in base_names:
                 new_chain.append(qc)
             elif throw:
-                raise Exception("No such property name: " + qc[1])
+                raise NonexistentPropertyException("No such property name: " + qc[1])
         return Query.parse_chain(self.sm, new_chain, schema)
 
     def create_relation_tree(self, node_chain, query_chain):
@@ -76,12 +77,12 @@ class QueryPlanner:
                     # If all nodes/relations are unidentified and there's a duplicate,
                     # throw an error. Otherwise this is ok.
                     if all_unidentified and key in schema_keys and fullset:
-                        raise Exception("Duplicate property name `%s` in query. " \
+                        raise DuplicatePropertyException("Duplicate property name `%s` in query. " \
                             "Try adding an identifier." % key)
                 else:
                     key = "%s.%s" % (ident, tt_name)
                     if key in schema_keys:
-                        raise Exception("Duplicate property name `%s` in query. " \
+                        raise DuplicatePropertyException("Duplicate property name `%s` in query. " \
                             "Try adding an identifier." % key)
 
                 schema_keys.append(key)
@@ -101,15 +102,15 @@ class QueryPlanner:
             if qc[0] is not None:
                 key = "%s.%s" % (qc[0], qc[1])
                 if key not in schema_names:
-                    raise Exception("Property name `%s` does not exist." % key)
+                    raise NonexistentPropertyException("Property name `%s` does not exist." % key)
             # Otherwise check the base names
             else:
                 num_occur = base_names.count(qc[1])
                 # Occurs more than once, it's ambiguous
                 if num_occur > 1:
-                    raise Exception("Property name `%s` is ambiguous. Please add an identifier." % qc[1])
+                    raise AmbiguousPropertyException("Property name `%s` is ambiguous. Please add an identifier." % qc[1])
                 elif num_occur == 0:
-                    raise Exception("Property name `%s` does not exist." % qc[1])
+                    raise NonexistentPropertyException("Property name `%s` does not exist." % qc[1])
 
     def execute(self, node_chain, query_chain, return_chain):
         # Gather schema information from node chain. Collects all property names
