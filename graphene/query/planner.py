@@ -18,24 +18,25 @@ class QueryPlanner:
             if type(qc) != tuple:
                 continue
             # If the identifier doesn't exist or matches the alias given, check
-            # that the name is in base_names
-            # TODO: Determine whether this is missing any cases.
+            # that the name is in base_names. Note that we do not check for
+            # duplicates! That is handled elsewhere.
             elif (qc[0] == alias or qc[0] is None) and qc[1] in base_names:
                 new_chain.append(qc)
+            # TODO: Do we need this? So far nothing ever passes True to throw...
             elif throw:
                 raise NonexistentPropertyException("No such property name: " + qc[1])
         return Query.parse_chain(self.sm, new_chain, schema)
 
     def create_relation_tree(self, node_chain, query_chain):
+        # If there's only one thing in the node chain, it's a node selector, so
+        # we create a NodeIterator to iterate over that query
         if len(node_chain) == 1:
-            # If there's only one thing in the node chain, it's a node selector,
-            # so we create a NodeIterator to iterate over that query
             node = node_chain[0]
             schema = self.get_schema(node_chain)
             qc = self.reduce_query_chain(query_chain, schema, node.name)
             return NodeIterator(self.sm, node, schema, qc)
+        # Otherwise we want to create a RelationIterator
         else:
-            # Otherwise we want to create a RelationIterator
             full_schema = self.get_schema(node_chain)
 
             # Get right schema and query chain, reduced to the right schema
@@ -74,8 +75,11 @@ class QueryPlanner:
                 # If the key is identified, we prefix it with the identifier
                 if not identified:
                     key = tt_name
-                    # If all nodes/relations are unidentified and there's a duplicate,
-                    # throw an error. Otherwise this is ok.
+                    # If all nodes/relations are unidentified and there's a
+                    # duplicate, throw an error. We also only want to do this
+                    # when we are told that this is the full set of schema data,
+                    # not just a subset, since we only care about there being
+                    # duplicates at the end. Otherwise this is ok.
                     if all_unidentified and key in schema_keys and fullset:
                         raise DuplicatePropertyException("Duplicate property name `%s` in query. " \
                             "Try adding an identifier." % key)
@@ -144,6 +148,4 @@ class QueryPlanner:
             schema_names = stream.schema_names
             results = list(stream)
 
-        # TODO: Strip property columns where the node/relation was not supplied
-        # an alias
         return (schema_names, results)
