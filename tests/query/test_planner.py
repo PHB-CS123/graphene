@@ -95,26 +95,26 @@ class TestQueryPlanner(unittest.TestCase):
         # With identifier
         qc = (('t', 'a', '=', '1'),)
         try:
-            self.planner.check_query(self.planner.get_schema(nc), nc, qc)
+            self.planner.check_query(self.planner.get_schema(nc), qc)
         except Exception:
             self.fail("check_query raised an Exception unexpectedly.")
 
         # Without identifier
         qc = ((None, 'a', '=', '1'),)
         try:
-            self.planner.check_query(self.planner.get_schema(nc), nc, qc)
+            self.planner.check_query(self.planner.get_schema(nc), qc)
         except Exception:
             self.fail("check_query raised an Exception unexpectedly.")
 
         # No such property
         qc = ((None, 'b', '=', '1'),)
         with self.assertRaises(NonexistentPropertyException):
-            self.planner.check_query(self.planner.get_schema(nc), nc, qc)
+            self.planner.check_query(self.planner.get_schema(nc), qc)
 
         # No such identifier
         qc = (('s', 'a', '=', '1'),)
         with self.assertRaises(NonexistentPropertyException):
-            self.planner.check_query(self.planner.get_schema(nc), nc, qc)
+            self.planner.check_query(self.planner.get_schema(nc), qc)
 
     def test_check_query_relations(self):
         nc = (MatchNode("t", "T"), MatchRelation("r", "R"), MatchNode("t2", "T"))
@@ -122,32 +122,32 @@ class TestQueryPlanner(unittest.TestCase):
         # With identifier
         qc = (('t', 'a', '=', '1'),)
         try:
-            self.planner.check_query(self.planner.get_schema(nc), nc, qc)
+            self.planner.check_query(self.planner.get_schema(nc), qc)
         except Exception:
             self.fail("check_query raised an Exception unexpectedly.")
 
         qc = (('r', 'b', '=', '1'),)
         try:
-            self.planner.check_query(self.planner.get_schema(nc), nc, qc)
+            self.planner.check_query(self.planner.get_schema(nc), qc)
         except Exception:
             self.fail("check_query raised an Exception unexpectedly.")
 
         # Without identifier, ambiguous
         qc = ((None, 'a', '=', '1'),)
         with self.assertRaises(AmbiguousPropertyException):
-            self.planner.check_query(self.planner.get_schema(nc), nc, qc)
+            self.planner.check_query(self.planner.get_schema(nc), qc)
 
         # Without identifier, unambiguous
         qc = ((None, 'b', '=', '1'),)
         try:
-            self.planner.check_query(self.planner.get_schema(nc), nc, qc)
+            self.planner.check_query(self.planner.get_schema(nc), qc)
         except Exception:
             self.fail("check_query raised an Exception unexpectedly.")
 
         # No such identifier
         qc = (('s', 'a', '=', '1'),)
         with self.assertRaises(NonexistentPropertyException):
-            self.planner.check_query(self.planner.get_schema(nc), nc, qc)
+            self.planner.check_query(self.planner.get_schema(nc), qc)
 
     def test_reduce_query_chain(self):
         #ni = no ident

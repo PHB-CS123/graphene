@@ -11,6 +11,10 @@ class ProjectStream:
         self.indexes = self.gen_indexes()
 
     def gen_indexes(self):
+        """
+        This generates the indexes of the original schema that correspond to the
+        new schema after applying projection.
+        """
         indexes = []
         if len(self.rc) == 0:
             for i, pair in enumerate(self.schema):

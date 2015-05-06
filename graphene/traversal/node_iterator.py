@@ -10,6 +10,10 @@ class NodeIterator:
         self.queries = queries[:]
 
     def prop_to_dict(self, props):
+        """
+        Converts the provided property list into a dict corresponding to the key
+        names (which may have identifiers)
+        """
         result = {}
         for i, tt_data in enumerate(self.schema):
             tt, name, tt_type = tt_data
@@ -25,6 +29,10 @@ class NodeIterator:
         return result
 
     def node_matches(self, properties):
+        """
+        Tests whether the provided properties (which came from a node) are
+        matched by the queries the iterator was provided with.
+        """
         # For now we assume all the queries are ANDed together.
         # TODO: Handle actual boolean logic. Probably will involve some
         # recursion somewhere.

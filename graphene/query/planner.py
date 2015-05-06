@@ -28,6 +28,12 @@ class QueryPlanner:
         return Query.parse_chain(self.sm, new_chain, schema)
 
     def create_relation_tree(self, node_chain, query_chain):
+        """
+        Creates a binary tree corresponding to how we will traverse relations.
+        All leafs are node iterators, and all non-leafs are relation iterators.
+        Determines which subtrees queries apply to and restricts them
+        accordingly so less query testing needs to be done.
+        """
         # If there's only one thing in the node chain, it's a node selector, so
         # we create a NodeIterator to iterate over that query
         if len(node_chain) == 1:
@@ -54,6 +60,13 @@ class QueryPlanner:
                 self.create_relation_tree(left, query_chain), right, rel_schema, rel_qc)
 
     def get_schema(self, node_chain, fullset=False):
+        """
+        Calculates the schema of a given node chain. If fullset is set to True,
+        that implies that the node chain provided is that of the entire query,
+        so we actually care about ambiguous/duplicate unidentified property
+        names. If we are only acting on a subset, we don't worry about
+        unidentified names because they will be ignored in a later projection.
+        """
         schema = []
         sub_schemas = []
         schema_keys = []
@@ -94,7 +107,12 @@ class QueryPlanner:
 
         return schema
 
-    def check_query(self, schema, node_chain, query_chain):
+    def check_query(self, schema, query_chain):
+        """
+        Checks a given query chain for validity given a schema; ensures that the
+        queries do not refer to ambiguous or nonexistent property names in the
+        schema.
+        """
         schema_names = [n for n, tt in schema]
         base_names = [n.split(".")[-1] for n, tt in schema]
         for qc in query_chain:
@@ -117,6 +135,11 @@ class QueryPlanner:
                     raise NonexistentPropertyException("Property name `%s` does not exist." % qc[1])
 
     def execute(self, node_chain, query_chain, return_chain):
+        """
+        Executes a query plan given a node chain, query chain and return chain.
+        Handles any projection necessary and creates a relation tree for
+        traversal.
+        """
         if query_chain is None:
             query_chain = ()
         if return_chain is None:
@@ -126,7 +149,7 @@ class QueryPlanner:
 
         # Check query against schema to ensure no ambiguous or nonexistent properties are being queried
         schema_names = [n for n, tt in schema]
-        self.check_query(schema, node_chain, query_chain)
+        self.check_query(schema, query_chain)
 
         # Gather results
         results = []

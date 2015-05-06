@@ -8,6 +8,10 @@ class Query:
         self.value = value
 
     def test(self, prop_dict):
+        """
+        Test the current query against a dictionary of properties, which
+        correspond to some node we are trying to match with.
+        """
         if self.ident is not None:
             key = "%s.%s" % (self.ident, self.name)
         else:
@@ -51,6 +55,12 @@ class Query:
 
     @staticmethod
     def parse_chain(storage_manager, chain, type_schema):
+        """
+        Parses a chain of queries from tuples of basic information (i.e. the
+        identifier, name of the property, the operator, and the value tested)
+        given the schema they should apply to. Returns a list of Query objects
+        that can be used for testing later.
+        """
         qc = []
         for q in chain:
             if type(q) == tuple:

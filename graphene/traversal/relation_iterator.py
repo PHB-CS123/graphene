@@ -13,6 +13,10 @@ class RelationIterator:
         self.right = right_child
 
     def prop_to_dict(self, props):
+        """
+        Converts the provided property list into a dict corresponding to the key
+        names (which may have identifiers)
+        """
         result = {}
         for i, tt_data in enumerate(self.schema):
             tt, name, tt_type = tt_data

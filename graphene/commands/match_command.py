@@ -16,6 +16,15 @@ class MatchCommand(Command):
         return "[Match\n%s\n]" % "\n".join(lst)
 
     def execute(self, storage_manager, output=sys.stdout):
+        """
+        Runs a MATCH query against the server
+
+        :type storage_manager: StorageManager
+        :param storage_manager: storage manager for this instance
+        :type output: file
+        :param output: The file stream to pipe output into
+        :return: List of results
+        """
         # Create a planner and execute given a node chain and query chain
         planner = QueryPlanner(storage_manager)
         schema, results = planner.execute(self.nc, self.qc, self.rc)
