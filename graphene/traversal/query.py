@@ -1,3 +1,5 @@
+from graphene.errors import *
+
 class Query:
     def __init__(self, ident, name, oper, value):
         self.ident = ident
@@ -13,7 +15,7 @@ class Query:
         try:
             value, tt = prop_dict[key]
         except KeyError:
-            raise Exception("%s is not a valid property name." % key)
+            raise NonexistentPropertyException("%s is not a valid property name." % key)
         if self.oper == '=':
             return value == self.value
         if self.oper == '!=':
@@ -26,6 +28,7 @@ class Query:
             return value <= self.value
         if self.oper == '<':
             return value < self.value
+        # TODO: This should probably throw an error...
         return False
 
     def __repr__(self):
@@ -53,10 +56,11 @@ class Query:
             if type(q) == tuple:
                 # actual query
                 ident, name, oper, value = q
+                # check that the named property exists
+                # TODO: Check if this is actually correct...
                 tt = filter(lambda t: t[0] == name or t[0].split(".")[-1] == name, type_schema)
                 if len(tt) == 0:
-                    # no such named property
-                    raise Exception("%s is not a valid property name." % name)
+                    raise NonexistentPropertyException("%s is not a valid property name." % name)
                 ttype = tt[0][1]
                 qc.append(Query(ident, name, oper, storage_manager.convert_to_value(value, ttype)))
             else:

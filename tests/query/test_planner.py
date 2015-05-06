@@ -32,7 +32,7 @@ class TestQueryPlanner(unittest.TestCase):
         cls.planner = QueryPlanner(cls.sm)
 
     @classmethod
-    def tearDown(cls):
+    def tearDownClass(cls):
         """
         Clean the database so that the tests are independent of one another
         """
