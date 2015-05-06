@@ -2,15 +2,12 @@ from graphene.traversal.query import Query
 from graphene.storage import *
 
 class NodeIterator:
-    def __init__(self, storage_manager, match_node, schema, queries=None):
+    def __init__(self, storage_manager, match_node, schema, queries=()):
         self.sm = storage_manager
         self.alias = match_node.name
         self.node_type, self.schema = storage_manager.get_node_data(match_node.type)
-        #self.schema = schema
-        if queries is not None:
-            self.queries = queries
-        else:
-            self.queries = ()
+        # copy to ensure tuple in argument default is not modified
+        self.queries = queries[:]
 
     def prop_to_dict(self, props):
         result = {}
