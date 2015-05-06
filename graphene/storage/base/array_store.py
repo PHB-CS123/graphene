@@ -167,9 +167,7 @@ class ArrayStore(GeneralStore):
 
         # Convert the array of unsigned shorts to actual unicode chars
         if array_type is Property.PropertyType.charArray:
-            # Apply the value to data to all the items in the array
-            return map(lambda x: PropertyStore.
-                       value_to_data(Property.PropertyType.char, x), items)
+            return map(lambda x: unichr(x), items)
         else:
             return items
 
@@ -184,6 +182,8 @@ class ArrayStore(GeneralStore):
         :return: Packed data
         :rtype: bytes
         """
+        if array_type is Property.PropertyType.charArray:
+            items = map(lambda x: ord(x), items)
         # Get the size and format string from the given array type
         (size, format_str) = self.size_and_format_str_for_type(array_type)
         # Pack the items
@@ -198,12 +198,12 @@ class ArrayStore(GeneralStore):
         """
         # Create an empty header struct
         empty_header_struct = struct.Struct(self.HEADER_STRUCT_FORMAT_STR)
-        packed_header = empty_header_struct(0, 0, 0, 0, 0)
+        packed_header = empty_header_struct.pack(0, 0, 0, 0, 0)
 
         # Create an empty data payload (using BOOL_FORMAT_STR for easy padding)
         empty_data = struct.Struct(self.BOOL_FORMAT_STR * self.blockSize)
         pad_tuple = self.blockSize * self.PAD_TUPLE
-        packed_payload = empty_data(*pad_tuple)
+        packed_payload = empty_data.pack(*pad_tuple)
 
         # Concatenate header and payload
         return packed_header + packed_payload
@@ -305,4 +305,4 @@ class ArrayStore(GeneralStore):
         s = struct.Struct(total_format_str)
         unpacked_array = s.unpack(packed_data)
         # Truncate the array to remove padded items
-        return unpacked_array[:amount]
+        return list(unpacked_array[:amount])

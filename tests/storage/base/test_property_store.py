@@ -74,23 +74,6 @@ class TestPropertyStoreMethods(unittest.TestCase):
         # Make sure it returned None
         self.assertEquals(no_item, GeneralStore.EOF)
 
-    def test_write_read_1_property(self):
-        """
-        Tests that the property written to the PropertyStore is the
-        property that is read.
-        """
-        property_store = PropertyStore()
-
-        # Create a property and add it to the PropertyStore file
-        db_property = Property(1, False, Property.PropertyType.int, 2, 3, 4, 5)
-        property_store.write_item(db_property)
-
-        # Read the property from the PropertyStore file
-        db_property_file = property_store.item_at_index(db_property.index)
-
-        # Assert that the values are the same
-        self.assertEquals(db_property, db_property_file)
-
     def test_write_read_int(self):
         """
         Tests that the int property written to the PropertyStore is the
@@ -295,7 +278,7 @@ class TestPropertyStoreMethods(unittest.TestCase):
         # Create 2 properties and add them to the PropertyStore
         property2 = Property(2, False, Property.PropertyType.char,
                              4, 6, 8, unichr(57344))
-        property3 = Property(9, True, Property.PropertyType.float,
+        property3 = Property(3, True, Property.PropertyType.float,
                              8, 7, 6, 3.14159)
         property_store.write_item(property2)
         property_store.write_item(property3)
@@ -320,10 +303,10 @@ class TestPropertyStoreMethods(unittest.TestCase):
         property1 = Property(1, False, Property.PropertyType.short,
                              2, 3, 4, 5)
         property2 = Property(2, True, Property.PropertyType.string, 4, 6, 8, 10)
-        property3 = Property(9, False, Property.PropertyType.double,
+        property3 = Property(3, False, Property.PropertyType.double,
                              8, 7, 6, 5e-324)
 
-        # Write them to the property_store
+        # Write them to the property store
         property_store.write_item(property1)
         property_store.write_item(property2)
         property_store.write_item(property3)
@@ -339,7 +322,7 @@ class TestPropertyStoreMethods(unittest.TestCase):
         self.assertEquals(property3, property3_file)
 
         # Create a new property2 and overwrite the old property2
-        new_property2 = Property(3, False, Property.PropertyType.stringArray,
+        new_property2 = Property(2, False, Property.PropertyType.stringArray,
                                  6, 9, 12, 15)
         property_store.write_item(new_property2)
 
@@ -366,7 +349,7 @@ class TestPropertyStoreMethods(unittest.TestCase):
         property3 = Property(9, False, Property.PropertyType.double,
                              8, 7, 6, 5e-324)
 
-        # Write them to the property_store
+        # Write them to the property store
         property_store.write_item(property1)
         property_store.write_item(property2)
         property_store.write_item(property3)
