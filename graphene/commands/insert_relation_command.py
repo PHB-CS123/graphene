@@ -2,6 +2,7 @@ from __future__ import print_function
 
 from graphene.commands.command import Command
 from graphene.storage import StorageManager
+from graphene.expressions import *
 from graphene.traversal import *
 from graphene.utils.conversion import TypeConversion
 from graphene.errors import TypeMismatchException
@@ -11,9 +12,21 @@ import itertools
 class InsertRelationCommand(Command):
     def __init__(self, ctx):
         self.rel, self.query1, self.query2 = ctx
-        print("rel, query1, query2:", self.rel, self.query1, self.query2)
 
     def parse_properties(self, prop_list, schema, storage_manager):
+        """
+        Takes a list of properties that are intended to be inserted into the
+        relation, check that they match the schema of the relation (in order),
+        and then convert them to the desired type.
+
+        :type prop_list: list
+        :param prop_list: list of properties
+        :type schema: list
+        :param schema: list of tuples (type-type, property name, expected type)
+        :type storage_manager: StorageManager
+        :param storage_manager: storage manager for the calling instance
+        :return: List of properties
+        """
         properties = []
         for prop, schema_tt in zip(prop_list, schema):
             tt, prop_name, exp_tt = schema_tt
@@ -33,22 +46,32 @@ class InsertRelationCommand(Command):
 
         :type storage_manager: StorageManager
         :param storage_manager: storage manager for this instance
-        :return: None
+        :return: List of inserted relations
         """
-        type1, queries1 = self.query1
-        type2, queries2 = self.query2
-        rel_name, rel_props = self.rel
+        # Gather information about the relation: name, type, schema and properties
+        rel_name = self.rel[0]
         rel_type, rel_schema = storage_manager.get_relationship_data(rel_name)
-        rel_props = self.parse_properties(rel_props, rel_schema, storage_manager)
+        rel_props = self.parse_properties(self.rel[1], rel_schema, storage_manager)
 
-        type_data1, type_schema1 = storage_manager.get_node_data(type1)
-        type_data2, type_schema2 = storage_manager.get_node_data(type2)
+        # Determine type and schema information for type 1 (the left side of the
+        # relation)
+        type1, queries1 = self.query1
+        type_data1, type_schema_data1 = storage_manager.get_node_data(type1)
+        type_schema1 = [(tt_name, tt_type) for _, tt_name, tt_type in type_schema_data1]
 
+        # Determine type and schema information for type 2 (the right side of the
+        # relation)
+        type2, queries2 = self.query2
+        type_data2, type_schema_data2 = storage_manager.get_node_data(type2)
+        type_schema2 = [(tt_name, tt_type) for _, tt_name, tt_type in type_schema_data2]
+
+        # Parse queries for the left and right nodes
         qc1 = Query.parse_chain(storage_manager, queries1, type_schema1)
         qc2 = Query.parse_chain(storage_manager, queries2, type_schema2)
 
-        iter1 = NodeIterator(storage_manager, type_data1, type_schema1, queries=qc1)
-        iter2 = NodeIterator(storage_manager, type_data2, type_schema2, queries=qc2)
+        # Create iterators for the left and right nodes
+        iter1 = NodeIterator(storage_manager, MatchNode(None, type1), type_schema1, queries=qc1)
+        iter2 = NodeIterator(storage_manager, MatchNode(None, type2), type_schema2, queries=qc2)
 
         inserted_relations = []
 
@@ -59,9 +82,10 @@ class InsertRelationCommand(Command):
             if np1 == np2:
                 continue
 
-            print("Inserting relation %s between %s and %s" %
+            print("Inserting relation %s between %s and %s" % \
                 (rel_name, np1.node, np2.node))
-            rel = storage_manager.insert_relation(rel_type, rel_props, np1.node, np2.node)
+            rel = storage_manager.insert_relation(rel_type, rel_props,
+                np1.node, np2.node)
             inserted_relations.append(rel)
 
         return inserted_relations

@@ -18,8 +18,8 @@ class RelationshipPropertyStore:
 
     def __getitem__(self, key):
         cur_relationship = self.relationship_manager.get_item_at_index(key)
-        if cur_relationship is None:
-            return None
+        if cur_relationship is None or cur_relationship == GeneralStore.EOF:
+            return cur_relationship
         properties = []
         cur_prop_id = cur_relationship.propId
         while cur_prop_id != 0:
