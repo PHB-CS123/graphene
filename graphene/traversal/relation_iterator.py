@@ -3,15 +3,12 @@ from graphene.traversal.node_iterator import NodeIterator
 from graphene.storage import *
 
 class RelationIterator:
-    def __init__(self, storage_manager, match_rel, left_child, right_child, schema, queries=None):
+    def __init__(self, storage_manager, match_rel, left_child, right_child, schema, queries=()):
         self.sm = storage_manager
         self.alias = match_rel.name
         self.rel_type, self.schema = storage_manager.get_relationship_data(match_rel.type)
-        #self.schema = schema
-        if queries is not None:
-            self.queries = queries
-        else:
-            self.queries = ()
+        # copy to ensure tuple in argument default is not modified
+        self.queries = queries[:]
         self.left = left_child
         self.right = right_child
 

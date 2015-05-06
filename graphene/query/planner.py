@@ -117,6 +117,10 @@ class QueryPlanner:
                     raise NonexistentPropertyException("Property name `%s` does not exist." % qc[1])
 
     def execute(self, node_chain, query_chain, return_chain):
+        if query_chain is None:
+            query_chain = ()
+        if return_chain is None:
+            return_chain = ()
         # Gather schema information from node chain. Collects all property names
         schema = self.get_schema(node_chain, fullset=True)
 

@@ -1,3 +1,5 @@
+from graphene.errors import *
+
 class ProjectStream:
     def __init__(self, return_chain, schema, results):
         self.rc = return_chain
@@ -31,24 +33,26 @@ class ProjectStream:
                 # do the same thing, but `RETURN a` and `RETURN t.b` do not.
                 if ident is None:
                     if schema_base_names.count(name) > 1:
-                        raise Exception("Property name `%s` is ambiguous." % name)
+                        raise AmbiguousPropertyException("Property name `%s` is ambiguous." % name)
                     elif name not in schema_base_names:
-                        raise Exception("Property name `%s` does not exist." % name)
+                        raise NonexistentPropertyException("Property name `%s` does not exist." % name)
                     else:
                         indexes.append(schema_base_names.index(name))
                         self.schema_names.append(name)
                 else:
                     key = "%s.%s" % r
                     if key not in schema_names:
-                        raise Exception("Property name `%s` does not exist." % key)
+                        raise NonexistentPropertyException("Property name `%s` does not exist." % key)
                     else:
                         indexes.append(schema_names.index(key))
                         self.schema_names.append(key)
         return indexes
 
     def __iter__(self):
+        # If the indices are just the original assumed indices, no point mapping
+        is_nontrivial_project = self.indexes != range(len(self.schema))
         for result in self.results:
-            if self.indexes is not None:
+            if is_nontrivial_project:
                 yield map(lambda i: result[i], self.indexes)
             else:
                 yield result
