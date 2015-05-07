@@ -31,8 +31,8 @@ exit_stmt returns [cmd]
 // MATCH command
 match_stmt returns [cmd]
   @init {$cmd = None}
-  : K_MATCH (nc=node_chain) (K_WHERE (qc=query_chain))?
-  {$cmd = MatchCommand($nc.ctx, $qc.ctx)}
+  : K_MATCH (nc=node_chain) (K_WHERE (qc=query_chain))? (K_RETURN (rc=return_chain))?
+  {$cmd = MatchCommand($nc.ctx, $qc.ctx, $rc.ctx)}
   ;
 
 node_chain returns [chain]
@@ -51,6 +51,18 @@ node
   {return MatchNode($nn.text, $nt.text)}
   ;
 
+ident
+  : ((ii=I_NAME) '.')? ni=I_NAME
+  {return ($ii.text, $ni.text)}
+  ;
+
+return_chain returns [chain]
+  @init {$chain = []}
+  : (i1=ident {$chain.append($i1.ctx)})
+    (',' ii=ident {$chain.append($ii.ctx)})*
+  {return $chain}
+  ;
+
 // Queries
 
 logic_op : (K_AND/* | K_OR*/) ;
@@ -58,9 +70,9 @@ logic_test : (('!' | '>' | '<')? '=' | '<' | '>') ;
 
 query_chain returns [queries]
   @init {$queries = []}
-  : ( ((i1=I_NAME) '.')? n1=I_NAME t1=logic_test v1=Literal {$queries.append(($i1.text, $n1.text, $t1.text, $v1.text))})
+  : ( i1=ident t1=logic_test v1=Literal {$queries.append($i1.ctx + ($t1.text, $v1.text))})
     (op=logic_op {$queries.append($op.text)}
-     ((ii=I_NAME) '.')? ni=I_NAME ti=logic_test vi=Literal {$queries.append(($ii.text, $ni.text, $ti.text, $vi.text))})*
+     ii=ident ti=logic_test vi=Literal {$queries.append($ii.ctx + ($ti.text, $vi.text))})*
   {return $queries}
   ;
 
