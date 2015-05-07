@@ -246,6 +246,22 @@ class ArrayStore(GeneralStore):
         return size, format_str
 
     @classmethod
+    def capacity_for_type(cls, array_type, block_size):
+        """
+        Get the number of items that an array block with the given block size
+        can store for the given item type
+
+        :param array_type: Type of array
+        :type array_type: PropertyType
+        :param block_size: Size of array block
+        :type block_size: int
+        :return: Capacity for given block size and type
+        :rtype: int
+        """
+        (size, format_str) = cls.size_and_format_str_for_type(array_type)
+        return block_size / size
+
+    @classmethod
     def list_to_data(cls, array, format_str, block_size, type_size):
         """
         Create packed data from the given array and parameters
