@@ -127,7 +127,7 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
     def test_mangled_delete(self):
         """
         Test that when deleting a mangled string, the method returns
-        an error (-1)
+        an error (false)
         """
         name_manager = GeneralNameManager(self.TEST_FILENAME,
                                           self.TEST_BLOCK_SIZE)
@@ -139,7 +139,7 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         # Mangle the name by deleting from the second block (first block intact)
         name_manager.storeManager.delete_item_at_index(2)
         # Make sure that the read_name_at_index method returns None
-        self.assertEquals(name_manager.delete_name_at_index(name_index), -1)
+        self.assertEquals(name_manager.delete_name_at_index(name_index), False)
 
     def test_write_2_names_multiple_blocks(self):
         """
