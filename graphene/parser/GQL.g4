@@ -65,16 +65,24 @@ return_chain returns [chain]
 
 // Queries
 
-logic_op : (K_AND/* | K_OR*/) ;
+logic_op : (K_AND | K_OR) ;
 logic_test : (('!' | '>' | '<')? '=' | '<' | '>') ;
 
 query_chain returns [queries]
   @init {$queries = []}
-  : ( i1=ident t1=logic_test v1=Literal {$queries.append($i1.ctx + ($t1.text, $v1.text))})
+  : ('(' {$queries.append("(")})?
+    (q1=query {$queries.append($q1.ctx)})
     (op=logic_op {$queries.append($op.text)}
-     ii=ident ti=logic_test vi=Literal {$queries.append($ii.ctx + ($ti.text, $vi.text))})*
+     qi=query_chain {$queries += $qi.ctx})*
+    (')' {$queries.append(")")})?
   {return $queries}
   ;
+
+query
+  : name=ident test=logic_test val=Literal
+  {return ($name.ctx + ($test.text, $val.text))}
+  ;
+
 
 node_query
   : (t=I_TYPE {$t=$t.text})

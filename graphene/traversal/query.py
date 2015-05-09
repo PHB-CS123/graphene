@@ -1,4 +1,17 @@
 from graphene.errors import *
+from graphene.expressions import AndOperator, OrOperator
+
+# Group a list based on a delimiter.
+# Adapted from http://stackoverflow.com/a/15358005/28429
+def group(seq, sep):
+    g = []
+    for el in seq:
+        if el == sep:
+            yield g
+            g = []
+        else:
+            g.append(el)
+    yield g
 
 class Query:
     def __init__(self, ident, name, oper, value):
@@ -54,6 +67,28 @@ class Query:
         return not (self == other)
 
     @staticmethod
+    def reduce_operators(chain):
+        """
+        Turns a nested list with boolean operators as strings into one with
+        actual operator instances.
+        """
+        if type(chain) != list:
+            # Just a query value, so return it
+            return chain
+        elif chain.count("OR") > 0:
+            # There's ORs, and these have less precedence, so separate them
+            # first
+            return OrOperator(map(Query.reduce_operators, group(chain, "OR")))
+        elif chain.count("AND") > 0:
+            # Otherwise, separate the ANDs (idea is these guys are closer
+            # together)
+            return AndOperator(map(Query.reduce_operators, group(chain, "AND")))
+        else:
+            # Otherwise we have a list with an extra list around it, so just
+            # recurse
+            return Query.reduce_operators(chain[0])
+
+    @staticmethod
     def parse_chain(storage_manager, chain, type_schema):
         """
         Parses a chain of queries from tuples of basic information (i.e. the
@@ -61,7 +96,10 @@ class Query:
         given the schema they should apply to. Returns a list of Query objects
         that can be used for testing later.
         """
-        qc = []
+        # Parse a series of parentheses in to a nested list, e.g.
+        # 1(23(45)(6)) turns into [1, [2, 3, [4, 5], [6]]]
+        # Adapted from http://stackoverflow.com/a/17141899/28429
+        qc = [[]]
         for q in chain:
             if type(q) == tuple:
                 # actual query
@@ -72,7 +110,20 @@ class Query:
                 if len(tt) == 0:
                     raise NonexistentPropertyException("%s is not a valid property name." % name)
                 ttype = tt[0][1]
-                qc.append(Query(ident, name, oper, storage_manager.convert_to_value(value, ttype)))
+                qc[-1].append(Query(ident, name, oper, storage_manager.convert_to_value(value, ttype)))
+            elif q == '(':
+                qc[-1].append([])
+                qc.append(qc[-1][-1])
+            elif q == ')':
+                qc.pop()
+                if not qc:
+                    # TODO: These should be a SyntaxError from the parser, sorta
+                    raise ValueError('error: opening bracket is missing')
             else:
-                qc.append(q)
+                qc[-1].append(q)
+        if len(qc) > 1:
+            # TODO: These should be a SyntaxError from the parser, sorta
+            raise ValueError('error: closing bracket is missing')
+        qc = qc.pop()
+        print Query.reduce_operators(qc)
         return qc

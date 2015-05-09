@@ -11,6 +11,7 @@ class QueryPlanner:
         """
         Reduce a set of queries such that they only apply to the given schema.
         """
+        return Query.parse_chain(self.sm, query_chain, schema)
         new_chain = []
         base_names = [n.split(".")[-1] for n, t in schema]
         for qc in query_chain:
