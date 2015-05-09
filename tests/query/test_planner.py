@@ -155,29 +155,29 @@ class TestQueryPlanner(unittest.TestCase):
         n2, n2ni = MatchNode("t2", "T"), MatchNode(None, "T")
         r, rni = MatchRelation("r", "R"), MatchRelation(None, "R")
 
-        qc = (('t', 'a', '=', '1'), ('r', 'b', '>', '0'))
+        qc = (('t', 'a', '=', '1'), 'AND', ('r', 'b', '>', '0'))
         expected = Query.parse_chain(self.sm, (('t', 'a', '=', '1'),), self.planner.get_schema((n1,)))
         result = self.planner.reduce_query_chain(qc, self.planner.get_schema((n1, r, n2ni)), 't')
-        self.assertListEqual(result, expected)
+        self.assertEqual(result, expected)
 
         expected = Query.parse_chain(self.sm, (('r', 'b', '>', '0'),), self.planner.get_schema((r,)))
         result = self.planner.reduce_query_chain(qc, self.planner.get_schema((n1, r, n2ni)), 'r')
-        self.assertListEqual(result, expected)
+        self.assertEqual(result, expected)
 
         expected = []
         result = self.planner.reduce_query_chain(qc, self.planner.get_schema((n1, r, n2ni)))
-        self.assertListEqual(result, expected)
+        self.assertEqual(result, expected)
 
-        qc = ((None, 'a', '=', '1'), (None, 'b', '>', '0'))
+        qc = ((None, 'a', '=', '1'), 'AND', (None, 'b', '>', '0'))
         expected = Query.parse_chain(self.sm, ((None, 'b', '>', '0'),), self.planner.get_schema((r,)))
         result = self.planner.reduce_query_chain(qc, self.planner.get_schema((r,)))
-        self.assertListEqual(result, expected)
+        self.assertEqual(result, expected)
 
         # Note that this does not handle ambiguous names... check_query does
-        qc = ((None, 'a', '=', '1'), (None, 'b', '>', '0'))
-        expected = Query.parse_chain(self.sm, ((None, 'a', '=', '1'), (None, 'b', '>', '0')), self.planner.get_schema((n1, r, n2)))
+        qc = ((None, 'a', '=', '1'), 'AND', (None, 'b', '>', '0'))
+        expected = Query.parse_chain(self.sm, ((None, 'a', '=', '1'), 'AND', (None, 'b', '>', '0')), self.planner.get_schema((n1, r, n2)))
         result = self.planner.reduce_query_chain(qc, self.planner.get_schema((n1, r, n2)))
-        self.assertListEqual(result, expected)
+        self.assertEqual(result, expected)
 
         # Does handle nonexistent properties though!
         qc = ((None, 'c', '=', '1'),)

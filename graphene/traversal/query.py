@@ -83,6 +83,9 @@ class Query:
             # Otherwise, separate the ANDs (idea is these guys are closer
             # together)
             return AndOperator(map(Query.reduce_operators, group(chain, "AND")))
+        elif chain == []:
+            # Empty list
+            return []
         else:
             # Otherwise we have a list with an extra list around it, so just
             # recurse
@@ -96,6 +99,9 @@ class Query:
         given the schema they should apply to. Returns a list of Query objects
         that can be used for testing later.
         """
+        if chain is None:
+            # Nothing to parse
+            return None
         # Parse a series of parentheses in to a nested list, e.g.
         # 1(23(45)(6)) turns into [1, [2, 3, [4, 5], [6]]]
         # Adapted from http://stackoverflow.com/a/17141899/28429
@@ -125,5 +131,4 @@ class Query:
             # TODO: These should be a SyntaxError from the parser, sorta
             raise ValueError('error: closing bracket is missing')
         qc = qc.pop()
-        print Query.reduce_operators(qc)
-        return qc
+        return Query.reduce_operators(qc)

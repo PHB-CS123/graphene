@@ -66,12 +66,12 @@ class TestQuery(unittest.TestCase):
         schema = (('t.a', Property.PropertyType.int),('t.b', Property.PropertyType.int))
 
         chain = (('t','a','=','1'),)
-        self.assertListEqual(Query.parse_chain(self.sm, chain, schema), [Query('t','a','=', 1)])
+        self.assertEqual(Query.parse_chain(self.sm, chain, schema), Query('t','a','=', 1))
 
         # This will be changed later when we actually care about booleans
         chain = (('t','a','=','1'),'AND',('t','b','>','0'))
-        self.assertListEqual(Query.parse_chain(self.sm, chain, schema),
-            [Query('t','a','=', 1), 'AND', Query('t','b','>', 0)])
+        self.assertEqual(Query.parse_chain(self.sm, chain, schema),
+            AndOperator([Query('t','a','=', 1), Query('t','b','>', 0)]))
 
         chain = (('t','c','>','0'),)
         with self.assertRaises(NonexistentPropertyException):

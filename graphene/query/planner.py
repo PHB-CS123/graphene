@@ -37,6 +37,7 @@ class QueryPlanner:
         """
         # If there's only one thing in the node chain, it's a node selector, so
         # we create a NodeIterator to iterate over that query
+        print query_chain
         if len(node_chain) == 1:
             node = node_chain[0]
             schema = self.get_schema(node_chain)
@@ -116,6 +117,9 @@ class QueryPlanner:
         """
         schema_names = [n for n, tt in schema]
         base_names = [n.split(".")[-1] for n, tt in schema]
+        if query_chain is None:
+            # Nothing to check!
+            return
         for qc in query_chain:
             if type(qc) != tuple:
                 # Boolean logic, ignore for now
@@ -141,8 +145,6 @@ class QueryPlanner:
         Handles any projection necessary and creates a relation tree for
         traversal.
         """
-        if query_chain is None:
-            query_chain = ()
         if return_chain is None:
             return_chain = ()
         # Gather schema information from node chain. Collects all property names
