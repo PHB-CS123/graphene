@@ -15,3 +15,8 @@ class DuplicatePropertyException(Exception):
 class AmbiguousPropertyException(Exception):
     """Error for attempting to store the incorrect data type for a property."""
     pass
+
+class BadPropertyException(Exception):
+    """Error for trying to store the incorrect number of properties in a node or
+    relation"""
+    pass
