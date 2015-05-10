@@ -110,14 +110,14 @@ class GeneralArrayManager:
         while index != 0:
             # Get array block
             array_block = self.storeManager.get_item_at_index(index)
-            # Get the type of the array
-            array_type = array_block.type
             # Check if either the block was deleted or the linked list was
             # broken (only part of a block was deleted)
             if array_block is None:
                 return None
-            elif isinstance(array_block, EOF):
+            elif array_block == EOF:
                 raise EOFError("Corrupted data, unexpected EOF.")
+            # Get the type of the array
+            array_type = array_block.type
             # Add the next array block to the list
             array.append(array_block.items)
             # Update the index with the index of the next block
@@ -163,15 +163,17 @@ class GeneralArrayManager:
             index = next_index
         return True
 
-    def find_array_items(self, items, limit=0):
+    def find_array_items(self, items, limit=0, array_type=None):
         """
         Finds the starting index of the arrays containing the requested item(s)
         WARNING: not efficient
 
         :param items: Item(s) to look for
         :type items: list
-        :param limit: Number of matches to limit the search to
+        :param limit: Matches to limit the search to (can speed up search)
         :type limit: int
+        :param array_type: Type of array searching for (can speed up search)
+        :type array_type: PropertyType
         :return: List of starting indexes of the arrays containing the items
         :rtype: list
         """
@@ -182,10 +184,12 @@ class GeneralArrayManager:
 
         for i in range(1, last_index):
             cur_array = self.storeManager.get_item_at_index(i)
-            # Check if the current array block is not empty, that is is the
-            # starting block, and that it contains the necessary items
-            if cur_array is not None and cur_array.previousBlock == 0 and \
-               self.array_contains_items(self.read_array_at_index(i), items):
+            # Continue if the current array does not match basic criteria
+            if cur_array is None or cur_array.previousBlock != 0 or \
+               (array_type is not None and cur_array.type is not array_type):
+                continue
+
+            if self.array_contains_items(self.read_array_at_index(i), items):
                 match_indexes.append(i)
                 # Check if we have reached the requested number of matches
                 if limit != 0 and len(match_indexes) == limit:
@@ -255,4 +259,4 @@ class GeneralArrayManager:
         :return: Whether the reference array contains all the items
         :rtype: bool
         """
-        all(map(lambda x: x in array, items))
+        return all(map(lambda x: x in array, items))

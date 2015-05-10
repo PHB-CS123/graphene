@@ -104,7 +104,7 @@ class GeneralNameManager:
             # was broken (only part of a block was deleted)
             if name_block is None:
                 return None
-            elif isinstance(name_block, EOF):
+            elif name_block == EOF:
                 raise EOFError("Corrupted data, unexpected EOF.")
             # Add the next block name to the list
             names.append(name_block.name)

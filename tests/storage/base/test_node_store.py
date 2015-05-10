@@ -39,6 +39,24 @@ class TestNodeStoreMethods(unittest.TestCase):
             self.fail("NodeStore initializer failed on second attempt: "
                       "db file failed to open.")
 
+    def test_non_interface_file_creation(self):
+        """
+        Test that writing to a NodeStore does not fail when the db file
+        was created outside of the interface (i.e. touch <NodeStore.db>)
+        This error was caused because when a file is touched, it might not
+        get padded, leading to a plethora of errors since index 0 is not
+        supposed to be usable.
+        """
+        graphene_store = GrapheneStore()
+        # Create db file outside interface
+        open(graphene_store.datafilesDir + NodeStore.FILE_NAME, "w+").close()
+        try:
+            node_store = NodeStore()
+            node = Node(1, False, 1, 1, 1)
+            node_store.write_item(node)
+        except Exception:
+            self.fail("Writing failed when db file was touched externally")
+
     def test_invalid_write(self):
         """
         Test that writing a node to index 0 raises an error

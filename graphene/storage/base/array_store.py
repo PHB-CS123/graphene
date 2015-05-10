@@ -63,6 +63,9 @@ class ArrayStore(GeneralStore):
     # Padding tuple for non-full array blocks
     PAD_TUPLE = (0,)
 
+    # Type stored by this class
+    STORAGE_TYPE = Array
+
     # Name of ArrayStore File
     FILE_NAME = "graphenestore.arraystore.db"
     ''':type str'''
