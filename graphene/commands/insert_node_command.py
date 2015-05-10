@@ -2,6 +2,7 @@ from __future__ import print_function
 from graphene.commands.command import Command
 from graphene.storage import Property
 from graphene.utils.conversion import TypeConversion
+from graphene.errors import BadPropertyException
 import logging
 
 class InsertNodeCommand(Command):
@@ -13,9 +14,13 @@ class InsertNodeCommand(Command):
         final_types, final_props = [], []
         self.logger.debug("node_prop_list: " % self.node_prop_list)
         for nodeprop in self.node_prop_list:
-            type_name, prop_list = nodeprop.t, nodeprop.pl
+            type_name, prop_list = nodeprop.t, nodeprop.pl or []
             node_type, schema = storage_manager.get_node_data(type_name)
             properties = []
+            num_props, schema_len = len(prop_list), len(schema)
+            if num_props != schema_len:
+                raise BadPropertyException("Expected %d propert%s, but got %d." % \
+                    (schema_len, "y" if schema_len == 1 else "ies", num_props))
             for prop, schema_tt in zip(prop_list, schema):
                 tt, prop_name, exp_tt = schema_tt
 
