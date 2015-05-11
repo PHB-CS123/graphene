@@ -32,7 +32,7 @@ class Query:
         try:
             value, tt = prop_dict[key]
         except KeyError:
-            raise NonexistentPropertyException("%s is not a valid property name." % key)
+            return False#raise NonexistentPropertyException("%s is not a valid property name." % key)
         if self.oper == '=':
             return value == self.value
         if self.oper == '!=':
@@ -114,9 +114,10 @@ class Query:
                 # TODO: Check if this is actually correct...
                 tt = filter(lambda t: t[0] == name or t[0].split(".")[-1] == name, type_schema)
                 if len(tt) == 0:
-                    raise NonexistentPropertyException("%s is not a valid property name." % name)
-                ttype = tt[0][1]
-                qc[-1].append(Query(ident, name, oper, storage_manager.convert_to_value(value, ttype)))
+                    pass#raise NonexistentPropertyException("%s is not a valid property name." % name)
+                else:
+                    ttype = tt[0][1]
+                    qc[-1].append(Query(ident, name, oper, storage_manager.convert_to_value(value, ttype)))
             elif q == '(':
                 qc[-1].append([])
                 qc.append(qc[-1][-1])

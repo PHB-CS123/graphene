@@ -6,7 +6,8 @@ class RelationIterator:
     def __init__(self, storage_manager, match_rel, left_child, right_child, schema, queries=None):
         self.sm = storage_manager
         self.alias = match_rel.name
-        self.rel_type, self.schema = storage_manager.get_relationship_data(match_rel.type)
+        self.type_name = match_rel.type
+        self.rel_type, self.schema = storage_manager.get_relationship_data(self.type_name)
         # copy to ensure tuple in argument default is not modified
         self.queries = queries
         self.left = left_child
@@ -31,11 +32,21 @@ class RelationIterator:
             result[name] = (props[i], tt_type)
         return result
 
+    def __repr__(self):
+        if self.alias is not None:
+            key = "%s:%s" % (self.alias, self.type_name)
+        else:
+            key = self.type_name
+        if isinstance(self.queries, Query):
+            return "RelationIterator[%s, %s: %s, %s]" % (self.left, key, self.queries, self.right)
+        else:
+            return "RelationIterator[%s, %s, %s]" % (self.left, key, self.right)
+
     def __iter__(self):
         for relprop in self.sm.get_relations_of_type(self.rel_type):
             rel = relprop.rel
             # Make sure relation matches queries provided
-            if self.queries is not None:
+            if isinstance(self.queries, Query):
                 if not self.queries.test(self.prop_to_dict(relprop.properties)):
                     continue
 

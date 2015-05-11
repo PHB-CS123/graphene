@@ -5,9 +5,20 @@ class NodeIterator:
     def __init__(self, storage_manager, match_node, schema, queries=None):
         self.sm = storage_manager
         self.alias = match_node.name
+        self.type_name = match_node.type
         self.node_type, self.schema = storage_manager.get_node_data(match_node.type)
         # copy to ensure tuple in argument default is not modified
         self.queries = queries
+
+    def __repr__(self):
+        if self.alias is not None:
+            key = "%s:%s" % (self.alias, self.type_name)
+        else:
+            key = self.type_name
+        if self.queries is not None:
+            return "NodeIterator[%s: %s]" % (key, self.queries)
+        else:
+            return "NodeIterator[%s]" % key
 
     def prop_to_dict(self, props):
         """

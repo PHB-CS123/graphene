@@ -7,11 +7,12 @@ class QueryPlanner:
     def __init__(self, storage_manager):
         self.sm = storage_manager
 
-    def reduce_query_chain(self, query_chain, schema, alias=None, throw=False):
+    def reduce_query_chain(self, query, tree, schema):
         """
         Reduce a set of queries such that they only apply to the given schema.
         """
-        return Query.parse_chain(self.sm, query_chain, schema)
+        print query, tree, schema
+        return query
         new_chain = []
         base_names = [n.split(".")[-1] for n, t in schema]
         for qc in query_chain:
@@ -28,7 +29,7 @@ class QueryPlanner:
                 raise NonexistentPropertyException("No such property name: " + qc[1])
         return Query.parse_chain(self.sm, new_chain, schema)
 
-    def create_relation_tree(self, node_chain, query_chain):
+    def create_relation_tree(self, node_chain):
         """
         Creates a binary tree corresponding to how we will traverse relations.
         All leafs are node iterators, and all non-leafs are relation iterators.
@@ -37,29 +38,25 @@ class QueryPlanner:
         """
         # If there's only one thing in the node chain, it's a node selector, so
         # we create a NodeIterator to iterate over that query
-        print query_chain
         if len(node_chain) == 1:
             node = node_chain[0]
             schema = self.get_schema(node_chain)
-            qc = self.reduce_query_chain(query_chain, schema, node.name)
-            return NodeIterator(self.sm, node, schema, qc)
+            return NodeIterator(self.sm, node, schema, None)
         # Otherwise we want to create a RelationIterator
         else:
             full_schema = self.get_schema(node_chain)
 
             # Get right schema and query chain, reduced to the right schema
             right_schema = self.get_schema([node_chain[-1]])
-            right_qc = self.reduce_query_chain(query_chain, right_schema, node_chain[-1].name)
 
             left, rel, right = node_chain[:-2], node_chain[-2], \
-                NodeIterator(self.sm, node_chain[-1], right_schema, right_qc)
+                NodeIterator(self.sm, node_chain[-1], right_schema, None)
 
             # Get relation schema and query chain, reduced to the right schema
             rel_schema = self.get_schema([rel])
-            rel_qc = self.reduce_query_chain(query_chain, rel_schema, rel.name)
 
             return RelationIterator(self.sm, rel,
-                self.create_relation_tree(left, query_chain), right, rel_schema, rel_qc)
+                self.create_relation_tree(left), right, rel_schema, None)
 
     def get_schema(self, node_chain, fullset=False):
         """
@@ -157,15 +154,19 @@ class QueryPlanner:
         # Gather results
         results = []
 
+        iter_tree = self.create_relation_tree(node_chain)
+        query = Query.parse_chain(self.sm, query_chain, schema)
+        print self.reduce_query_chain(query, iter_tree, schema)
+
         # TODO: Make it so NodeIterator and RelationIterator return same
         # kind of thing (i.e. RI returns (props, rightNode), NI returns a
         # NodeProperty instance)
         if len(node_chain) == 1:
             # NodeIterator returns slightly different structure than RelationshipIterator
-            for nodeprop in self.create_relation_tree(node_chain, query_chain):
+            for nodeprop in iter_tree:
                 results.append(nodeprop.properties)
         else:
-            for props, right in self.create_relation_tree(node_chain, query_chain):
+            for props, right in iter_tree:
                 results.append(props)
 
         num_unidentified = [nc.name for nc in node_chain].count(None)
