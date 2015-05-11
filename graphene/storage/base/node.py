@@ -61,7 +61,7 @@ class Node:
         """
         return not (self == other)
 
-    def __str__(self):
+    def __repr__(self):
         """
         String representation of this node.
 

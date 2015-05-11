@@ -46,6 +46,15 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
                       "attempt: %s db file failed to open."
                       % self.TEST_FILENAME)
 
+    def test_eof_read(self):
+        """
+        Test that reading from an empty file returns an EOF
+        """
+        name_manager = GeneralNameManager(self.TEST_FILENAME,
+                                          self.TEST_BLOCK_SIZE)
+        with self.assertRaises(EOFError):
+            name_manager.read_name_at_index(1)
+
     def test_write_name_1_block(self):
         """
         Tests that writing a name that fits in a single block succeeds
@@ -105,7 +114,7 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         # Write the name to the name store
         name_index = name_manager.write_name(name)
         # Mangle the name by deleting from the second block (first block intact)
-        name_manager.storeManager.delete_item_at_index(2)
+        name_manager.storeManager.delete_item_at_index(name_index + 1)
         # Make sure that the read_name_at_index method returns None
         self.assertEquals(name_manager.read_name_at_index(name_index), None)
 
@@ -127,7 +136,7 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
     def test_mangled_delete(self):
         """
         Test that when deleting a mangled string, the method returns
-        an error (-1)
+        an error (false)
         """
         name_manager = GeneralNameManager(self.TEST_FILENAME,
                                           self.TEST_BLOCK_SIZE)
@@ -137,9 +146,9 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         # Write the name to the name store
         name_index = name_manager.write_name(name)
         # Mangle the name by deleting from the second block (first block intact)
-        name_manager.storeManager.delete_item_at_index(2)
+        name_manager.storeManager.delete_item_at_index(name_index + 1)
         # Make sure that the read_name_at_index method returns None
-        self.assertEquals(name_manager.delete_name_at_index(name_index), -1)
+        self.assertEquals(name_manager.delete_name_at_index(name_index), False)
 
     def test_write_2_names_multiple_blocks(self):
         """
@@ -187,7 +196,7 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
 
     def test_delete_name_at_index(self):
         """
-        Tests that deleting the name at a specific index works
+        Tests that deleting an array at a specific index works
         """
         name_manager = GeneralNameManager(self.TEST_FILENAME,
                                           self.TEST_BLOCK_SIZE)
@@ -199,14 +208,14 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         # Check that the name is as expected
         self.assertEquals(name1, name_manager.read_name_at_index(name_index1))
 
-        # Delete the name from the name store
+        # Delete the name from the name manager
         name_manager.delete_name_at_index(name_index1)
         # Try to read the name, it should return None
         self.assertEquals(name_manager.read_name_at_index(name_index1), None)
 
     def test_delete_names_at_index_multiple(self):
         """
-        Tests that deleting the name at a specific index works with more than
+        Tests that deleting a name at a specific index works with more than
         one item in the store
         """
         name_manager = GeneralNameManager(self.TEST_FILENAME,

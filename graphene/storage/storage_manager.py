@@ -1,6 +1,8 @@
 from graphene.storage import *
 from graphene.errors.storage_manager_errors import *
 
+from graphene.storage.base.property import Property
+
 from graphene.storage.intermediate import *
 from pylru import WriteBackCacheManager
 
@@ -49,13 +51,19 @@ class StorageManager:
         """
         self.logger = logging.getLogger(self.__class__.__name__)
 
+        # Create a string manager for string property types
+        self.prop_string_manager = \
+            GeneralNameManager(self.PROP_STORE_STRINGS_FILENAME,
+                               self.STRING_BLOCK_SIZE)
+
         # Create object managers
         self.node_manager = GeneralStoreManager(NodeStore())
         self.property_manager = GeneralStoreManager(PropertyStore())
         self.relationship_manager = GeneralStoreManager(RelationshipStore())
 
         # Create combined object managers along with their cache handlers
-        nodeprop = NodePropertyStore(self.node_manager, self.property_manager)
+        nodeprop = NodePropertyStore(self.node_manager, self.property_manager,
+                                     self.prop_string_manager)
         relprop = RelationshipPropertyStore(self.relationship_manager,
                                             self.property_manager)
         self.nodeprop = WriteBackCacheManager(nodeprop, self.MAX_CACHE_SIZE)
@@ -94,10 +102,6 @@ class StorageManager:
             GeneralNameManager(self.RELATIONSHIP_TYPE_TYPE_STORE_NAMES_FILENAME,
                                self.NAME_BLOCK_SIZE)
 
-        # Create a string manager for string property types
-        self.prop_string_manager = \
-            GeneralNameManager(self.PROP_STORE_STRINGS_FILENAME,
-                               self.STRING_BLOCK_SIZE)
 
     # --- Node Storage Methods --- #
 
@@ -253,6 +257,15 @@ class StorageManager:
         else:
             type_type_manager = self.relTypeTypeManager
             type_type_name_manager = self.relTypeTypeNameManager
+
+        if type_type.propertyType == Property.PropertyType.string:
+            # TODO: Need to delete all strings of this type_type in the
+            # prop_string_manager.
+
+            # Note: type_type.typeName is the index of the type name in node type
+            # type name manager, so the following does not suffice.
+            # self.prop_string_manager.delete_name_at_index(type_type.typeName)
+            pass
 
         type_type_name_manager.delete_name_at_index(type_type.typeName)
         type_type_manager.delete_item(type_type)

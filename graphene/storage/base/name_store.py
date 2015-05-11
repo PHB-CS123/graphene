@@ -7,8 +7,9 @@ from graphene.storage.base.name import *
 class NameStore(GeneralStore):
     """
     Handles storage of names to a file. It stores names using the format:
-    (inUse, previous, length, next, data). Everything except data is stored
-    using a struct, while the data (string) is stored as is.
+    (inUse, previous, length, next, data)
+    Everything except data is stored using a struct, while the data (string)
+    is stored as is.
     """
 
     # Format string used to compact these values
@@ -20,10 +21,11 @@ class NameStore(GeneralStore):
 
     # Size of the header struct (bytes)
     HEADER_SIZE = struct.calcsize(HEADER_STRUCT_FORMAT_STR)
-    ''':type str'''
+    ''':type int'''
 
     # Character used to pad the string block
     PAD_CHAR = "\0"
+    ''':type str'''
 
     # Type stored by this class
     STORAGE_TYPE = Name
