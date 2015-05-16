@@ -60,10 +60,11 @@ class StorageManager:
         self.node_manager = GeneralStoreManager(NodeStore())
         self.property_manager = GeneralStoreManager(PropertyStore())
         self.relationship_manager = GeneralStoreManager(RelationshipStore())
+        self.array_manager = GeneralArrayManager()
 
         # Create combined object managers along with their cache handlers
         nodeprop = NodePropertyStore(self.node_manager, self.property_manager,
-                                     self.prop_string_manager)
+                                     self.prop_string_manager, self.array_manager)
         relprop = RelationshipPropertyStore(self.relationship_manager,
                                             self.property_manager)
         self.nodeprop = WriteBackCacheManager(nodeprop, self.MAX_CACHE_SIZE)
@@ -218,6 +219,8 @@ class StorageManager:
             # Create linked list of types for the created type
             for i, idx in enumerate(ids):
                 tt_name, tt_type = schema[i]
+                if tt_type.find("[]") > -1:
+                    tt_type = tt_type.replace("[]", "Array")
                 tt_name_id = type_type_name_manager.write_name(tt_name)
                 kwargs = {
                     "property_type": Property.PropertyType[tt_type],
@@ -373,9 +376,15 @@ class StorageManager:
                 elif i < len(prop_ids) - 1:
                     kwargs["next_prop_id"] = prop_ids[i + 1]
 
+                # string, so write name
                 if prop_type == Property.PropertyType.string:
                     kwargs["prop_block_id"] = \
                         self.prop_string_manager.write_name(prop_val)
+                # array, so use array manager
+                elif prop_type.value >= Property.PropertyType.intArray.value:
+                    kwargs["prop_block_id"] = \
+                        self.array_manager.write_array(prop_val, prop_type)
+                # otherwise primitive
                 else:
                     kwargs["prop_block_id"] = prop_val
                 stored_prop = self.property_manager.create_item(**kwargs)
@@ -396,7 +405,10 @@ class StorageManager:
     def get_property_value(self, prop):
         if prop.type == Property.PropertyType.string:
             return self.prop_string_manager.read_name_at_index(prop.propBlockId)
-        return prop.propBlockId
+        elif prop.type.value >= Property.PropertyType.intArray.value:
+            return self.array_manager.read_array_at_index(prop.propBlockId)
+        else:
+            return prop.propBlockId
 
     def get_node(self, index):
         nodeprop = self.nodeprop[index]
@@ -548,6 +560,14 @@ class StorageManager:
 
     @staticmethod
     def convert_to_value(s, given_type):
+        if given_type.name.find("Array") > -1:
+            # array type! so just map
+            base_type = Property.PropertyType[given_type.name.replace("Array", "")]
+            if s == "[]":
+                return []
+            else:
+                return map(lambda v: StorageManager.convert_to_value(v,
+                    base_type), s[1:-1].split(","))
         if given_type == Property.PropertyType.bool:
             if s.upper() == "TRUE":
                 return True

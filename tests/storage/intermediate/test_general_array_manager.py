@@ -78,6 +78,24 @@ class TestGeneralArrayManagerMethods(unittest.TestCase):
         # Make sure they are the same
         self.assertEqual(array, array_file)
 
+    def test_write_read_empty_array(self):
+        """
+        Test that writing an int array that spans multiple blocks works as
+        expected
+        """
+        array_manager = GeneralArrayManager(self.TEST_BLOCK_SIZE,
+                                            self.TEST_STRING_BLOCK_SIZE)
+
+        # Create an array and add it to the GeneralArrayStore
+        array = []
+        array_idx = array_manager.write_array(array,
+                                              Property.PropertyType.intArray)
+
+        # Read it back from the array manager
+        array_file = array_manager.read_array_at_index(array_idx)
+        # Make sure they are the same
+        self.assertEqual(array, array_file)
+
     def test_write_read_int_array(self):
         """
         Test that writing an int array that spans multiple blocks works as

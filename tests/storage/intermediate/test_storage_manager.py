@@ -64,11 +64,16 @@ class TestStorageManagerMethods(unittest.TestCase):
                 read_name_at_index(tt.typeName)
             tt_type = tt.propertyType.name
             s_name, s_type = schema[i]
+            if "[]" in s_type:
+                # The type name has Array in it but the way the schema reads it
+                # is with a []
+                s_type = s_type.replace("[]", "Array")
             self.assertEquals(tt_name, s_name)
             self.assertEquals(tt_type, s_type)
 
     def test_create_node_type(self):
-        schema = ( ("name", "string"), ("age", "int"), ("address", "string") )
+        schema = ( ("name", "string"), ("age", "int"), ("address", "string"),
+                    ("phones", "string[]") )
         t = self.sm.create_node_type("Person", schema)
         type_name = self.sm.nodeTypeNameManager.read_name_at_index(t.nameId)
         self.assertEquals(type_name, "Person")
@@ -77,13 +82,17 @@ class TestStorageManagerMethods(unittest.TestCase):
         self.check_type_types_with_schema(type_types, schema)
 
     def test_create_type_with_nodes(self):
-        t = self.sm.create_node_type("T", (("a", "int"),("c", "string"),))
+        t = self.sm.create_node_type("T", (("a", "int"),("c", "string"),
+            ("d", "int[]")))
         n1, p1 = self.sm.insert_node(t, ((Property.PropertyType.int, 1),
-                                         (Property.PropertyType.string, "a")))
+                                         (Property.PropertyType.string, "a"),
+                                         (Property.PropertyType.intArray, [1])))
         n2, p2 = self.sm.insert_node(t, ((Property.PropertyType.int, 2),
-                                         (Property.PropertyType.string, "b")))
+                                         (Property.PropertyType.string, "b"),
+                                         (Property.PropertyType.intArray, [2])))
         n3, p3 = self.sm.insert_node(t, ((Property.PropertyType.int, 3),
-                                         (Property.PropertyType.string, "c")))
+                                         (Property.PropertyType.string, "c"),
+                                         (Property.PropertyType.intArray, [3])))
         n1i, p1i = n1.index, [p1[0].index, p1[1].index]
         n2i, p2i = n2.index, [p2[0].index, p2[1].index]
         n3i, p3i = n3.index, [p3[0].index, p3[1].index]
@@ -269,3 +278,5 @@ class TestStorageManagerMethods(unittest.TestCase):
         self.assertEquals(self.sm.convert_to_value('false', Property.PropertyType.bool), False)
         self.assertEquals(self.sm.convert_to_value('34', Property.PropertyType.int), 34)
         self.assertEquals(self.sm.convert_to_value('-34', Property.PropertyType.int), -34)
+        self.assertEquals(self.sm.convert_to_value('[]', Property.PropertyType.intArray), [])
+        self.assertEquals(self.sm.convert_to_value('[3]', Property.PropertyType.intArray), [3])

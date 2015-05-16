@@ -1,4 +1,6 @@
 from graphene.errors import *
+from graphene.utils.conversion import TypeConversion
+from graphene.storage import Property
 
 class Query:
     def __init__(self, ident, name, oper, value):
@@ -72,7 +74,22 @@ class Query:
                 if len(tt) == 0:
                     raise NonexistentPropertyException("%s is not a valid property name." % name)
                 ttype = tt[0][1]
-                qc.append(Query(ident, name, oper, storage_manager.convert_to_value(value, ttype)))
+                if value == "[]":
+                    if ttype.value < Property.PropertyType.intArray.value:
+                        raise TypeMismatchException("Got empty array, but " \
+                                "expected value of type %s for property '%s'." \
+                                % (ttype, name))
+                    else:
+                        converted_value = []
+                else:
+                    value_type = TypeConversion.get_type_type_of_string(value)
+                    if value_type != ttype:
+                        raise TypeMismatchException("Got value of type %s, " \
+                            "but expected value of type %s for property '%s'." \
+                             % (value_type, ttype, name))
+                    else:
+                        converted_value = storage_manager.convert_to_value(value, ttype)
+                qc.append(Query(ident, name, oper, converted_value))
             else:
                 qc.append(q)
         return qc
