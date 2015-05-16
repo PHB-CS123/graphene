@@ -11,13 +11,15 @@ class TypeConversion:
             else:
                 return map(lambda v: TypeConversion.convert_to_value(v,
                     base_type), s[1:-1].split(","))
-        if given_type == Property.PropertyType.bool:
+        elif given_type == Property.PropertyType.bool:
             if s.upper() == "TRUE":
                 return True
             return False
-        if given_type == Property.PropertyType.int:
+        elif given_type == Property.PropertyType.float:
+            return float(s)
+        elif given_type == Property.PropertyType.int:
             return int(s)
-        if given_type == Property.PropertyType.string:
+        elif given_type == Property.PropertyType.string:
             return s[1:-1]
 
     @staticmethod
@@ -37,6 +39,9 @@ class TypeConversion:
                 return Property.PropertyType.undefined
         elif s.upper() == "TRUE" or s.upper() == "FALSE":
             return Property.PropertyType.bool
+        elif s.count(".") == 1 and (all(v.isdigit() for v in s.split(".")) or (
+                (s[0] == '-' or s[0] == '+') and all(lambda v: v.isdigit(), s[1:].split(".")))):
+            return Property.PropertyType.float
         elif s.isdigit() or \
             ((s[0] == '-' or s[0] == '+') and s[1:].isdigit()):
             return Property.PropertyType.int
