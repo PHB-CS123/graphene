@@ -88,7 +88,7 @@ class Query:
                             "but expected value of type %s for property '%s'." \
                              % (value_type, ttype, name))
                     else:
-                        converted_value = storage_manager.convert_to_value(value, ttype)
+                        converted_value = TypeConversion.convert_to_value(value, ttype)
                 qc.append(Query(ident, name, oper, converted_value))
             else:
                 qc.append(q)

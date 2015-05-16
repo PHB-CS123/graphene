@@ -557,22 +557,3 @@ class StorageManager:
             i += 1
             if relation is not None and relation.type == relation_type:
                 yield relation
-
-    @staticmethod
-    def convert_to_value(s, given_type):
-        if given_type.name.find("Array") > -1:
-            # array type! so just map
-            base_type = Property.PropertyType[given_type.name.replace("Array", "")]
-            if s == "[]":
-                return []
-            else:
-                return map(lambda v: StorageManager.convert_to_value(v,
-                    base_type), s[1:-1].split(","))
-        if given_type == Property.PropertyType.bool:
-            if s.upper() == "TRUE":
-                return True
-            return False
-        if given_type == Property.PropertyType.int:
-            return int(s)
-        if given_type == Property.PropertyType.string:
-            return s[1:-1]

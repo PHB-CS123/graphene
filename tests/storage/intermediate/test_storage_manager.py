@@ -271,12 +271,3 @@ class TestStorageManagerMethods(unittest.TestCase):
         # Check that nodes were updated
         self.assertEquals(n4.relId, rel5_idx)
         self.assertEquals(n3.relId, rel5_idx)
-
-    def test_convert_to_value(self):
-        self.assertEquals(self.sm.convert_to_value('"a"', Property.PropertyType.string), "a")
-        self.assertEquals(self.sm.convert_to_value('true', Property.PropertyType.bool), True)
-        self.assertEquals(self.sm.convert_to_value('false', Property.PropertyType.bool), False)
-        self.assertEquals(self.sm.convert_to_value('34', Property.PropertyType.int), 34)
-        self.assertEquals(self.sm.convert_to_value('-34', Property.PropertyType.int), -34)
-        self.assertEquals(self.sm.convert_to_value('[]', Property.PropertyType.intArray), [])
-        self.assertEquals(self.sm.convert_to_value('[3]', Property.PropertyType.intArray), [3])

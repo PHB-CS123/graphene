@@ -42,7 +42,7 @@ class InsertNodeCommand(Command):
                                     exp_tt, prop_name)
                         raise TypeMismatchException(err)
                     # Convert value and add to list
-                    conv_value = storage_manager.convert_to_value(prop, given_type)
+                    conv_value = TypeConversion.convert_to_value(prop, given_type)
                     print( conv_value, given_type)
                 properties.append((exp_tt, conv_value))
             final_types.append(node_type)

@@ -41,7 +41,7 @@ class InsertRelationCommand(Command):
                 raise TypeMismatchException("Got value of type %s, but"
                             " expected value of type %s for property '%s'." %
                             (given_type, expected_type, prop_name))
-            conv_value = storage_manager.convert_to_value(prop, given_type)
+            conv_value = TypeConversion.convert_to_value(prop, given_type)
             properties.append((given_type, conv_value))
         return properties
 
