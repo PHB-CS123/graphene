@@ -1,4 +1,5 @@
 from graphene.traversal.query import Query
+from graphene.expressions import AndOperator, OrOperator
 from graphene.storage import *
 
 class NodeIterator:
@@ -6,7 +7,7 @@ class NodeIterator:
         self.sm = storage_manager
         self.alias = match_node.name
         self.type_name = match_node.type
-        self.node_type, self.schema = storage_manager.get_node_data(match_node.type)
+        self.node_type, self.type_schema = storage_manager.get_node_data(match_node.type)
         # copy to ensure tuple in argument default is not modified
         self.queries = queries
 
@@ -20,13 +21,33 @@ class NodeIterator:
         else:
             return "NodeIterator[%s]" % key
 
+    @property
+    def schema(self):
+        if self.alias is not None:
+            return set("%s.%s" % (self.alias, tname) for tt, tname, ttype in self.type_schema)
+        else:
+            return set(tname for tt, tname, ttype in self.type_schema)
+
+    def add_query(self, query):
+        # We can only AND queries together, since ORing is not pushable down
+        if query.schema <= self.schema:
+            # Nothing there, so just replace
+            if self.queries is None:
+                self.queries = query
+            # Not an AndOperator, so create a new one
+            elif isinstance(self.queries, Query) or isinstance(self.queries, OrOperator):
+                self.queries = AndOperator([self.queries, query])
+            # AndOperator, so just tack on the query
+            elif isinstance(self.queries, AndOperator):
+                self.queries.children.append(query)
+
     def prop_to_dict(self, props):
         """
         Converts the provided property list into a dict corresponding to the key
         names (which may have identifiers)
         """
         result = {}
-        for i, tt_data in enumerate(self.schema):
+        for i, tt_data in enumerate(self.type_schema):
             tt, name, tt_type = tt_data
             # If there is an alias, create a key from it; i.e. if the type
             # identifier is t, then t.a works.

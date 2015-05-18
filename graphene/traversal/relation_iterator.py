@@ -1,15 +1,21 @@
 from graphene.traversal.query import Query
 from graphene.traversal.node_iterator import NodeIterator
 from graphene.storage import *
+from graphene.expressions import *
 
 class RelationIterator:
-    def __init__(self, storage_manager, match_rel, left_child, right_child, schema, queries=None):
+    def __init__(self, storage_manager, match_rel, left_child, right_child, schema):
         self.sm = storage_manager
         self.alias = match_rel.name
         self.type_name = match_rel.type
-        self.rel_type, self.schema = storage_manager.get_relationship_data(self.type_name)
-        # copy to ensure tuple in argument default is not modified
-        self.queries = queries
+        self.rel_type, self.type_schema = storage_manager.get_relationship_data(self.type_name)
+        # Queries that apply to the entire chunk but not specific children. This
+        # basically will only be queries that are ORs with schemas overlapping
+        # over parts of this iteration
+        self.queries = None
+        # Queries that apply only to the relationship (as if we were doing a
+        # node iterator on the relationship)
+        self.rel_queries = None
         self.left = left_child
         self.right = right_child
 
@@ -37,10 +43,53 @@ class RelationIterator:
             key = "%s:%s" % (self.alias, self.type_name)
         else:
             key = self.type_name
-        if isinstance(self.queries, Query):
-            return "RelationIterator[%s, %s: %s, %s]" % (self.left, key, self.queries, self.right)
+        if self.rel_queries is not None:
+            s = "RelationIterator[%s, %s: %s, %s]" % (self.left, key, self.rel_queries, self.right)
         else:
-            return "RelationIterator[%s, %s, %s]" % (self.left, key, self.right)
+            s = "RelationIterator[%s, %s, %s]" % (self.left, key, self.right)
+        if self.queries is not None:
+            s += "[%s]" % self.queries
+        return s
+
+    def get_rel_schema(self):
+        if self.alias is not None:
+            return set("%s.%s" % (self.alias, tname) for tt, tname, ttype in self.type_schema)
+        else:
+            return set(tname for tt, tname, ttype in self.type_schema)
+
+    @property
+    def schema(self):
+        return (self.get_rel_schema() | self.left.schema | self.right.schema)
+
+    def add_query(self, query):
+        # If it's part of the relation schema,
+        if query.schema <= self.get_rel_schema():
+            # Nothing there, so just replace
+            if self.rel_queries is None:
+                self.rel_queries = query
+            # Not an AndOperator, so create a new one
+            elif isinstance(self.rel_queries, Query) or isinstance(self.rel_queries, OrOperator):
+                self.rel_queries = AndOperator([self.rel_queries, query])
+            # AndOperator, so just tack on the query
+            elif isinstance(self.rel_queries, AndOperator):
+                self.rel_queries.children.append(query)
+        else:
+            if query.schema <= self.left.schema:
+                self.left.add_query(query)
+            elif query.schema <= self.right.schema:
+                self.right.add_query(query)
+            else:
+                # Do the same thing with our overall queries, since it applies
+                # to some subset of the entire schema
+                if self.queries is None:
+                    self.queries = query
+                # Not an AndOperator, so create a new one
+                elif isinstance(self.queries, Query) or isinstance(self.queries, OrOperator):
+                    self.queries = AndOperator([self.queries, query])
+                # AndOperator, so just tack on the query
+                elif isinstance(self.queries, AndOperator):
+                    self.queries.children.append(query)
+
 
     def __iter__(self):
         for relprop in self.sm.get_relations_of_type(self.rel_type):

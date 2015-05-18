@@ -17,3 +17,11 @@ class OrOperator:
 
     def __ne__(self, other):
         return not (self == other)
+
+    @property
+    def schema(self):
+        return reduce(lambda total, next: (total | next.schema), self.children, set())
+
+    def apply_to(self, tree):
+        # OR operator, so we can't split it
+        tree.add_query(self)

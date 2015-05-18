@@ -66,6 +66,18 @@ class Query:
     def __ne__(self, other):
         return not (self == other)
 
+    @property
+    def schema(self):
+        if self.ident is not None:
+            return set(["%s.%s" % (self.ident, self.name)])
+        else:
+            return set([self.name])
+
+    def apply_to(self, tree):
+        # if this schema is a subset of the tree schema, we can just apply it
+        if self.schema <= tree.schema:
+            tree.add_query(self)
+
     @staticmethod
     def reduce_operators(chain):
         """

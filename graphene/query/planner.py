@@ -7,28 +7,6 @@ class QueryPlanner:
     def __init__(self, storage_manager):
         self.sm = storage_manager
 
-    def reduce_query_chain(self, query, tree, schema):
-        """
-        Reduce a set of queries such that they only apply to the given schema.
-        """
-        print query, tree, schema
-        return query
-        new_chain = []
-        base_names = [n.split(".")[-1] for n, t in schema]
-        for qc in query_chain:
-            # Boolean logic, ignore for now
-            if type(qc) != tuple:
-                continue
-            # If the identifier doesn't exist or matches the alias given, check
-            # that the name is in base_names. Note that we do not check for
-            # duplicates! That is handled elsewhere.
-            elif (qc[0] == alias or qc[0] is None) and qc[1] in base_names:
-                new_chain.append(qc)
-            # TODO: Do we need this? So far nothing ever passes True to throw...
-            elif throw:
-                raise NonexistentPropertyException("No such property name: " + qc[1])
-        return Query.parse_chain(self.sm, new_chain, schema)
-
     def create_relation_tree(self, node_chain):
         """
         Creates a binary tree corresponding to how we will traverse relations.
@@ -56,7 +34,7 @@ class QueryPlanner:
             rel_schema = self.get_schema([rel])
 
             return RelationIterator(self.sm, rel,
-                self.create_relation_tree(left), right, rel_schema, None)
+                self.create_relation_tree(left), right, rel_schema)
 
     def get_schema(self, node_chain, fullset=False):
         """
@@ -156,7 +134,8 @@ class QueryPlanner:
 
         iter_tree = self.create_relation_tree(node_chain)
         query = Query.parse_chain(self.sm, query_chain, schema)
-        print self.reduce_query_chain(query, iter_tree, schema)
+        if query is not None:
+            query.apply_to(iter_tree)
 
         # TODO: Make it so NodeIterator and RelationIterator return same
         # kind of thing (i.e. RI returns (props, rightNode), NI returns a

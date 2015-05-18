@@ -17,3 +17,12 @@ class AndOperator:
 
     def __ne__(self, other):
         return not (self == other)
+
+    @property
+    def schema(self):
+        return reduce(lambda total, next: (total | next.schema), self.children, set())
+
+    def apply_to(self, tree):
+        # this is an and operator, so we can split these up!
+        for child in self.children:
+            tree.add_query(child)
