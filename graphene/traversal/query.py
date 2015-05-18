@@ -126,7 +126,7 @@ class Query:
                 # TODO: Check if this is actually correct...
                 tt = filter(lambda t: t[0] == name or t[0].split(".")[-1] == name, type_schema)
                 if len(tt) == 0:
-                    pass#raise NonexistentPropertyException("%s is not a valid property name." % name)
+                    raise NonexistentPropertyException("%s is not a valid property name." % name)
                 else:
                     ttype = tt[0][1]
                     qc[-1].append(Query(ident, name, oper, storage_manager.convert_to_value(value, ttype)))

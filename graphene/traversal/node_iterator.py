@@ -26,10 +26,10 @@ class NodeIterator:
         """
         Generate the schema for the node iterator
         """
+        schema = set(tname for tt, tname, ttype in self.type_schema)
         if self.alias is not None:
-            return set("%s.%s" % (self.alias, tname) for tt, tname, ttype in self.type_schema)
-        else:
-            return set(tname for tt, tname, ttype in self.type_schema)
+            schema = schema | set("%s.%s" % (self.alias, tname) for tt, tname, ttype in self.type_schema)
+        return schema
 
     def add_query(self, query):
         """
@@ -38,6 +38,7 @@ class NodeIterator:
         before.
         """
         # We can only AND queries together, since ORing is not pushable down
+        print query.schema, self.schema
         if query.schema <= self.schema:
             # Nothing there, so just replace
             if self.queries is None:

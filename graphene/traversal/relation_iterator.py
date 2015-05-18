@@ -25,7 +25,7 @@ class RelationIterator:
         names (which may have identifiers)
         """
         result = {}
-        for i, tt_data in enumerate(self.schema):
+        for i, tt_data in enumerate(self.type_schema):
             tt, name, tt_type = tt_data
             # If there is an alias, create a key from it; i.e. if the type
             # identifier is t, then t.a works.
@@ -55,10 +55,10 @@ class RelationIterator:
         """
         Generate the schema for the relation
         """
+        schema = set(tname for tt, tname, ttype in self.type_schema)
         if self.alias is not None:
-            return set("%s.%s" % (self.alias, tname) for tt, tname, ttype in self.type_schema)
-        else:
-            return set(tname for tt, tname, ttype in self.type_schema)
+            schema = schema | set("%s.%s" % (self.alias, tname) for tt, tname, ttype in self.type_schema)
+        return schema
 
     @property
     def schema(self):
@@ -109,8 +109,8 @@ class RelationIterator:
         for relprop in self.sm.get_relations_of_type(self.rel_type):
             rel = relprop.rel
             # Make sure relation matches queries provided
-            if isinstance(self.queries, Query):
-                if not self.queries.test(self.prop_to_dict(relprop.properties)):
+            if self.rel_queries is not None:
+                if not self.rel_queries.test(self.prop_to_dict(relprop.properties)):
                     continue
 
             # Right side will always be a NodeIterator (we branch to the left)
@@ -134,13 +134,29 @@ class RelationIterator:
                 # future chains can determine whether their left node
                 # corresponds to this right node)
                 if self.left.node_matches(left_node.properties):
-                    yield (left_node.properties + relprop.properties + \
-                            right_node.properties, right_node)
+                    all_props = left_node.properties + relprop.properties + \
+                                right_node.properties
+                    all_prop_dict = {}
+                    all_prop_dict.update(self.left.prop_to_dict(left_node.properties))
+                    all_prop_dict.update(self.prop_to_dict(relprop.properties))
+                    all_prop_dict.update(self.right.prop_to_dict(right_node.properties))
+                    if self.queries is not None:
+                        if not self.queries.test(all_prop_dict):
+                            continue
+                    yield (all_props, right_node)
             # Otherwise, we already chained from something else, so we just
             # check that the left node is the right node of something on the
             # left side of the iteration
             else:
                 for props, right in self.left:
                     if left_node.node == right.node:
-                        yield (props + relprop.properties + \
-                                right_node.properties, right_node)
+                        all_props = props + relprop.properties + \
+                                right_node.properties
+                        all_prop_dict = {}
+                        all_prop_dict.update(self.left.prop_to_dict(props))
+                        all_prop_dict.update(self.prop_to_dict(relprop.properties))
+                        all_prop_dict.update(self.right.prop_to_dict(right_node.properties))
+                        if self.queries is not None:
+                            if not self.queries.test(all_prop_dict):
+                                continue
+                        yield (all_props, right_node)
