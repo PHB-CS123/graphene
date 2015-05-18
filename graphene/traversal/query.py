@@ -84,7 +84,8 @@ class Query:
         Turns a nested list with boolean operators as strings into one with
         actual operator instances.
         """
-        if type(chain) != list:
+        if isinstance(chain, Query) or isinstance(chain, AndOperator) or \
+            isinstance(chain, OrOperator):
             # Just a query value, so return it
             return chain
         elif chain.count("OR") > 0:
