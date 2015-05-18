@@ -132,7 +132,10 @@ class QueryPlanner:
         # Gather results
         results = []
 
+        # Generate traversal tree
         iter_tree = self.create_relation_tree(node_chain)
+
+        # Apply query to tree if the query exists
         query = Query.parse_chain(self.sm, query_chain, schema)
         if query is not None:
             query.apply_to(iter_tree)

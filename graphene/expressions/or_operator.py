@@ -23,5 +23,8 @@ class OrOperator:
         return reduce(lambda total, next: (total | next.schema), self.children, set())
 
     def apply_to(self, tree):
+        """
+        Apply the current query to a traversal tree.
+        """
         # OR operator, so we can't split it
         tree.add_query(self)

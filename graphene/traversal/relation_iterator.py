@@ -52,6 +52,9 @@ class RelationIterator:
         return s
 
     def get_rel_schema(self):
+        """
+        Generate the schema for the relation
+        """
         if self.alias is not None:
             return set("%s.%s" % (self.alias, tname) for tt, tname, ttype in self.type_schema)
         else:
@@ -59,16 +62,26 @@ class RelationIterator:
 
     @property
     def schema(self):
+        """
+        Generate the schema for the relation iterator. Combines the relation
+        schema with the schemas of the left and right children.
+        """
         return (self.get_rel_schema() | self.left.schema | self.right.schema)
 
     def add_query(self, query):
-        # If it's part of the relation schema,
+        """
+        Adds a query to the current list of queries. Since ORs are not able to
+        be split, "adding" a query consists of ANDing it with whatever was there
+        before.
+        """
+        # If it's part of the relation schema, add to the relation queries
         if query.schema <= self.get_rel_schema():
             # Nothing there, so just replace
             if self.rel_queries is None:
                 self.rel_queries = query
             # Not an AndOperator, so create a new one
-            elif isinstance(self.rel_queries, Query) or isinstance(self.rel_queries, OrOperator):
+            elif isinstance(self.rel_queries, Query) \
+                    or isinstance(self.rel_queries, OrOperator):
                 self.rel_queries = AndOperator([self.rel_queries, query])
             # AndOperator, so just tack on the query
             elif isinstance(self.rel_queries, AndOperator):
@@ -84,7 +97,8 @@ class RelationIterator:
                 if self.queries is None:
                     self.queries = query
                 # Not an AndOperator, so create a new one
-                elif isinstance(self.queries, Query) or isinstance(self.queries, OrOperator):
+                elif isinstance(self.queries, Query) \
+                        or isinstance(self.queries, OrOperator):
                     self.queries = AndOperator([self.queries, query])
                 # AndOperator, so just tack on the query
                 elif isinstance(self.queries, AndOperator):

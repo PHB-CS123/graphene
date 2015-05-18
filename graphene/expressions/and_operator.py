@@ -23,6 +23,9 @@ class AndOperator:
         return reduce(lambda total, next: (total | next.schema), self.children, set())
 
     def apply_to(self, tree):
+        """
+        Apply the current query to a traversal tree.
+        """
         # this is an and operator, so we can split these up!
         for child in self.children:
             tree.add_query(child)

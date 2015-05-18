@@ -32,7 +32,7 @@ class Query:
         try:
             value, tt = prop_dict[key]
         except KeyError:
-            return False#raise NonexistentPropertyException("%s is not a valid property name." % key)
+            raise NonexistentPropertyException("%s is not a valid property name." % key)
         if self.oper == '=':
             return value == self.value
         if self.oper == '!=':

@@ -23,12 +23,20 @@ class NodeIterator:
 
     @property
     def schema(self):
+        """
+        Generate the schema for the node iterator
+        """
         if self.alias is not None:
             return set("%s.%s" % (self.alias, tname) for tt, tname, ttype in self.type_schema)
         else:
             return set(tname for tt, tname, ttype in self.type_schema)
 
     def add_query(self, query):
+        """
+        Adds a query to the current list of queries. Since ORs are not able to
+        be split, "adding" a query consists of ANDing it with whatever was there
+        before.
+        """
         # We can only AND queries together, since ORing is not pushable down
         if query.schema <= self.schema:
             # Nothing there, so just replace
