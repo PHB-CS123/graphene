@@ -99,15 +99,28 @@ class QueryPlanner:
             if type(qc) != tuple:
                 # Boolean logic, ignore for now
                 continue
+            left, test, right = qc
             # If there is an identifier, check that the requested property
             # exists in the schema
-            if qc[0] is not None:
-                key = "%s.%s" % (qc[0], qc[1])
+            if left[0] is not None:
+                key = "%s.%s" % (left[0], left[1])
                 if key not in schema_names:
                     raise NonexistentPropertyException("Property name `%s` does not exist." % key)
             # Otherwise check the base names
-            else:
-                num_occur = base_names.count(qc[1])
+            if type(right) is tuple:
+                # Checking with an identifier
+                key = "%s.%s" % (right[0], right[1])
+                if key not in schema_names:
+                    raise NonexistentPropertyException("Property name `%s` does not exist." % key)
+            # Then check base names for left and right
+            num_occur = base_names.count(left[1])
+            # Occurs more than once, it's ambiguous
+            if num_occur > 1:
+                raise AmbiguousPropertyException("Property name `%s` is ambiguous. Please add an identifier." % qc[1])
+            elif num_occur == 0:
+                raise NonexistentPropertyException("Property name `%s` does not exist." % qc[1])
+            if type(right) is tuple:
+                num_occur = base_names.count(right[1])
                 # Occurs more than once, it's ambiguous
                 if num_occur > 1:
                     raise AmbiguousPropertyException("Property name `%s` is ambiguous. Please add an identifier." % qc[1])

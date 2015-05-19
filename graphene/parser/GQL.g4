@@ -79,8 +79,13 @@ query_chain returns [queries]
   ;
 
 query
-  : name=ident test=logic_test val=(Literal | '[]')
-  {return ($name.ctx + ($test.text, $val.text))}
+  : name=ident test=logic_test (name2=ident | val=(Literal | '[]'))
+{
+if $name2.ctx is not None:
+  return ($name.ctx, $test.text, $name2.ctx)
+else:
+  return ($name.ctx, $test.text, $val.text)
+}
   ;
 
 

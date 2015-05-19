@@ -35,18 +35,29 @@ class Query:
             value, tt = prop_dict[key]
         except KeyError:
             raise NonexistentPropertyException("%s is not a valid property name." % key)
+        if type(self.value) is tuple:
+            if self.value[0] is not None:
+                key_right = "%s.%s" % self.value
+            else:
+                key_right = self.value[1]
+            try:
+                given_value, tt_right = prop_dict[key_right]
+            except KeyError:
+                raise NonexistentPropertyException("%s is not a valid property name." % key_right)
+        else:
+            given_value = self.value
         if self.oper == '=':
-            return value == self.value
+            return value == given_value
         if self.oper == '!=':
-            return value != self.value
+            return value != given_value
         if self.oper == '>=':
-            return value >= self.value
+            return value >= given_value
         if self.oper == '>':
-            return value > self.value
+            return value > given_value
         if self.oper == '<=':
-            return value <= self.value
+            return value <= given_value
         if self.oper == '<':
-            return value < self.value
+            return value < given_value
         # TODO: This should probably throw an error...
         return False
 
@@ -71,9 +82,18 @@ class Query:
     @property
     def schema(self):
         if self.ident is not None:
-            return set(["%s.%s" % (self.ident, self.name)])
+            s = set(["%s.%s" % (self.ident, self.name)])
         else:
-            return set([self.name])
+            s = set([self.name])
+
+        # right side is a name, so add that
+        if type(self.value) is tuple:
+            if self.value[0] is not None:
+                s.add("%s.%s" % self.value)
+            else:
+                s.add(self.value[1])
+
+        return s
 
     def apply_to(self, tree):
         # if this schema is a subset of the tree schema, we can just apply it
@@ -124,14 +144,17 @@ class Query:
         for q in chain:
             if type(q) == tuple:
                 # actual query
-                ident, name, oper, value = q
+                left, oper, value = q
+                ident, name = left
                 # check that the named property exists
                 # TODO: Check if this is actually correct...
                 tt = filter(lambda t: t[0] == name or t[0].split(".")[-1] == name, type_schema)
                 if len(tt) == 0:
                     raise NonexistentPropertyException("%s is not a valid property name." % name)
-                else:
-                    ttype = tt[0][1]
+                ttype = tt[0][1]
+                # If the value is actually another property, we can't know since
+                # it might be another schema
+                if type(value) is not tuple:
                     if value == "[]":
                         if ttype.value < Property.PropertyType.intArray.value:
                             raise TypeMismatchException("Got empty array, but " \
@@ -148,6 +171,8 @@ class Query:
                         else:
                             converted_value = TypeConversion.convert_to_value(value, ttype)
                     qc[-1].append(Query(ident, name, oper, converted_value))
+                else:
+                    qc[-1].append(Query(ident, name, oper, value))
             elif q == '(':
                 qc[-1].append([])
                 qc.append(qc[-1][-1])
