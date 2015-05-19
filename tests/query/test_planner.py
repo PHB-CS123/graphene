@@ -79,26 +79,26 @@ class TestQueryPlanner(unittest.TestCase):
         nc = (MatchNode("t", "T"),)
 
         # With identifier
-        qc = (('t', 'a', '=', '1'),)
+        qc = ((('t', 'a'), '=', '1'),)
         try:
             self.planner.check_query(self.planner.get_schema(nc), qc)
         except Exception:
             self.fail("check_query raised an Exception unexpectedly.")
 
         # Without identifier
-        qc = ((None, 'a', '=', '1'),)
+        qc = (((None, 'a'), '=', '1'),)
         try:
             self.planner.check_query(self.planner.get_schema(nc), qc)
         except Exception:
             self.fail("check_query raised an Exception unexpectedly.")
 
         # No such property
-        qc = ((None, 'b', '=', '1'),)
+        qc = (((None, 'b'), '=', '1'),)
         with self.assertRaises(NonexistentPropertyException):
             self.planner.check_query(self.planner.get_schema(nc), qc)
 
         # No such identifier
-        qc = (('s', 'a', '=', '1'),)
+        qc = ((('s', 'a'), '=', '1'),)
         with self.assertRaises(NonexistentPropertyException):
             self.planner.check_query(self.planner.get_schema(nc), qc)
 
@@ -106,32 +106,32 @@ class TestQueryPlanner(unittest.TestCase):
         nc = (MatchNode("t", "T"), MatchRelation("r", "R"), MatchNode("t2", "T"))
 
         # With identifier
-        qc = (('t', 'a', '=', '1'),)
+        qc = ((('t', 'a'), '=', '1'),)
         try:
             self.planner.check_query(self.planner.get_schema(nc), qc)
         except Exception:
             self.fail("check_query raised an Exception unexpectedly.")
 
-        qc = (('r', 'b', '=', '1'),)
+        qc = ((('r', 'b'), '=', '1'),)
         try:
             self.planner.check_query(self.planner.get_schema(nc), qc)
         except Exception:
             self.fail("check_query raised an Exception unexpectedly.")
 
         # Without identifier, ambiguous
-        qc = ((None, 'a', '=', '1'),)
+        qc = (((None, 'a'), '=', '1'),)
         with self.assertRaises(AmbiguousPropertyException):
             self.planner.check_query(self.planner.get_schema(nc), qc)
 
         # Without identifier, unambiguous
-        qc = ((None, 'b', '=', '1'),)
+        qc = (((None, 'b'), '=', '1'),)
         try:
             self.planner.check_query(self.planner.get_schema(nc), qc)
         except Exception:
             self.fail("check_query raised an Exception unexpectedly.")
 
         # No such identifier
-        qc = (('s', 'a', '=', '1'),)
+        qc = ((('s', 'a'), '=', '1'),)
         with self.assertRaises(NonexistentPropertyException):
             self.planner.check_query(self.planner.get_schema(nc), qc)
 
@@ -232,21 +232,21 @@ class TestQueryPlanner(unittest.TestCase):
         exp_schema = ['t.a', 'r.b', 't2.a', 'r2.b', 't3.a']
         # node queries
         exp_vals = [[1,2,2,6,3], [1,3,3,12,4], [1,3,3,15,5]]
-        schema, results = self.planner.execute((n1, r, n2, r2, n3), (('t','a','=','1'),), None)
+        schema, results = self.planner.execute((n1, r, n2, r2, n3), ((('t','a'),'=','1'),), None)
         self.assertListEqual(schema, exp_schema)
         self.assertListEqualUnsorted(results, exp_vals)
 
         exp_vals = [[1,3,3,12,4], [1,3,3,15,5], [2,6,3,12,4], [2,6,3,15,5]]
-        schema, results = self.planner.execute((n1, r, n2, r2, n3), (('t2','a','=','3'),), None)
+        schema, results = self.planner.execute((n1, r, n2, r2, n3), ((('t2','a'),'=','3'),), None)
         self.assertListEqualUnsorted(results, exp_vals)
 
         exp_vals = [[1,3,3,12,4], [2,6,3,12,4]]
-        schema, results = self.planner.execute((n1, r, n2, r2, n3), (('t3','a','=','4'),), None)
+        schema, results = self.planner.execute((n1, r, n2, r2, n3), ((('t3','a'),'=','4'),), None)
         self.assertListEqualUnsorted(results, exp_vals)
 
         # relation queries
         exp_vals = [[1,2,2,6,3]]
-        schema, results = self.planner.execute((n1, r, n2, r2, n3), (('r','b','=','2'),), None)
+        schema, results = self.planner.execute((n1, r, n2, r2, n3), ((('r','b'),'=','2'),), None)
         self.assertListEqualUnsorted(results, exp_vals)
 
     def test_execute_with_return(self):
@@ -275,7 +275,7 @@ class TestQueryPlanner(unittest.TestCase):
 
         # (t:T)-[r:R]->(t2:T)-[r2:R]->(t3:T) WHERE a = 1
         with self.assertRaises(AmbiguousPropertyException):
-            self.planner.execute((n1, r, n2, r2, n3), ((None, 'a', '=', '1'),), None)
+            self.planner.execute((n1, r, n2, r2, n3), (((None, 'a'), '=', '1'),), None)
 
         # (t:T)-[r:R]->(t2:T)-[r2:R]->(t3:T) RETURN a
         with self.assertRaises(AmbiguousPropertyException):

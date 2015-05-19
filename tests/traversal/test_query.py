@@ -94,38 +94,38 @@ class TestQuery(unittest.TestCase):
     def test_parse_chain(self):
         schema = (('t.a', Property.PropertyType.int),('t.b', Property.PropertyType.int))
 
-        chain = (('t','a','=','1'),)
+        chain = ((('t','a'),'=','1'),)
         self.assertEqual(Query.parse_chain(self.sm, chain, schema), Query('t','a','=', 1))
 
         # Booleans
-        chain = (('t','a','=','1'),'AND',('t','b','>','0'))
+        chain = ((('t','a'),'=','1'),'AND',(('t','b'),'>','0'))
         self.assertEqual(Query.parse_chain(self.sm, chain, schema),
             AndOperator([Query('t','a','=', 1), Query('t','b','>', 0)]))
 
-        chain = (('t','a','=','1'),'OR',('t','b','>','0'))
+        chain = ((('t','a'),'=','1'),'OR',(('t','b'),'>','0'))
         self.assertEqual(Query.parse_chain(self.sm, chain, schema),
             OrOperator([Query('t','a','=', 1), Query('t','b','>', 0)]))
 
         # Bad property
-        chain = (('t','c','>','0'),)
+        chain = ((('t','c'),'>','0'),)
         with self.assertRaises(NonexistentPropertyException):
             Query.parse_chain(self.sm, chain, schema)
 
         # Test parens
-        chain = (('t','a','=','1'),'OR',('t','b','>','0'),'AND',('t','b','<','3'))
+        chain = ((('t','a'),'=','1'),'OR',(('t','b'),'>','0'),'AND',(('t','b'),'<','3'))
         self.assertEqual(Query.parse_chain(self.sm, chain, schema),
             OrOperator([Query('t','a','=', 1), AndOperator([Query('t','b','>', 0), Query('t','b','<', 3)])]))
 
-        chain = ('(',('t','a','=','1'),'OR',('t','b','>','0'),')','AND',('t','b','<','3'))
+        chain = ('(',(('t','a'),'=','1'),'OR',(('t','b'),'>','0'),')','AND',(('t','b'),'<','3'))
         self.assertEqual(Query.parse_chain(self.sm, chain, schema),
             AndOperator([OrOperator([Query('t','a','=', 1), Query('t','b','>', 0)]), Query('t','b','<', 3)]))
 
         # Test uneven parens
-        chain = ('(',('t','a','=','1'),'OR',('t','b','>','0'),')','AND',('t','b','<','3'),')')
+        chain = ('(',(('t','a'),'=','1'),'OR',(('t','b'),'>','0'),')','AND',(('t','b'),'<','3'),')')
         with self.assertRaises(ValueError):
             Query.parse_chain(self.sm, chain, schema)
 
-        chain = ('(','(',('t','a','=','1'),'OR',('t','b','>','0'),')','AND',('t','b','<','3'))
+        chain = ('(','(',(('t','a'),'=','1'),'OR',(('t','b'),'>','0'),')','AND',(('t','b'),'<','3'))
         with self.assertRaises(ValueError):
             Query.parse_chain(self.sm, chain, schema)
 

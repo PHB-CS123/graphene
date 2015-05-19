@@ -109,23 +109,25 @@ class QueryPlanner:
             # Otherwise check the base names
             if type(right) is tuple:
                 # Checking with an identifier
-                key = "%s.%s" % (right[0], right[1])
-                if key not in schema_names:
-                    raise NonexistentPropertyException("Property name `%s` does not exist." % key)
+                if right[0] is not None:
+                    key = "%s.%s" % (right[0], right[1])
+                    if key not in schema_names:
+                        raise NonexistentPropertyException("Property name `%s` does not exist." % key)
             # Then check base names for left and right
-            num_occur = base_names.count(left[1])
-            # Occurs more than once, it's ambiguous
-            if num_occur > 1:
-                raise AmbiguousPropertyException("Property name `%s` is ambiguous. Please add an identifier." % qc[1])
-            elif num_occur == 0:
-                raise NonexistentPropertyException("Property name `%s` does not exist." % qc[1])
-            if type(right) is tuple:
+            if left[0] is None:
+                num_occur = base_names.count(left[1])
+                # Occurs more than once, it's ambiguous
+                if num_occur > 1:
+                    raise AmbiguousPropertyException("Property name `%s` is ambiguous. Please add an identifier." % left[1])
+                elif num_occur == 0:
+                    raise NonexistentPropertyException("Property name `%s` does not exist." % left[1])
+            if type(right) is tuple and right[0] is None:
                 num_occur = base_names.count(right[1])
                 # Occurs more than once, it's ambiguous
                 if num_occur > 1:
-                    raise AmbiguousPropertyException("Property name `%s` is ambiguous. Please add an identifier." % qc[1])
+                    raise AmbiguousPropertyException("Property name `%s` is ambiguous. Please add an identifier." % right[1])
                 elif num_occur == 0:
-                    raise NonexistentPropertyException("Property name `%s` does not exist." % qc[1])
+                    raise NonexistentPropertyException("Property name `%s` does not exist." % right[1])
 
     def execute(self, node_chain, query_chain, return_chain):
         """
