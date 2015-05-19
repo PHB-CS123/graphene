@@ -79,7 +79,7 @@ query_chain returns [queries]
   ;
 
 query
-  : name=ident test=logic_test val=Literal
+  : name=ident test=logic_test val=(Literal | '[]')
   {return ($name.ctx + ($test.text, $val.text))}
   ;
 
@@ -136,7 +136,7 @@ type_list returns [tds]
   ;
 
 prop_type : (T_INT | T_LONG | T_BOOL | T_SHORT
-            | T_CHAR | T_FLOAT | T_DOUBLE | T_STRING)
+            | T_CHAR | T_FLOAT | T_DOUBLE | T_STRING) ('[]')?
           ;
 
 type_decl
@@ -227,7 +227,7 @@ prop_list returns [props]
   ;
 
 prop_value
-  : (v=Literal)
+  : (v=(Literal | '[]'))
   {return $v.text}
   ;
 
@@ -237,10 +237,21 @@ insert_relation
   ;
 
 // Literals
-Literal : (StringLiteral | IntLiteral | BooleanLiteral) ;
-IntLiteral : DIGIT+;
+Literal : (ArrayLiteral | SingleLiteral);
+IntLiteral : ('-' | '+')? DIGIT+;
+FloatLiteral : ('-' | '+')? DIGIT+ '.' DIGIT* ;
 StringLiteral : '"' StringChars? '"' ;
 BooleanLiteral : (T R U E | F A L S E) ;
+StringArrayLiteral : StringLiteral (',' StringLiteral)*;
+IntArrayLiteral : IntLiteral (',' IntLiteral)*;
+BooleanArrayLiteral : BooleanLiteral (',' BooleanLiteral)*;
+FloatArrayLiteral : FloatLiteral (',' FloatLiteral)*;
+ArrayLiteral : '[' ( StringArrayLiteral
+               | IntArrayLiteral
+               | BooleanArrayLiteral
+               | FloatArrayLiteral
+               ) ']';
+SingleLiteral : (StringLiteral | IntLiteral | BooleanLiteral | FloatLiteral) ;
 
 // Keywords
 K_MATCH : M A T C H ;

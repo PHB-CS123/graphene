@@ -1,4 +1,6 @@
 from graphene.errors import *
+from graphene.utils.conversion import TypeConversion
+from graphene.storage import Property
 from graphene.expressions import AndOperator, OrOperator
 
 # Group a list based on a delimiter.
@@ -129,8 +131,22 @@ class Query:
                 if len(tt) == 0:
                     raise NonexistentPropertyException("%s is not a valid property name." % name)
                 else:
-                    ttype = tt[0][1]
-                    qc[-1].append(Query(ident, name, oper, storage_manager.convert_to_value(value, ttype)))
+                    if value == "[]":
+                    if ttype.value < Property.PropertyType.intArray.value:
+                        raise TypeMismatchException("Got empty array, but " \
+                                "expected value of type %s for property '%s'." \
+                                % (ttype, name))
+                    else:
+                        converted_value = []
+                else:
+                    value_type = TypeConversion.get_type_type_of_string(value)
+                    if value_type != ttype:
+                        raise TypeMismatchException("Got value of type %s, " \
+                            "but expected value of type %s for property '%s'." \
+                             % (value_type, ttype, name))
+                    else:
+                        converted_value = TypeConversion.convert_to_value(value, ttype)
+                    qc[-1].append(Query(ident, name, oper, converted_value))
             elif q == '(':
                 qc[-1].append([])
                 qc.append(qc[-1][-1])

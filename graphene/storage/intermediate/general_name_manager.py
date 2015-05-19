@@ -4,10 +4,10 @@ from graphene.storage.intermediate.general_store_manager import *
 
 class GeneralNameManager:
     """
-    Handles handles reading/writing variable-length names (ASCII strings)
+    Handles reading/writing variable-length names (ASCII strings)
     """
 
-    def __init__(self, filename, block_size):
+    def __init__(self, filename, block_size=10):
         """
         Creates a GeneralNameManager instance which handles reading/writing
         variable-length names (ASCII strings)
@@ -59,7 +59,7 @@ class GeneralNameManager:
         # Write it to the file
         self.storeManager.write_item(block)
         # First index in linked list
-        first_index = block.index
+        first_index = ids[0]
 
         # Create rest of linked list
         for i in range(1, length):
@@ -78,7 +78,7 @@ class GeneralNameManager:
                           'next_block': ids[i + 1],
                           'name': name_parts[i]}
             # Create next block
-            block = self.storeManager.create_item(**kwargs)
+            block = self.storeManager.create_item(ids[i], **kwargs)
             # Write it to the file
             self.storeManager.write_item(block)
 
@@ -104,7 +104,7 @@ class GeneralNameManager:
             # was broken (only part of a block was deleted)
             if name_block is None:
                 return None
-            elif isinstance(name_block, EOF):
+            elif name_block == EOF:
                 raise EOFError("Corrupted data, unexpected EOF.")
             # Add the next block name to the list
             names.append(name_block.name)
@@ -119,8 +119,8 @@ class GeneralNameManager:
 
         :param index: Index of name to delete
         :type index: int
-        :return: Whether the delete succeeded (0) or failed (-1)
-        :rtype: int
+        :return: Whether the delete succeeded
+        :rtype: bool
         """
         # Store the starting index to check if deletion is
         # starting from beginning of linked list
@@ -132,7 +132,7 @@ class GeneralNameManager:
             # Check if either the name was deleted, or the linked list
             # was broken (only part of a block was deleted)
             if name_block is None:
-                return -1
+                return False
             # Make sure that deletion is starting from start of the linked list
             elif index == start_index and name_block.previousBlock != 0:
                 raise IndexError("Cannot begin deletion from non-start index")
@@ -142,7 +142,7 @@ class GeneralNameManager:
             self.storeManager.delete_item_at_index(index)
             # Update index to the next index
             index = next_index
-        return 0
+        return True
 
     def split_name(self, name):
         """
@@ -165,6 +165,7 @@ class GeneralNameManager:
         :return: Starting index of name
         :rtype: int
         """
+        # Last index in the name store file
         last_index = self.storeManager.store.get_last_file_index()
         for idx in range(1, last_index):
             cur_name = self.storeManager.get_item_at_index(idx)

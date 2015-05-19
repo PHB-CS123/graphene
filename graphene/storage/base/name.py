@@ -8,16 +8,16 @@ class Name:
         :type index: int
         :param in_use: Whether the database is using the name
         :type in_use: bool
-        :param previous_block:
-        :type previous_block:
-        :param length:
-        :type length:
-        :param next_block:
-        :type next_block:
-        :param name:
-        :type name:
-        :return:
-        :rtype:
+        :param previous_block: Index of previous block of data
+        :type previous_block: int
+        :param length: Length of the name
+        :type length: int
+        :param next_block: Index of next block of data
+        :type next_block: int
+        :param name: Name part stored with this header
+        :type name: str
+        :return: Name instance with the specified values
+        :rtype: Name
         """
 
         # Index of the name is not stored in the NameStore

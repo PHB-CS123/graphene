@@ -5,7 +5,7 @@ from graphene.storage import StorageManager
 from graphene.expressions import *
 from graphene.traversal import *
 from graphene.utils.conversion import TypeConversion
-from graphene.errors import TypeMismatchException
+from graphene.errors import TypeMismatchException, BadPropertyException
 
 import itertools
 
@@ -28,6 +28,11 @@ class InsertRelationCommand(Command):
         :return: List of properties
         """
         properties = []
+        schema_len = len(schema)
+        num_props = len(prop_list)
+        if num_props != schema_len:
+            raise BadPropertyException("Expected %d propert%s, but got %d." % \
+                (schema_len, "y" if schema_len == 1 else "ies", num_props))
         for prop, schema_tt in zip(prop_list, schema):
             tt, prop_name, exp_tt = schema_tt
             given_type = TypeConversion.get_type_type_of_string(prop)
@@ -36,7 +41,7 @@ class InsertRelationCommand(Command):
                 raise TypeMismatchException("Got value of type %s, but"
                             " expected value of type %s for property '%s'." %
                             (given_type, expected_type, prop_name))
-            conv_value = storage_manager.convert_to_value(prop, given_type)
+            conv_value = TypeConversion.convert_to_value(prop, given_type)
             properties.append((given_type, conv_value))
         return properties
 
@@ -51,7 +56,7 @@ class InsertRelationCommand(Command):
         # Gather information about the relation: name, type, schema and properties
         rel_name = self.rel[0]
         rel_type, rel_schema = storage_manager.get_relationship_data(rel_name)
-        rel_props = self.parse_properties(self.rel[1], rel_schema, storage_manager)
+        rel_props = self.parse_properties(self.rel[1] or [], rel_schema, storage_manager)
 
         # Determine type and schema information for type 1 (the left side of the
         # relation)

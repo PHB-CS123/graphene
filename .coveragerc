@@ -19,6 +19,9 @@ exclude_lines =
     import
     from
 
+    # Do not test continue statements
+    continue
+
     ######### Storage #########
     # Don't complain if we don't hit IOErrors since these might be defensive
     except IOError

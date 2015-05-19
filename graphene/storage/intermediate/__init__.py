@@ -1,3 +1,4 @@
+from graphene.storage.intermediate.general_array_manager import GeneralArrayManager
 from graphene.storage.intermediate.general_store_manager import GeneralStoreManager
 from graphene.storage.intermediate.general_name_manager import GeneralNameManager
 from graphene.storage.intermediate.node_property_store import NodePropertyStore

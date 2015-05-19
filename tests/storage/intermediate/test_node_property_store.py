@@ -13,7 +13,10 @@ class TestNodePropertyStore(unittest.TestCase):
         self.sm = StorageManager()
         self.node_manager = self.sm.node_manager
         self.prop_manager = self.sm.property_manager
-        self.nodeprop = NodePropertyStore(self.node_manager, self.prop_manager)
+        self.prop_string_manager = self.sm.prop_string_manager
+        self.array_manager = self.sm.array_manager
+        self.nodeprop = NodePropertyStore(self.node_manager, self.prop_manager,
+            self.prop_string_manager, self.array_manager)
         self.type = self.sm.create_node_type("T", ())
         self.type_props = self.sm.create_node_type("R", (("a", "int"),))
 

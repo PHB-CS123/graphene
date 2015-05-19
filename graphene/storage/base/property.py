@@ -89,7 +89,7 @@ class Property:
         """
         return not (self == other)
 
-    def __str__(self):
+    def __repr__(self):
         """
         String representation of this property.
 
@@ -99,3 +99,4 @@ class Property:
                 self.nextPropId, self.propBlockId)
         return "Property: %d. Type: %s, nameID: %s, prevPropertyID: %s, " \
                "nextPropertyID: %s, propBlockID: %s" % args
+

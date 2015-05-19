@@ -26,12 +26,3 @@ class TestInsertNodeCommand(unittest.TestCase):
     def test_init(self):
         cmd = InsertNodeCommand("foo")
         assert cmd.node_prop_list == "foo"
-
-    # TODO: Put this in a place where it actually belongs...
-    def test_get_tt_of_string(self):
-        assert TypeConversion.get_type_type_of_string('"a"') == Property.PropertyType.string
-        assert TypeConversion.get_type_type_of_string('true') == Property.PropertyType.bool
-        assert TypeConversion.get_type_type_of_string('false') == Property.PropertyType.bool
-        assert TypeConversion.get_type_type_of_string('34') == Property.PropertyType.int
-        assert TypeConversion.get_type_type_of_string('3.4') == Property.PropertyType.undefined
-        assert TypeConversion.get_type_type_of_string('-34') == Property.PropertyType.int

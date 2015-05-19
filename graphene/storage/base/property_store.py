@@ -14,26 +14,27 @@ class PropertyStore(GeneralStore):
     # Format string used to compact header values
     # '=': native byte order representation, standard size, no alignment
     # '?': boolean
+    # 'B': unsigned char
     # 'I': unsigned int
-    STRUCT_HEADER_FORMAT_STR = "= ? I I I I "
+    HEADER_STRUCT_FORMAT_STR = "= ? B I I I "
     ''':type: str'''
 
     # Size of header
-    HEADER_SIZE = struct.calcsize(STRUCT_HEADER_FORMAT_STR)
+    HEADER_SIZE = struct.calcsize(HEADER_STRUCT_FORMAT_STR)
     ''':type: int'''
 
     # Format string used to read types other than floats and doubles
     # 'q': signed long long
-    STRUCT_REGULAR_FORMAT_STR = "q"
+    REGULAR_FORMAT_STR = "q"
     ''':type: str'''
 
     # Format string to handle float and double types
     # 'd': double
-    STRUCT_DECIMAL_FORMAT_STR = "d"
+    LONG_FORMAT_STR = "d"
     ''':type: str'''
 
     # Size of data block (same whether decimal or non-decimal: 8 bytes)
-    BLOCK_SIZE = struct.calcsize(STRUCT_REGULAR_FORMAT_STR)
+    BLOCK_SIZE = struct.calcsize(REGULAR_FORMAT_STR)
     ''':type: int'''
 
     # Name of PropertyStore File
@@ -51,7 +52,6 @@ class PropertyStore(GeneralStore):
         :return: PropertyStore instance for handling property records
         :rtype: PropertyStore
         """
-
         # Size of record will be the size of the header and the block itself
         record_size = self.HEADER_SIZE + self.BLOCK_SIZE
 
@@ -65,16 +65,16 @@ class PropertyStore(GeneralStore):
         :param index: Index of the property the packed data belongs to
         :type index: int
         :param packed_data: Packed binary data
+        :type packed_data: bytes
         :return: Property from packed data
         :rtype: Property
         """
-
         # Split the packed data into header and block
         header_data = packed_data[:self.HEADER_SIZE]
         block_data = packed_data[self.HEADER_SIZE:]
 
         # Unpack the header data using the header struct format
-        header_struct = struct.Struct(self.STRUCT_HEADER_FORMAT_STR)
+        header_struct = struct.Struct(self.HEADER_STRUCT_FORMAT_STR)
         unpacked_header_data = header_struct.unpack(header_data)
 
         # Get the property header components
@@ -96,26 +96,23 @@ class PropertyStore(GeneralStore):
         return Property(index, in_use, prop_type, key_index_id,
                         prev_prop_id, next_prop_id, prop_block_id)
 
-    def packed_data_from_item(self, db_property):
+    def packed_data_from_item(self, item):
         """
-        Creates packed data with the property structure to be written out
+        Creates packed data with the property given
 
-        :param db_property: Property to convert into packed data
-        :type db_property: Property
+        :param item: Property to convert into packed data
+        :type item: Property
         :return: Packed data
+        :rtype: bytes
         """
-
         # Pack the property header into a struct with the order
         # (inUse, type, keyIndexId, prevPropId, nextPropId)
-        property_struct = struct.Struct(self.STRUCT_HEADER_FORMAT_STR)
-        packed_header = property_struct.pack(db_property.inUse,
-                                             db_property.type.value,
-                                             db_property.nameId,
-                                             db_property.prevPropId,
-                                             db_property.nextPropId)
+        header_struct = struct.Struct(self.HEADER_STRUCT_FORMAT_STR)
+        packed_header = header_struct.pack(item.inUse, item.type.value,
+                                           item.nameId, item.prevPropId,
+                                           item.nextPropId)
         # Pack the data block
-        packed_block = self.value_to_data(db_property.type,
-                                          db_property.propBlockId)
+        packed_block = self.value_to_data(item.type, item.propBlockId)
         # Concatenate the two
         return packed_header + packed_block
 
@@ -126,8 +123,8 @@ class PropertyStore(GeneralStore):
         :return: Packed struct of 0s
         :rtype: bytes
         """
-        empty_struct = struct.Struct(self.STRUCT_HEADER_FORMAT_STR +
-                                     self.STRUCT_REGULAR_FORMAT_STR)
+        empty_struct = struct.Struct(self.HEADER_STRUCT_FORMAT_STR +
+                                     self.REGULAR_FORMAT_STR)
         packed_data = empty_struct.pack(0, 0, 0, 0, 0, 0)
         return packed_data
 
@@ -142,14 +139,14 @@ class PropertyStore(GeneralStore):
         :type packed_data: bytes
         :return: Value of type prop_type
         """
-        # Simple case, decimal can be either double or float
+        # Long values (8 bytes)
         if prop_type is Property.PropertyType.double or \
            prop_type is Property.PropertyType.float:
-            decimal_struct = struct.Struct(cls.STRUCT_DECIMAL_FORMAT_STR)
+            decimal_struct = struct.Struct(cls.LONG_FORMAT_STR)
             return decimal_struct.unpack(packed_data)[0]
 
         # Unpack the general data
-        general_struct = struct.Struct(cls.STRUCT_REGULAR_FORMAT_STR)
+        general_struct = struct.Struct(cls.REGULAR_FORMAT_STR)
         general_value = general_struct.unpack(packed_data)[0]
 
         # Character type stored as ASCII value
@@ -171,18 +168,18 @@ class PropertyStore(GeneralStore):
 
         :param prop_type: Property type of the value
         :type prop_type: PropertyType
-        :param value: Value to pack, with type prop_type
+        :param value: Value to pack with the given type
         :return: Packed value
         :rtype: bytes
         """
-        # Simple case, decimal can be either double or float
+        # Long values (8 bytes)
         if prop_type is Property.PropertyType.double or \
            prop_type is Property.PropertyType.float:
-            decimal_struct = struct.Struct(cls.STRUCT_DECIMAL_FORMAT_STR)
+            decimal_struct = struct.Struct(cls.LONG_FORMAT_STR)
             return decimal_struct.pack(value)
 
         # Create a struct for the other cases
-        general_struct = struct.Struct(cls.STRUCT_REGULAR_FORMAT_STR)
+        general_struct = struct.Struct(cls.REGULAR_FORMAT_STR)
 
         # Convert character into ASCII value
         if prop_type is Property.PropertyType.char:
