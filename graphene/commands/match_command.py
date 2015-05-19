@@ -8,7 +8,7 @@ from graphene.query.planner import QueryPlanner
 class MatchCommand(Command):
     def __init__(self, node_chain, query_chain, return_chain):
         self.nc = node_chain
-        self.qc = query_chain or ()
+        self.qc = query_chain
         self.rc = return_chain or ()
 
     def __repr__(self):
