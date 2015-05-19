@@ -79,7 +79,7 @@ query_chain returns [queries]
   ;
 
 query
-  : name=ident test=logic_test (name2=ident | val=(Literal | '[]'))
+  : name=ident test=logic_test (name2=ident | val=literal)
 {
 if $name2.ctx is not None:
   return ($name.ctx, $test.text, $name2.ctx)
@@ -231,10 +231,7 @@ prop_list returns [props]
   {return $props}
   ;
 
-prop_value
-  : (v=(Literal | '[]'))
-  {return $v.text}
-  ;
+prop_value : v=literal {return $v.text} ;
 
 insert_relation
   : K_RELATION (n1=node_query) (r=relation_with_props) (n2=node_query)
@@ -242,21 +239,21 @@ insert_relation
   ;
 
 // Literals
-Literal : (ArrayLiteral | SingleLiteral);
+
+array_literal
+  : '[' literal (',' literal)* ']'
+  | '[' ']'
+  ;
+
+literal
+  : IntLiteral | FloatLiteral | StringLiteral | BooleanLiteral
+  | array_literal // recursion
+  ;
+
 IntLiteral : ('-' | '+')? DIGIT+;
 FloatLiteral : ('-' | '+')? DIGIT+ '.' DIGIT* ;
 StringLiteral : '"' StringChars? '"' ;
 BooleanLiteral : (T R U E | F A L S E) ;
-StringArrayLiteral : StringLiteral (',' StringLiteral)*;
-IntArrayLiteral : IntLiteral (',' IntLiteral)*;
-BooleanArrayLiteral : BooleanLiteral (',' BooleanLiteral)*;
-FloatArrayLiteral : FloatLiteral (',' FloatLiteral)*;
-ArrayLiteral : '[' ( StringArrayLiteral
-               | IntArrayLiteral
-               | BooleanArrayLiteral
-               | FloatArrayLiteral
-               ) ']';
-SingleLiteral : (StringLiteral | IntLiteral | BooleanLiteral | FloatLiteral) ;
 
 // Keywords
 K_MATCH : M A T C H ;
