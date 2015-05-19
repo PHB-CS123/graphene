@@ -38,7 +38,6 @@ class NodeIterator:
         before.
         """
         # We can only AND queries together, since ORing is not pushable down
-        print query.schema, self.schema
         if query.schema <= self.schema:
             # Nothing there, so just replace
             if self.queries is None:
