@@ -72,15 +72,16 @@ class TestRelationshipTypeStoreMethods(unittest.TestCase):
 
     def test_write_read_1_relationship_type(self):
         """
-        Tests that the node written to the NodeStore is the node that is read.
+        Tests that the relationship type written to the RelationshipTypeStore
+        is the relationship type that is read.
         """
         relationship_type_store = RelationshipTypeStore()
 
-        # Create a node and add it to the NodeStore
+        # Create a relationship type and add it to the RelationshipTypeStore
         rel_type = RelationshipType(1, False, 1)
         relationship_type_store.write_item(rel_type)
 
-        # Read the node from the NodeStore file
+        # Read the relationship type from the RelationshipTypeStore file
         rel_type_file = relationship_type_store.item_at_index(rel_type.index)
 
         # Assert that the values are the same
@@ -88,21 +89,22 @@ class TestRelationshipTypeStoreMethods(unittest.TestCase):
 
     def test_write_read_2_relationship_types(self):
         """
-        Tests when 2 nodes are written after 1 node to the NodeStore
+        Tests when 2 relationship types are written after 1 relationship type
+        to the RelationshipTypeStore
         """
         relationship_type_store = RelationshipTypeStore()
 
-        # Create one node and write it to the NodeStore
+        # Create one relationship type and write it to the RelationshipTypeStore
         rel_type1 = RelationshipType(1, False, 1)
         relationship_type_store.write_item(rel_type1)
 
-        # Create 2 nodes and add them to the NodeStore
+        # Create 2 relationship types and add them to the RelationshipTypeStore
         rel_type2 = RelationshipType(2, False, 2)
         rel_type3 = RelationshipType(3, False, 3)
         relationship_type_store.write_item(rel_type2)
         relationship_type_store.write_item(rel_type3)
 
-        # Read the nodes from the NodeStore file
+        # Read the relationship types from the RelationshipTypeStore file
         rel_type1_file = relationship_type_store.item_at_index(rel_type1.index)
         rel_type2_file = relationship_type_store.item_at_index(rel_type2.index)
         rel_type3_file = relationship_type_store.item_at_index(rel_type3.index)
@@ -114,16 +116,17 @@ class TestRelationshipTypeStoreMethods(unittest.TestCase):
 
     def test_overwrite_relationship_type(self):
         """
-        Tests that overwriting a node in a database with 3 nodes works
+        Tests that overwriting a relationship type in a database with 3
+        relationship types works
         """
         relationship_type_store = RelationshipTypeStore()
 
-        # Create 3 nodes
+        # Create 3 relationship types
         rel_type1 = RelationshipType(1, False, 1)
         rel_type2 = RelationshipType(2, False, 2)
         rel_type3 = RelationshipType(3, False, 3)
 
-        # Write them to the nodestore
+        # Write them to the RelationshipTypeStore
         relationship_type_store.write_item(rel_type1)
         relationship_type_store.write_item(rel_type2)
         relationship_type_store.write_item(rel_type3)
@@ -155,16 +158,17 @@ class TestRelationshipTypeStoreMethods(unittest.TestCase):
 
     def test_delete_relationship_type(self):
         """
-        Tests that deleting 2 nodes in a database with 3 nodes works
+        Tests that deleting 2 relationship types in a database with 3
+        relationship types works
         """
         relationship_type_store = RelationshipTypeStore()
 
-        # Create 3 nodes
+        # Create 3 relationship types
         rel_type1 = RelationshipType(1, True, 1)
         rel_type2 = RelationshipType(2, True, 2)
         rel_type3 = RelationshipType(3, True, 3)
 
-        # Write them to the nodestore
+        # Write them to the RelationshipTypeStore
         relationship_type_store.write_item(rel_type1)
         relationship_type_store.write_item(rel_type2)
         relationship_type_store.write_item(rel_type3)
@@ -179,20 +183,19 @@ class TestRelationshipTypeStoreMethods(unittest.TestCase):
         rel_type3_file = relationship_type_store.item_at_index(rel_type3.index)
         self.assertEquals(rel_type3, rel_type3_file)
 
-        # Delete nodes 1 and 3
+        # Delete relationship types 1 and 3
         relationship_type_store.delete_item(rel_type1)
+        # Deleting from end of file, should return EOF when read
         relationship_type_store.delete_item(rel_type3)
 
-        # Verify deleted node is deleted
+        # Verify deleted relationship types are deleted
         deleted_rel_type1_file = \
             relationship_type_store.item_at_index(rel_type1.index)
         self.assertEquals(deleted_rel_type1_file, None)
-
-        # Verify unaffected node is as expected
-        rel_type2_file = relationship_type_store.item_at_index(rel_type2.index)
-        self.assertEquals(rel_type2, rel_type2_file)
-
-        # Verify deleted node is deleted
         deleted_rel_type3_file = \
             relationship_type_store.item_at_index(rel_type3.index)
-        self.assertEquals(deleted_rel_type3_file, None)
+        self.assertEquals(deleted_rel_type3_file, EOF)
+
+        # Verify unaffected relationship type is as expected
+        rel_type2_file = relationship_type_store.item_at_index(rel_type2.index)
+        self.assertEquals(rel_type2, rel_type2_file)

@@ -114,7 +114,7 @@ class GeneralArrayManager:
             # broken (only part of a block was deleted)
             if array_block is None:
                 return None
-            elif array_block == EOF:
+            elif array_block is EOF:
                 raise EOFError("Corrupted data, unexpected EOF.")
             # Get the type of the array
             array_type = array_block.type
@@ -150,7 +150,7 @@ class GeneralArrayManager:
             array_block = self.storeManager.get_item_at_index(index)
             # Check if either the array was deleted, or the linked list
             # was broken (only part of a block was deleted)
-            if array_block is None:
+            if array_block is None or array_block is EOF:
                 return False
             # Make sure that deletion is starting from start of the linked list
             elif index == start_index and array_block.previousBlock != 0:

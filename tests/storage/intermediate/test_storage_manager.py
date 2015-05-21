@@ -1,7 +1,9 @@
 import unittest
 
 from graphene.errors.storage_manager_errors import *
-from graphene.storage import (StorageManager, GrapheneStore, Property, Relationship, Node)
+from graphene.storage import (StorageManager, GrapheneStore, Property,
+                              Relationship, Node)
+from graphene.storage.base.general_store import EOF
 
 
 class TestStorageManagerMethods(unittest.TestCase):
@@ -89,18 +91,26 @@ class TestStorageManagerMethods(unittest.TestCase):
         n3i, p3i = n3.index, [p3[0].index, p3[1].index]
         idx = t.index
         self.sm.delete_node_type("T")
-        self.assertEquals(self.sm.nodeTypeManager.get_item_at_index(idx), None)
+        item = self.sm.nodeTypeManager.get_item_at_index(idx)
+        self.assertTrue(item is None or item is EOF)
         with self.assertRaises(TypeDoesNotExistException):
             self.sm.get_node_data("T")
-        self.assertEquals(self.sm.node_manager.get_item_at_index(n1i), None)
-        self.assertEquals(self.sm.node_manager.get_item_at_index(n2i), None)
-        self.assertEquals(self.sm.node_manager.get_item_at_index(n3i), None)
+        item = self.sm.node_manager.get_item_at_index(n1i)
+        self.assertTrue(item is None or item is EOF)
+        item = self.sm.node_manager.get_item_at_index(n2i)
+        self.assertTrue(item is None or item is EOF)
+        item = self.sm.node_manager.get_item_at_index(n3i)
+        self.assertTrue(item is None or item is EOF)
+
         for i in p1i:
-            self.assertEquals(self.sm.property_manager.get_item_at_index(i), None)
+            item = self.sm.property_manager.get_item_at_index(i)
+            self.assertTrue(item is None or item is EOF)
         for i in p2i:
-            self.assertEquals(self.sm.property_manager.get_item_at_index(i), None)
+            item = self.sm.property_manager.get_item_at_index(i)
+            self.assertTrue(item is None or item is EOF)
         for i in p3i:
-            self.assertEquals(self.sm.property_manager.get_item_at_index(i), None)
+            item = self.sm.property_manager.get_item_at_index(i)
+            self.assertTrue(item is None or item is EOF)
 
     def test_create_multiple_types(self):
         """
@@ -137,7 +147,8 @@ class TestStorageManagerMethods(unittest.TestCase):
         t = self.sm.create_node_type("Person", schema)
         idx = t.index
         self.sm.delete_node_type("Person")
-        self.assertEquals(self.sm.nodeTypeManager.get_item_at_index(idx), None)
+        item = self.sm.nodeTypeManager.get_item_at_index(idx)
+        self.assertTrue(item is None or item is EOF)
         with self.assertRaises(TypeDoesNotExistException):
             self.sm.get_node_data("Person")
 
@@ -146,7 +157,8 @@ class TestStorageManagerMethods(unittest.TestCase):
         t = self.sm.create_relationship_type("R", schema)
         idx = t.index
         self.sm.delete_relationship_type("R")
-        self.assertEquals(self.sm.relTypeManager.get_item_at_index(idx), None)
+        item = self.sm.relTypeManager.get_item_at_index(idx)
+        self.assertTrue(item is None or item is EOF)
         with self.assertRaises(TypeDoesNotExistException):
             self.sm.get_relationship_data("R")
 

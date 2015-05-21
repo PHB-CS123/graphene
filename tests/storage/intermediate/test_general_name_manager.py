@@ -104,19 +104,38 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
 
     def test_mangled_return_none(self):
         """
-        Test that when reading a mangled string, the method returns None
+        Test that when reading a mangled string, the method returns None.
+        Assuming the mangling is not at the end of the file
         """
         name_manager = GeneralNameManager(self.TEST_FILENAME,
                                           self.TEST_BLOCK_SIZE)
 
         # Create a name with a random length (longer than one block)
-        name = "a" * self.random_length()
+        name = "a" * (2 * self.TEST_BLOCK_SIZE + 1)
         # Write the name to the name store
         name_index = name_manager.write_name(name)
         # Mangle the name by deleting from the second block (first block intact)
         name_manager.storeManager.delete_item_at_index(name_index + 1)
         # Make sure that the read_name_at_index method returns None
         self.assertEquals(name_manager.read_name_at_index(name_index), None)
+
+    def test_mangled_return_EOF(self):
+        """
+        Test that when reading a mangled string, the method returns None.
+        Assuming the mangling is at the end of the file (the file is truncated)
+        """
+        name_manager = GeneralNameManager(self.TEST_FILENAME,
+                                          self.TEST_BLOCK_SIZE)
+
+        # Create a name with a random length (longer than one block)
+        name = "a" * (2 * self.TEST_BLOCK_SIZE)
+        # Write the name to the name store
+        name_index = name_manager.write_name(name)
+        # Mangle the name by deleting from the second block (first block intact)
+        name_manager.storeManager.delete_item_at_index(name_index + 1)
+        # Make sure that the read_name_at_index method returns None
+        with self.assertRaises(EOFError):
+            name_manager.read_name_at_index(name_index)
 
     def test_invalid_delete(self):
         """

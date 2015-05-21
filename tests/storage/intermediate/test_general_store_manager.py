@@ -82,40 +82,53 @@ class TestGeneralStoreManagerMethods(unittest.TestCase):
         store_manager.delete_item(item)
 
         # Read the item index to make sure the item is deleted
+        # Since the item is at the end of the file, the file will be truncated
+        # so this should return EOF
         item_read = store_manager.get_item_at_index(item.index)
-        self.assertEquals(item_read, None)
+        self.assertEquals(item_read, EOF)
 
     def test_get_indexes(self):
         """
         Test that get indexes returns the expected number of recycled IDs or
         last file indexes.
         """
+        # import pytest
+        # pytest.set_trace()
         store_manager = GeneralStoreManager(self.TEST_STORE())
-        # Get an index (should be the last file index)
-        index_list = store_manager.get_indexes()
-        # Check that the last index is as expected the last file index
-        index = index_list[0]
-        self.assertEquals(index, store_manager.store.get_last_file_index())
-        # Create an item with the given index
-        store_manager.create_item(index)
+        # Get indexes (should be the last file indexes)
+        index_list = store_manager.get_indexes(2)
+        # Check that the indexes are as expected (last file indexes)
+        index1 = index_list[0]
+        index2 = index_list[1]
+        self.assertEquals(index1, store_manager.store.get_last_file_index())
+        self.assertEquals(index2, store_manager.store.get_last_file_index() + 1)
+        # Create and write two items with the given index
+        item1 = store_manager.create_item(index1)
+        item2 = store_manager.create_item(index2)
+        store_manager.write_item(item1)
+        store_manager.write_item(item2)
         # Delete the item, the index should now be in the recycled IDs
-        store_manager.delete_item_at_index(index)
+        store_manager.delete_item_at_index(index1)
 
         # Get two indexes, now one should be a recycled index i.e. 1, and the
         # other should be the last file index
         index_list = store_manager.get_indexes(2)
-        index1 = index_list[0]
+        index1_new = index_list[0]
         index2 = index_list[1]
         # Check that the first index is the recycled one
-        self.assertEquals(index, index1)
+        self.assertEquals(index1, index1_new)
         # And that the last index is the last file index
         self.assertEquals(store_manager.store.get_last_file_index(), index2)
 
         # Create two items with the indexes
-        store_manager.create_item(index1)
-        store_manager.create_item(index2)
+        item1 = store_manager.create_item(index1)
+        item2 = store_manager.create_item(index2)
         # And a third without an index argument
-        store_manager.create_item()
+        item3 = store_manager.create_item()
+        # Write the items
+        store_manager.write_item(item1)
+        store_manager.write_item(item2)
+        store_manager.write_item(item3)
         # Delete the second item (second index)
         store_manager.delete_item_at_index(index2)
 

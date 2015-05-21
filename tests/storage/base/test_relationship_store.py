@@ -214,16 +214,15 @@ class TestRelationshipStoreMethods(unittest.TestCase):
 
         # Delete relationships 1 and 3
         relationship_store.delete_item(rel1)
+        # Deleting from end of file, should return EOF when read
         relationship_store.delete_item(rel3)
 
-        # Verify deleted relationship is deleted
+        # Verify deleted relationships are deleted
         del_rel1_file = relationship_store.item_at_index(rel1.index)
         self.assertEquals(del_rel1_file, None)
+        del_rel3_file = relationship_store.item_at_index(rel3.index)
+        self.assertEquals(del_rel3_file, EOF)
 
         # Verify unaffected relationship is as expected
         rel2_file = relationship_store.item_at_index(rel2.index)
         self.assertEquals(rel2, rel2_file)
-
-        # Verify deleted relationship is deleted
-        del_rel3_file = relationship_store.item_at_index(rel3.index)
-        self.assertEquals(del_rel3_file, None)

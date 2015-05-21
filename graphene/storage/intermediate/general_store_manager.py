@@ -66,8 +66,11 @@ class GeneralStoreManager:
         """
         # Delete the item from the store
         self.store.delete_item_at_index(index)
-        # Add the index to the IdStore, so it can be recycled
-        self.idStore.store_id(index)
+        # Check if the ID is the last ID in the file, if so then don't add it
+        # to the ID store since the file will be truncated instead of zeroed
+        if index != self.store.get_last_file_index() - 1:
+            # Add the index to the IdStore, so it can be recycled
+            self.idStore.store_id(index)
 
     def get_item_at_index(self, index):
         """

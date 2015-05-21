@@ -188,11 +188,12 @@ class TestGeneralTypeTypeStoreMethods(unittest.TestCase):
 
         # Delete types of types 1 and 3
         type_type_store.delete_item(type_t1)
+        # Deleting from end of file, should return EOF when read
         type_type_store.delete_item(type_t3)
 
         # Verify deleted type of type is deleted
         deleted_type_t1_file = type_type_store.item_at_index(type_t1.index)
-        self.assertEquals(deleted_type_t1_file, None)
+        self.assertIsNone(deleted_type_t1_file)
 
         # Verify unaffected type of type is as expected
         type_t2_file = type_type_store.item_at_index(type_t2.index)
@@ -200,4 +201,4 @@ class TestGeneralTypeTypeStoreMethods(unittest.TestCase):
 
         # Verify deleted type of type is deleted
         deleted_type3_file = type_type_store.item_at_index(type_t3.index)
-        self.assertEquals(deleted_type3_file, None)
+        self.assertEquals(deleted_type3_file, EOF)

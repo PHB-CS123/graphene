@@ -41,6 +41,7 @@ class TestNodeStoreMethods(unittest.TestCase):
 
     def test_non_interface_file_creation(self):
         """
+        NOTE: GeneralStore Test, only tested here
         Test that writing to a NodeStore does not fail when the db file
         was created outside of the interface (i.e. touch <NodeStore.db>)
         This error was caused because when a file is touched, it might not
@@ -194,18 +195,51 @@ class TestNodeStoreMethods(unittest.TestCase):
         node3_file = node_store.item_at_index(node3.index)
         self.assertEquals(node3, node3_file)
 
-        # Delete nodes 1 and 3
+        # Delete nodes 1 and 2
         node_store.delete_item(node1)
+        # Deleting from end of file, should return EOF when read
         node_store.delete_item(node3)
 
-        # Verify deleted node is deleted
+        # Verify deleted nodes are deleted
         deleted_node1_file = node_store.item_at_index(node1.index)
-        self.assertEquals(deleted_node1_file, None)
+        self.assertIsNone(deleted_node1_file)
+        deleted_node3_file = node_store.item_at_index(node3.index)
+        self.assertEquals(deleted_node3_file, EOF)
 
         # Verify unaffected node is as expected
         node2_file = node_store.item_at_index(node2.index)
         self.assertEquals(node2, node2_file)
 
-        # Verify deleted node is deleted
-        deleted_node3_file = node_store.item_at_index(node3.index)
-        self.assertEquals(deleted_node3_file, None)
+    def test_file_truncation(self):
+        """
+        NOTE: GeneralStore Test, only tested here
+        Test that the file is truncated when deleting from the end of the
+        file
+        """
+        node_store = NodeStore()
+
+        # Create 3 nodes
+        node1 = Node(1, True, 1, 1, 1)
+        node2 = Node(2, True, 2, 2, 2)
+        node3 = Node(3, True, 3, 3, 3)
+
+        # Write them to the nodestore
+        node_store.write_item(node1)
+        node_store.write_item(node2)
+        node_store.write_item(node3)
+
+        # Verify that they are in the store as expected
+        node1_file = node_store.item_at_index(node1.index)
+        self.assertEquals(node1, node1_file)
+
+        node2_file = node_store.item_at_index(node2.index)
+        self.assertEquals(node2, node2_file)
+
+        node3_file = node_store.item_at_index(node3.index)
+        self.assertEquals(node3, node3_file)
+
+        # Delete node 3, make sure file reduced in size (truncated)
+        old_size = os.path.getsize(node_store.storeFile.name)
+        node_store.delete_item(node3)
+        new_size = os.path.getsize(node_store.storeFile.name)
+        self.assertNotEqual(old_size, new_size)

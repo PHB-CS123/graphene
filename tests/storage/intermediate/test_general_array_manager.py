@@ -260,24 +260,48 @@ class TestGeneralArrayManagerMethods(unittest.TestCase):
 
     def test_mangled_return_none(self):
         """
-        Test that when reading a mangled array, the method returns None
+        Test that when reading a mangled array, the method returns None.
+        Assuming the mangling is not at the end of the file
         """
         array_manager = GeneralArrayManager(self.TEST_BLOCK_SIZE,
                                             self.TEST_STRING_BLOCK_SIZE)
 
         # Create an arbitrary int array
         array_size = self.TEST_BLOCK_SIZE / 4
-        rand_size = randint(1, 3) * array_size + randint(0, array_size - 1)
+        rand_size = randint(2, 4) * array_size + randint(0, array_size - 1)
         array = [randint(-2**31, 2**31 - 1) for _ in range(0, rand_size + 1)]
         # Write it to the array manager
         array_idx = array_manager.write_array(array,
                                               Property.PropertyType.intArray)
 
-        # Mangle the array by deleting from the second block (first block intact)
+        # Mangle the array by deleting from the 2nd block (first block intact)
         array_manager.storeManager.delete_item_at_index(array_idx + 1)
 
-        # Make sure that the read_name_at_index method returns None
+        # Make sure that the read_name_at_index method returns None or EOF
         self.assertEquals(array_manager.read_array_at_index(array_idx), None)
+
+    def test_mangled_return_EOF(self):
+        """
+        Test that when reading a mangled array, the method returns None.
+        Assuming the mangling is at the end of the file (the file is truncated)
+        """
+        array_manager = GeneralArrayManager(self.TEST_BLOCK_SIZE,
+                                            self.TEST_STRING_BLOCK_SIZE)
+
+        # Create an arbitrary int array
+        array_size = self.TEST_BLOCK_SIZE / 4
+        rand_size = array_size + randint(0, array_size - 1)
+        array = [randint(-2**31, 2**31 - 1) for _ in range(0, rand_size + 1)]
+        # Write it to the array manager
+        array_idx = array_manager.write_array(array,
+                                              Property.PropertyType.intArray)
+
+        # Mangle the array by deleting from the 2nd block (first block intact)
+        array_manager.storeManager.delete_item_at_index(array_idx + 1)
+
+        # Make sure that the read_name_at_index method returns None or EOF
+        with self.assertRaises(EOFError):
+            array_manager.read_array_at_index(array_idx)
 
     def test_invalid_delete(self):
         """

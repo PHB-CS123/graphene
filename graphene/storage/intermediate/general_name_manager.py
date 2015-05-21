@@ -131,7 +131,7 @@ class GeneralNameManager:
             name_block = self.storeManager.get_item_at_index(index)
             # Check if either the name was deleted, or the linked list
             # was broken (only part of a block was deleted)
-            if name_block is None:
+            if name_block is None or name_block is EOF:
                 return False
             # Make sure that deletion is starting from start of the linked list
             elif index == start_index and name_block.previousBlock != 0:
