@@ -65,16 +65,29 @@ return_chain returns [chain]
 
 // Queries
 
-logic_op : (K_AND/* | K_OR*/) ;
+logic_op : (K_AND | K_OR) ;
 logic_test : (('!' | '>' | '<')? '=' | '<' | '>') ;
 
 query_chain returns [queries]
   @init {$queries = []}
-  : ( i1=ident t1=logic_test v1=Literal {$queries.append($i1.ctx + ($t1.text, $v1.text))})
+  : ('(' {$queries.append("(")})?
+    (q1=query {$queries.append($q1.ctx)})
     (op=logic_op {$queries.append($op.text)}
-     ii=ident ti=logic_test vi=Literal {$queries.append($ii.ctx + ($ti.text, $vi.text))})*
+     qi=query_chain {$queries += $qi.ctx})*
+    (')' {$queries.append(")")})?
   {return $queries}
   ;
+
+query
+  : name=ident test=logic_test (name2=ident | val=literal)
+{
+if $name2.ctx is not None:
+  return ($name.ctx, $test.text, $name2.ctx)
+else:
+  return ($name.ctx, $test.text, $val.text)
+}
+  ;
+
 
 node_query
   : (t=I_TYPE {$t=$t.text})
@@ -128,7 +141,7 @@ type_list returns [tds]
   ;
 
 prop_type : (T_INT | T_LONG | T_BOOL | T_SHORT
-            | T_CHAR | T_FLOAT | T_DOUBLE | T_STRING)
+            | T_CHAR | T_FLOAT | T_DOUBLE | T_STRING) ('[]')?
           ;
 
 type_decl
@@ -218,10 +231,7 @@ prop_list returns [props]
   {return $props}
   ;
 
-prop_value
-  : (v=Literal)
-  {return $v.text}
-  ;
+prop_value : v=literal {return $v.text} ;
 
 insert_relation
   : K_RELATION (n1=node_query) (r=relation_with_props) (n2=node_query)
@@ -229,8 +239,19 @@ insert_relation
   ;
 
 // Literals
-Literal : (StringLiteral | IntLiteral | BooleanLiteral) ;
-IntLiteral : DIGIT+;
+
+array_literal
+  : '[' literal (',' literal)* ']'
+  | '[' ']'
+  ;
+
+literal
+  : IntLiteral | FloatLiteral | StringLiteral | BooleanLiteral
+  | array_literal // recursion
+  ;
+
+IntLiteral : ('-' | '+')? DIGIT+;
+FloatLiteral : ('-' | '+')? DIGIT+ '.' DIGIT* ;
 StringLiteral : '"' StringChars? '"' ;
 BooleanLiteral : (T R U E | F A L S E) ;
 

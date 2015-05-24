@@ -37,6 +37,7 @@ class GeneralArrayManager:
         if array_type == Property.PropertyType.stringArray:
             array = self.string_ids_for_strings(array)
 
+
         # Get parts of the array (separated based on the block size and type)
         capacity = ArrayStore.capacity_for_type(array_type, self.blockSize)
         parts = self.array_chunks(array, capacity)
@@ -231,6 +232,8 @@ class GeneralArrayManager:
         :return: Broken up array
         :rtype: list
         """
+        if len(array) == 0:
+            return [[]]
         n = max(1, n)
         return [array[i:i + n] for i in range(0, len(array), n)]
 

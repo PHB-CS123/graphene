@@ -7,27 +7,7 @@ class QueryPlanner:
     def __init__(self, storage_manager):
         self.sm = storage_manager
 
-    def reduce_query_chain(self, query_chain, schema, alias=None, throw=False):
-        """
-        Reduce a set of queries such that they only apply to the given schema.
-        """
-        new_chain = []
-        base_names = [n.split(".")[-1] for n, t in schema]
-        for qc in query_chain:
-            # Boolean logic, ignore for now
-            if type(qc) != tuple:
-                continue
-            # If the identifier doesn't exist or matches the alias given, check
-            # that the name is in base_names. Note that we do not check for
-            # duplicates! That is handled elsewhere.
-            elif (qc[0] == alias or qc[0] is None) and qc[1] in base_names:
-                new_chain.append(qc)
-            # TODO: Do we need this? So far nothing ever passes True to throw...
-            elif throw:
-                raise NonexistentPropertyException("No such property name: " + qc[1])
-        return Query.parse_chain(self.sm, new_chain, schema)
-
-    def create_relation_tree(self, node_chain, query_chain):
+    def create_relation_tree(self, node_chain):
         """
         Creates a binary tree corresponding to how we will traverse relations.
         All leafs are node iterators, and all non-leafs are relation iterators.
@@ -39,25 +19,22 @@ class QueryPlanner:
         if len(node_chain) == 1:
             node = node_chain[0]
             schema = self.get_schema(node_chain)
-            qc = self.reduce_query_chain(query_chain, schema, node.name)
-            return NodeIterator(self.sm, node, schema, qc)
+            return NodeIterator(self.sm, node, schema, None)
         # Otherwise we want to create a RelationIterator
         else:
             full_schema = self.get_schema(node_chain)
 
             # Get right schema and query chain, reduced to the right schema
             right_schema = self.get_schema([node_chain[-1]])
-            right_qc = self.reduce_query_chain(query_chain, right_schema, node_chain[-1].name)
 
             left, rel, right = node_chain[:-2], node_chain[-2], \
-                NodeIterator(self.sm, node_chain[-1], right_schema, right_qc)
+                NodeIterator(self.sm, node_chain[-1], right_schema, None)
 
             # Get relation schema and query chain, reduced to the right schema
             rel_schema = self.get_schema([rel])
-            rel_qc = self.reduce_query_chain(query_chain, rel_schema, rel.name)
 
             return RelationIterator(self.sm, rel,
-                self.create_relation_tree(left, query_chain), right, rel_schema, rel_qc)
+                self.create_relation_tree(left), right, rel_schema)
 
     def get_schema(self, node_chain, fullset=False):
         """
@@ -115,24 +92,42 @@ class QueryPlanner:
         """
         schema_names = [n for n, tt in schema]
         base_names = [n.split(".")[-1] for n, tt in schema]
+        if query_chain is None:
+            # Nothing to check!
+            return
         for qc in query_chain:
             if type(qc) != tuple:
                 # Boolean logic, ignore for now
                 continue
+            left, test, right = qc
             # If there is an identifier, check that the requested property
             # exists in the schema
-            if qc[0] is not None:
-                key = "%s.%s" % (qc[0], qc[1])
+            if left[0] is not None:
+                key = "%s.%s" % (left[0], left[1])
                 if key not in schema_names:
                     raise NonexistentPropertyException("Property name `%s` does not exist." % key)
             # Otherwise check the base names
-            else:
-                num_occur = base_names.count(qc[1])
+            if type(right) is tuple:
+                # Checking with an identifier
+                if right[0] is not None:
+                    key = "%s.%s" % (right[0], right[1])
+                    if key not in schema_names:
+                        raise NonexistentPropertyException("Property name `%s` does not exist." % key)
+            # Then check base names for left and right
+            if left[0] is None:
+                num_occur = base_names.count(left[1])
                 # Occurs more than once, it's ambiguous
                 if num_occur > 1:
-                    raise AmbiguousPropertyException("Property name `%s` is ambiguous. Please add an identifier." % qc[1])
+                    raise AmbiguousPropertyException("Property name `%s` is ambiguous. Please add an identifier." % left[1])
                 elif num_occur == 0:
-                    raise NonexistentPropertyException("Property name `%s` does not exist." % qc[1])
+                    raise NonexistentPropertyException("Property name `%s` does not exist." % left[1])
+            if type(right) is tuple and right[0] is None:
+                num_occur = base_names.count(right[1])
+                # Occurs more than once, it's ambiguous
+                if num_occur > 1:
+                    raise AmbiguousPropertyException("Property name `%s` is ambiguous. Please add an identifier." % right[1])
+                elif num_occur == 0:
+                    raise NonexistentPropertyException("Property name `%s` does not exist." % right[1])
 
     def execute(self, node_chain, query_chain, return_chain):
         """
@@ -140,8 +135,6 @@ class QueryPlanner:
         Handles any projection necessary and creates a relation tree for
         traversal.
         """
-        if query_chain is None:
-            query_chain = ()
         if return_chain is None:
             return_chain = ()
         # Gather schema information from node chain. Collects all property names
@@ -154,15 +147,23 @@ class QueryPlanner:
         # Gather results
         results = []
 
+        # Generate traversal tree
+        iter_tree = self.create_relation_tree(node_chain)
+
+        # Apply query to tree if the query exists
+        query = Query.parse_chain(self.sm, query_chain, schema)
+        if query is not None:
+            query.apply_to(iter_tree)
+
         # TODO: Make it so NodeIterator and RelationIterator return same
         # kind of thing (i.e. RI returns (props, rightNode), NI returns a
         # NodeProperty instance)
         if len(node_chain) == 1:
             # NodeIterator returns slightly different structure than RelationshipIterator
-            for nodeprop in self.create_relation_tree(node_chain, query_chain):
+            for nodeprop in iter_tree:
                 results.append(nodeprop.properties)
         else:
-            for props, right in self.create_relation_tree(node_chain, query_chain):
+            for props, right in iter_tree:
                 results.append(props)
 
         num_unidentified = [nc.name for nc in node_chain].count(None)

@@ -2,7 +2,7 @@ from __future__ import print_function
 from graphene.commands.command import Command
 from graphene.storage import Property
 from graphene.utils.conversion import TypeConversion
-from graphene.errors import BadPropertyException
+from graphene.errors import BadPropertyException, TypeMismatchException
 import logging
 
 class InsertNodeCommand(Command):
@@ -26,15 +26,25 @@ class InsertNodeCommand(Command):
 
                 # Get the type of the inputted property and compare it to the
                 # type we're expecting
-                given_type = TypeConversion.get_type_type_of_string(prop)
-                expected_type = exp_tt
-                if given_type != expected_type:
-                    raise Exception("Got value of type %s, but expected value "
-                                    "of type %s for property '%s'." %
-                                    (given_type, expected_type, prop_name))
-                # Convert value and add to list
-                conv_value = storage_manager.convert_to_value(prop, given_type)
-                properties.append((given_type, conv_value))
+                if prop == "[]":
+                    # empty array, so we just have to check that the expected
+                    # type is some time of array
+                    if exp_tt.value < Property.PropertyType.intArray.value:
+                        raise TypeMismatchException("Got empty array, but " \
+                                "expected value of type %s for property '%s'." \
+                                % (exp_tt, prop_name))
+                    conv_value = []
+                else:
+                    given_type = TypeConversion.get_type_type_of_string(prop)
+                    if given_type != exp_tt:
+                        err = "Got value of type %s, but expected value of "\
+                                "type %s for property '%s'." % (given_type,
+                                    exp_tt, prop_name)
+                        raise TypeMismatchException(err)
+                    # Convert value and add to list
+                    conv_value = TypeConversion.convert_to_value(prop, given_type)
+                    print( conv_value, given_type)
+                properties.append((exp_tt, conv_value))
             final_types.append(node_type)
             final_props.append(properties)
         for node_type, properties in zip(final_types, final_props):

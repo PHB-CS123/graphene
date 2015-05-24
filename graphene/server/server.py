@@ -5,6 +5,8 @@ from graphene.errors.parser_error import ParserError
 from graphene.errors.parser_error_listener import ParserErrorListener
 from graphene.storage.storage_manager import StorageManager
 
+import time
+
 class GrapheneServer:
     """
     This class handles execution of commands as the server. It uses the parser
@@ -76,7 +78,10 @@ class GrapheneServer:
             if not cmds:
                 return False
             for cmd in cmds:
+                start_time = time.time()
                 cmd.execute(self.storage_manager)
+                end_time = time.time()
+                print("Command executed in %.3fs" % (end_time - start_time))
             return True
         except ParserError as e:
             if eat_errors:

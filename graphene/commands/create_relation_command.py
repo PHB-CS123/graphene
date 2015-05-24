@@ -14,5 +14,4 @@ class CreateRelationCommand(Command):
         :param storage_manager: manager that stores the relation to disk
         :return: None
         """
-        print self.rel_name, self.type_list
         storage_manager.create_relationship_type(self.rel_name, self.type_list)
