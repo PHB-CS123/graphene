@@ -92,10 +92,19 @@ class GeneralStore(object):
         :return: Last index of current file
         :rtype: int
         """
+        return self.get_file_size() / self.recordSize
+
+    def get_file_size(self):
+        """
+        Get the size of the currently open file
+
+        :return: Size of the file currently open (bytes)
+        :rtype: long
+        """
         # Seek to the end of the file
         self.storeFile.seek(0, os.SEEK_END)
 
-        return self.storeFile.tell() / self.recordSize
+        return self.storeFile.tell()
 
     def item_at_index(self, index):
         """
@@ -182,19 +191,19 @@ class GeneralStore(object):
         # Write the zeroes to the file
         self.write_to_index_packed_data(index, empty_struct)
 
-    def truncate_file(self, trunc_index=1):
+    def truncate_file(self, trunc_amt=1):
         """
         Truncates the file from the given trunc_index on (the trunc_index
         is the number of record sizes before the end of the file. If no
         trunc_index is given, one item is truncated by default.
 
-        :param trunc_index: Number of records to truncate (from end of file)
-        :type trunc_index: int
+        :param trunc_amt: Number of records to truncate (from end of file)
+        :type trunc_amt: int
         :return: Nothing
         :rtype: None
         """
         # Seek to trunc_index before the end of the file
-        self.storeFile.seek(-self.recordSize * trunc_index, os.SEEK_END)
+        self.storeFile.seek(-self.recordSize * trunc_amt, os.SEEK_END)
         # Truncate the file from this point on
         self.storeFile.truncate()
 

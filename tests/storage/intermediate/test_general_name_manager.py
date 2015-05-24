@@ -52,8 +52,8 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         """
         name_manager = GeneralNameManager(self.TEST_FILENAME,
                                           self.TEST_BLOCK_SIZE)
-        with self.assertRaises(EOFError):
-            name_manager.read_name_at_index(1)
+        result = name_manager.read_name_at_index(1)
+        self.assertEquals(result, EOF)
 
     def test_write_name_1_block(self):
         """
@@ -121,7 +121,7 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
 
     def test_mangled_return_EOF(self):
         """
-        Test that when reading a mangled string, the method returns None.
+        Test that when reading a mangled string, the method returns None or EOF.
         Assuming the mangling is at the end of the file (the file is truncated)
         """
         name_manager = GeneralNameManager(self.TEST_FILENAME,
@@ -133,9 +133,8 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         name_index = name_manager.write_name(name)
         # Mangle the name by deleting from the second block (first block intact)
         name_manager.storeManager.delete_item_at_index(name_index + 1)
-        # Make sure that the read_name_at_index method returns None
-        with self.assertRaises(EOFError):
-            name_manager.read_name_at_index(name_index)
+        # Make sure that the read_name_at_index method returns EOF
+        self.assertEquals(name_manager.read_name_at_index(name_index), EOF)
 
     def test_invalid_delete(self):
         """
@@ -229,8 +228,9 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
 
         # Delete the name from the name manager
         name_manager.delete_name_at_index(name_index1)
-        # Try to read the name, it should return None
-        self.assertEquals(name_manager.read_name_at_index(name_index1), None)
+        # Try to read the name, it should return None or EOF
+        result = name_manager.read_name_at_index(name_index1)
+        self.assertTrue(result is None or result is EOF)
 
     def test_delete_names_at_index_multiple(self):
         """
@@ -263,8 +263,9 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
 
         # Delete the 2nd name from the name store
         name_manager.delete_name_at_index(name_index2)
-        # Try to read the name, it should return None
-        self.assertEquals(name_manager.read_name_at_index(name_index2), None)
+        # Try to read the name, it should return None or EOF
+        name2_file = name_manager.read_name_at_index(name_index2)
+        self.assertTrue(name2_file is None or name2_file is EOF)
         # Check that the other two are as expected
         self.assertEquals(name1, name_manager.read_name_at_index(name_index1))
         self.assertEquals(name3, name_manager.read_name_at_index(name_index3))
@@ -272,18 +273,23 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         # Delete the 1st name from the name store
         name_manager.delete_name_at_index(name_index1)
         # Try to read the name, it should return None
-        self.assertEquals(name_manager.read_name_at_index(name_index1), None)
+        name1_file = name_manager.read_name_at_index(name_index1)
+        self.assertTrue(name1_file is None or name1_file is EOF)
         # Check that the other two are as expected
-        self.assertEquals(name_manager.read_name_at_index(name_index2), None)
+        name2_file = name_manager.read_name_at_index(name_index2)
+        self.assertTrue(name2_file is None or name2_file is EOF)
         self.assertEquals(name3, name_manager.read_name_at_index(name_index3))
 
         # Delete the 3rd name from the name store
         name_manager.delete_name_at_index(name_index3)
         # Try to read the name, it should return None
-        self.assertEquals(name_manager.read_name_at_index(name_index3), None)
+        name3_file = name_manager.read_name_at_index(name_index3)
+        self.assertTrue(name3_file is None or name3_file is EOF)
         # Check that the other two are as expected
-        self.assertEquals(name_manager.read_name_at_index(name_index2), None)
-        self.assertEquals(name_manager.read_name_at_index(name_index1), None)
+        name1_file = name_manager.read_name_at_index(name_index1)
+        self.assertTrue(name1_file is None or name1_file is EOF)
+        name2_file = name_manager.read_name_at_index(name_index2)
+        self.assertTrue(name2_file is None or name2_file is EOF)
 
     @classmethod
     def random_length(cls):

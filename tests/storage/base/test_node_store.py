@@ -239,7 +239,7 @@ class TestNodeStoreMethods(unittest.TestCase):
         self.assertEquals(node3, node3_file)
 
         # Delete node 3, make sure file reduced in size (truncated)
-        old_size = os.path.getsize(node_store.storeFile.name)
+        old_size = node_store.get_file_size()
         node_store.delete_item(node3)
-        new_size = os.path.getsize(node_store.storeFile.name)
+        new_size = node_store.get_file_size()
         self.assertNotEqual(old_size, new_size)

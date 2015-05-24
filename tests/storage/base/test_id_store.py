@@ -122,3 +122,55 @@ class TestIdStoreMethods(unittest.TestCase):
         no_id = id_store.get_id()
         # Check that the NO_ID value was returned
         self.assertEquals(no_id, IdStore.NO_ID)
+
+    def test_get_all_ids_none(self):
+        """
+        Test that when no IDs are available, the method returns None
+        """
+        id_store = IdStore(self.TEST_FILENAME)
+        self.assertIsNone(id_store.get_all_ids())
+
+    def test_get_all_ids(self):
+        """
+        Test that all IDs are returned from the ID store
+        """
+        id_store = IdStore(self.TEST_FILENAME)
+
+        # Write 3 IDs to the file
+        id_written_1 = 42
+        id_written_2 = 10
+        id_written_3 = 12
+        id_store.store_id(id_written_1)
+        id_store.store_id(id_written_2)
+        id_store.store_id(id_written_3)
+
+        # Make sure the 3 IDs are read
+        ids = [id_written_1, id_written_2, id_written_3]
+        self.assertEquals(id_store.get_all_ids(), ids)
+
+    def test_write_all_ids(self):
+        """
+        Test that overwriting an ID store works
+        """
+        id_store = IdStore(self.TEST_FILENAME)
+
+        # Write 3 IDs to the file
+        id_written_1 = 42
+        id_written_2 = 10
+        id_written_3 = 12
+        id_store.store_id(id_written_1)
+        id_store.store_id(id_written_2)
+        id_store.store_id(id_written_3)
+
+        # Make sure they are in the file as expected
+        ids = [id_written_1, id_written_2, id_written_3]
+        self.assertEquals(id_store.get_all_ids(), ids)
+
+        # Overwrite the file with new IDs
+        overwrite = [1, 2, 3]
+        try:
+            id_store.write_all_ids(overwrite)
+        except IOError:
+            self.fail("IdStore overwrite failed: id file failed to open.")
+        # Make sure the new IDs have been overwritten
+        self.assertEquals(id_store.get_all_ids(), overwrite)
