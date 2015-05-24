@@ -31,8 +31,10 @@ class GeneralStoreManager:
         # If no index is given, check for an available ID from the IdStore
         if index == 0:
             index = self.get_indexes()[0]
+        item = self.store.STORAGE_TYPE(index, **kwargs)
+        self.store.write_item(item)
         # Create a type based on the type our store stores
-        return self.store.STORAGE_TYPE(index, **kwargs)
+        return item
 
     def write_item(self, item):
         """

@@ -230,12 +230,10 @@ class StorageManager:
                 if i < len(ids) - 1:
                     kwargs["next_type"] = ids[i + 1]
                 prop = type_type_manager.create_item(**kwargs)
-                type_type_manager.write_item(prop)
             new_type = type_manager.create_item(first_type=ids[0],
                                                 name_id=name_index)
         else:
             new_type = type_manager.create_item(name_id=name_index)
-        type_manager.write_item(new_type)
         self.logger.debug("TypeManager wrote new type: %s" % new_type)
         return new_type
 

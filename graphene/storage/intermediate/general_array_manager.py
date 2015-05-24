@@ -63,8 +63,6 @@ class GeneralArrayManager:
                       'items': parts[0]}
         # Create first block using kwargs
         block = self.storeManager.create_item(ids[0], **kwargs)
-        # Write it to the file
-        self.storeManager.write_item(block)
         # First index in linked list
         first_index = ids[0]
 
@@ -88,8 +86,6 @@ class GeneralArrayManager:
                           'items': parts[i]}
             # Create next block
             block = self.storeManager.create_item(ids[i], **kwargs)
-            # Write it to the file
-            self.storeManager.write_item(block)
         # Return the first index of the array in the store
         return first_index
 
