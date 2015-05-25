@@ -13,7 +13,7 @@ class TestNodePropertyStore(unittest.TestCase):
         self.sm = StorageManager()
         self.relationship_manager = self.sm.relationship_manager
         self.prop_manager = self.sm.property_manager
-        self.relprop = RelationshipPropertyStore(self.relationship_manager, self.prop_manager)
+        self.relprop = RelationshipPropertyStore(self.sm)
         self.type = self.sm.create_relationship_type("RA", ())
         self.type_props = self.sm.create_relationship_type("RB", (("a", "int"),))
 
@@ -49,7 +49,6 @@ class TestNodePropertyStore(unittest.TestCase):
         idx = self.sm.insert_relation(self.type_props,
                 ((Property.PropertyType.int, 1),), self.n1, self.n2).index
         del self.relprop[idx]
-
 
     def test_del_twice(self):
         idx = self.sm.insert_relation(self.type, (), self.n1, self.n2).index

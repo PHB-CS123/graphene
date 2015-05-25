@@ -271,3 +271,96 @@ class TestStorageManagerMethods(unittest.TestCase):
         # Check that nodes were updated
         self.assertEquals(n4.relId, rel5_idx)
         self.assertEquals(n3.relId, rel5_idx)
+
+
+    def test_delete_relation(self):
+        t = self.sm.create_node_type("T", (("a", "int"),))
+        n1, p1 = self.sm.insert_node(t, ((Property.PropertyType.int, 2),))
+        n2, p2 = self.sm.insert_node(t, ((Property.PropertyType.int, 3),))
+        n3, p3 = self.sm.insert_node(t, ((Property.PropertyType.int, 5),))
+
+        r = self.sm.create_relationship_type("R",
+            (("b", "int"), ("c", "string"), ("d", "int[]")))
+
+        r1i = self.sm.insert_relation(r,
+            ((Property.PropertyType.int, 6),(Property.PropertyType.string, "a"),
+                (Property.PropertyType.intArray, [1,2])),
+            n1, n2).index
+        self.assertEqual(n1.relId, r1i)
+        self.assertEqual(n2.relId, r1i)
+
+        r2i = self.sm.insert_relation(r,
+            ((Property.PropertyType.int, 10),(Property.PropertyType.string, "b"),
+                (Property.PropertyType.intArray, [3,4])),
+            n3, n1).index
+        r1, rp1 = self.sm.relprop[r1i] # update relation 1
+        r2, rp2 = self.sm.relprop[r2i]
+        self.assertEqual(n3.relId, r2i)
+        self.assertEqual(n1.relId, r2i)
+        self.assertEqual(r1.firstPrevRelId, r2i)
+        self.assertEqual(r2.secondNextRelId, r1i)
+
+        r3i = self.sm.insert_relation(r,
+            ((Property.PropertyType.int, 15),(Property.PropertyType.string, "c"),
+                (Property.PropertyType.intArray, [5,6])),
+            n2, n3).index
+        r1, rp1 = self.sm.relprop[r1i] # update relation 1
+        r2, rp2 = self.sm.relprop[r2i] # update relation 2
+        r3, rp3 = self.sm.relprop[r3i]
+        self.assertEqual(n2.relId, r3i)
+        self.assertEqual(n3.relId, r3i)
+        self.assertEqual(r2.firstPrevRelId, r3i)
+        self.assertEqual(r1.secondPrevRelId, r3i)
+        self.assertEqual(r3.firstNextRelId, r1i)
+        self.assertEqual(r3.secondNextRelId, r2i)
+
+        del self.sm.relprop[r2i]
+
+        r1, rp1 = self.sm.relprop[r1i] # update relation 1
+        r3, rp3 = self.sm.relprop[r3i] # update relation 3
+        n1, p1 = self.sm.nodeprop[n1.index]
+        n2, p2 = self.sm.nodeprop[n2.index]
+        n3, p3 = self.sm.nodeprop[n3.index]
+
+        self.assertEqual(n1.relId, r1i)
+        self.assertEqual(n3.relId, r3i)
+
+        # Ensure every property is now None in the manager (i.e. it was deleted)
+        map(self.assertIsNone,
+            map(self.sm.property_manager.get_item_at_index,
+                map(lambda p: p.index, rp2)))
+        self.assertIsNone(self.sm.prop_string_manager.read_name_at_index(rp2[1].propBlockId))
+        self.assertIsNone(self.sm.array_manager.read_array_at_index(rp2[2].propBlockId))
+
+        self.assertEqual(r3.secondNextRelId, 0)
+        self.assertEqual(r1.firstPrevRelId, 0)
+
+
+        del self.sm.relprop[r3i]
+        r1, rp1 = self.sm.relprop[r1i] # update relation 1
+        n1, p1 = self.sm.nodeprop[n1.index]
+        n2, p2 = self.sm.nodeprop[n2.index]
+        n3, p3 = self.sm.nodeprop[n3.index]
+
+        map(self.assertIsNone,
+            map(self.sm.property_manager.get_item_at_index,
+                map(lambda p: p.index, rp3)))
+        self.assertIsNone(self.sm.prop_string_manager.read_name_at_index(rp3[1].propBlockId))
+        self.assertIsNone(self.sm.array_manager.read_array_at_index(rp3[2].propBlockId))
+
+        self.assertEqual(n3.relId, 0)
+        self.assertEqual(n2.relId, r1i)
+        self.assertEqual(r1.secondPrevRelId, 0)
+
+        del self.sm.relprop[r1i]
+        n1, p1 = self.sm.nodeprop[n1.index]
+        n2, p2 = self.sm.nodeprop[n2.index]
+
+        map(self.assertIsNone,
+            map(self.sm.property_manager.get_item_at_index,
+                map(lambda p: p.index, rp1)))
+        self.assertIsNone(self.sm.prop_string_manager.read_name_at_index(rp1[1].propBlockId))
+        self.assertIsNone(self.sm.array_manager.read_array_at_index(rp1[2].propBlockId))
+
+        self.assertEqual(n1.relId, 0)
+        self.assertEqual(n2.relId, 0)
