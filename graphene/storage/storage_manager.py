@@ -63,10 +63,8 @@ class StorageManager:
         self.array_manager = GeneralArrayManager()
 
         # Create combined object managers along with their cache handlers
-        nodeprop = NodePropertyStore(self.node_manager, self.property_manager,
-                                     self.prop_string_manager, self.array_manager)
-        relprop = RelationshipPropertyStore(self.relationship_manager,
-                                            self.property_manager)
+        nodeprop = NodePropertyStore(self)
+        relprop = RelationshipPropertyStore(self)
         self.nodeprop = WriteBackCacheManager(nodeprop, self.MAX_CACHE_SIZE)
         self.relprop = WriteBackCacheManager(relprop, self.MAX_CACHE_SIZE)
 
@@ -373,7 +371,7 @@ class StorageManager:
                 }
                 if i > 0:
                     kwargs["prev_prop_id"] = prop_ids[i - 1]
-                elif i < len(prop_ids) - 1:
+                if i < len(prop_ids) - 1:
                     kwargs["next_prop_id"] = prop_ids[i + 1]
 
                 # string, so write name
@@ -453,7 +451,7 @@ class StorageManager:
                 }
                 if i > 0:
                     prop_kwargs["prev_prop_id"] = prop_ids[i - 1]
-                elif i < len(prop_ids) - 1:
+                if i < len(prop_ids) - 1:
                     prop_kwargs["next_prop_id"] = prop_ids[i + 1]
 
                 if prop_type == Property.PropertyType.string:
@@ -462,6 +460,10 @@ class StorageManager:
                     # written?
                     prop_kwargs["prop_block_id"] = \
                         self.prop_string_manager.write_name(prop_val)
+                # array, so use array manager
+                elif prop_type.value >= Property.PropertyType.intArray.value:
+                    prop_kwargs["prop_block_id"] = \
+                        self.array_manager.write_array(prop_val, prop_type)
                 else:
                     prop_kwargs["prop_block_id"] = prop_val
                 stored_prop = self.property_manager.create_item(**prop_kwargs)
@@ -557,3 +559,85 @@ class StorageManager:
             i += 1
             if relation is not None and relation.type == relation_type:
                 yield relation
+
+    # --- Deletion methods --- #
+    def update_relation_links(self, node_id, prev_rel_id, next_rel_id):
+        if prev_rel_id == 0:
+            cur_node, cur_node_props = self.nodeprop[node_id]
+            cur_node.relId = next_rel_id
+            self.nodeprop[cur_node.index] = (cur_node, cur_node_props)
+            self.nodeprop.sync()
+            if next_rel_id != 0:
+                # set next relation's previous relation to 0 (since it is now
+                # the first relation of that node)
+                next_rel, next_props = self.relprop[next_rel_id]
+                if next_rel.firstNodeId == node_id:
+                    next_rel.firstPrevRelId = 0
+                else:
+                    next_rel.secondPrevRelId = 0
+                self.relprop[next_rel.index] = (next_rel, next_props)
+                self.relprop.sync()
+        else:
+            # set previous relation's next relation to this relation's next relation
+            prev_rel, prev_props = self.relprop[prev_rel_id]
+            if prev_rel.firstNodeId == node_id:
+                prev_rel.firstNextRelId = next_rel_id
+            else:
+                prev_rel.secondNextRelId = next_rel_id
+            self.relprop[prev_rel.index] = (prev_rel, prev_props)
+            if next_rel_id != 0:
+                # set next relation's previous relation to this relation's previous relation
+                next_rel, next_props = self.relprop[next_rel_id]
+                if next_rel.firstNodeId == node_id:
+                    next_rel.firstPrevRelId = prev_rel_id
+                else:
+                    next_rel.secondPrevRelId = prev_rel_id
+                self.relprop[next_rel.index] = (next_rel, next_props)
+            self.relprop.sync()
+
+    def delete_relation(self, rel):
+        self.logger.debug("Deleting relationship #%d" % rel.index)
+
+        cur_prop_id = rel.propId
+        while cur_prop_id != 0:
+            prop = self.property_manager.get_item_at_index(cur_prop_id)
+            cur_prop_id = prop.nextPropId
+            self.logger.debug("Deleting rel %d, prop #%d" % (rel.index, prop.index))
+            self.delete_property(prop)
+
+        self.update_relation_links(rel.firstNodeId, rel.firstPrevRelId, rel.firstNextRelId)
+        self.update_relation_links(rel.secondNodeId, rel.secondPrevRelId, rel.secondNextRelId)
+
+        self.relationship_manager.delete_item(rel)
+
+    def delete_property(self, prop):
+        if prop.type == Property.PropertyType.string:
+            # The property has a string type, so we have to make sure we delete
+            # that string
+            self.prop_string_manager.delete_name_at_index(prop.propBlockId)
+        elif prop.type.value >= Property.PropertyType.intArray.value:
+            # Property has an array type, so delete the array
+            self.array_manager.delete_array_at_index(prop.propBlockId)
+
+        self.property_manager.delete_item(prop)
+
+    def delete_node(self, node):
+        # Delete all properties referred to by this node
+        cur_prop_id = node.propId
+        while cur_prop_id != 0:
+            prop = self.property_manager.get_item_at_index(cur_prop_id)
+            cur_prop_id = prop.nextPropId
+            self.delete_property(prop)
+
+        cur_rel_id = node.relId
+        while cur_rel_id != 0:
+            rel = self.relationship_manager.get_item_at_index(cur_rel_id)
+            if rel.firstNodeId == node.index:
+                cur_rel_id = rel.firstNextRelId
+            else:
+                cur_rel_id = rel.secondNextRelId
+            self.delete_relation(rel)
+            del self.relprop[rel.index]
+            self.relprop.sync()
+
+        self.node_manager.delete_item(node)
