@@ -195,8 +195,11 @@ delete_node
   ;
 
 delete_relation
-  : K_RELATION (t=(I_RELATION|I_TYPE) {$t.text.isupper()}? {$t=$t.text})
-    '(' (q=query_chain)? ')'
+  : K_RELATION
+    ((nl=node_query) '-')?
+    (t=(I_RELATION|I_TYPE) {$t.text.isupper()}? {$t=$t.text})
+    ('(' (q=query_chain)? ')')?
+    ('->' (nr=node_query))?
   ;
 
 // SHOW command
@@ -219,7 +222,6 @@ insert_stmt returns [cmd]
   @init {$cmd = None}
   : K_INSERT ( inode=insert_node
              | irel=insert_relation
-             //| igraph=insert_graph
              )
   {
 if $inode.ctx is not None:
@@ -329,7 +331,7 @@ LINE_COMMENT
   : '//' ~[\r\n]* -> channel(HIDDEN)
   ;
 
-fragment OTHER_VALID : [_\-];
+fragment OTHER_VALID : [_];
 fragment DIGIT : [0-9];
 fragment LETTER : [A-Za-z];
 fragment UCASE : [A-Z];
