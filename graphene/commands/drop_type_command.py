@@ -1,6 +1,6 @@
 from graphene.commands.command import Command
 
-class DeleteTypeCommand(Command):
+class DropTypeCommand(Command):
     def __init__(self, data):
         self.type_name = data.t
 

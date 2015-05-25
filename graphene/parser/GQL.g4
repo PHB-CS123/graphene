@@ -15,10 +15,10 @@ stmt_list returns [stmts]
 
 stmt
   : ( c=match_stmt
-    | c=create_stmt | c=delete_stmt
+    | c=create_stmt | c=drop_stmt
     | c=exit_stmt
     | c=show_stmt | c=desc_stmt
-    | c=insert_stmt
+    | c=insert_stmt | c=delete_stmt
     )
   ;
 
@@ -154,29 +154,37 @@ create_relation
     (r=(I_RELATION|I_TYPE) {$r.text.isupper()}? {$r=$r.text})
     ('(' (tl=type_list)? ')')?;
 
-// DELETE command
-delete_stmt returns [cmd]
+// DROP command
+drop_stmt returns [cmd]
   @init {$cmd = None}
-  : K_DELETE ( dt=delete_type
-             | dr=delete_relation
-             | dn=delete_node
-             )
+  : K_DROP ( dt=drop_type
+           | dr=drop_relation
+           )
 {
 if $dt.ctx is not None:
-    $cmd = DeleteTypeCommand($dt.ctx)
+    $cmd = DropTypeCommand($dt.ctx)
 if $dr.ctx is not None:
-    $cmd = DeleteRelationCommand($dr.ctx)
-if $dn.ctx is not None:
-    $cmd = DeleteNodeCommand($dn.ctx)
+    $cmd = DropRelationCommand($dr.ctx)
 }
   ;
 
-delete_type
+drop_type
   : K_TYPE (t=I_TYPE {$t=$t.text})
   ;
 
-delete_relation
+drop_relation
   : K_RELATION (t=(I_RELATION|I_TYPE) {$t.text.isupper()}? {$t=$t.text})
+  ;
+
+// DELETE command
+delete_stmt returns [cmd]
+  @init {$cmd = None}
+  : K_DELETE ( dn=delete_node
+             )
+{
+if $dn.ctx is not None:
+    $cmd = DeleteNodeCommand($dn.ctx)
+}
   ;
 
 delete_node
@@ -266,6 +274,7 @@ BooleanLiteral : (T R U E | F A L S E) ;
 K_MATCH : M A T C H ;
 K_CREATE : C R E A T E ;
 K_DELETE : D E L E T E ;
+K_DROP : D R O P ;
 K_EXIT : E X I T ;
 K_QUIT : Q U I T ;
 K_SHOW : S H O W ;
