@@ -21,6 +21,10 @@ class GeneralArrayManager:
                                                      string_block_size)
         self.logger = logging.getLogger(self.__class__.__name__)
 
+    def __del__(self):
+        del self.stringStoreManager
+        del self.storeManager
+
     def write_array(self, array, array_type):
         """
         Write the variable-length array to the array store
