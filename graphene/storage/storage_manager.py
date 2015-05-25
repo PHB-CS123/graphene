@@ -129,7 +129,7 @@ class StorageManager:
         del self.relTypeTypeManager
         del self.relTypeTypeNameManager
 
-    # --- Node Storage Methods --- #
+# --- Node Storage Methods --- #
 
     def create_node_type(self, type_name, schema):
         """
@@ -165,7 +165,7 @@ class StorageManager:
         """
         return self.get_type_data(type_name, True)
 
-    # --- Relationship Storage Methods --- #
+# --- Relationship Storage Methods --- #
 
     def create_relationship_type(self, type_name, schema):
         """
@@ -201,7 +201,7 @@ class StorageManager:
         """
         return self.get_type_data(type_name, False)
 
-    # --- Private Storage Methods --- #
+# --- Private Storage Methods --- #
 
     def create_type(self, type_name, schema, node_flag):
         """
@@ -381,40 +381,56 @@ class StorageManager:
             cur_type_type_id = cur_type_type.nextType
         return cur_type, schema
 
-    # --- Node Specific Storage Methods --- #
-    # TODO: generalize the rest of the functions for relationships as well
+# --- Node Specific Storage Methods --- #
     def insert_node(self, node_type, node_properties):
+        """
+        Inserts a node with the given type and properties
+
+        :param node_type: Type of node
+        :type node_type: GeneralType
+        :param node_properties: List of tuples containing (PropertyType, Value)
+        :type node_properties: list
+        :return: Tuple with
+        :rtype:
+        """
         properties = []
         if len(node_properties) > 0:
+            # Get the needed number of IDs to store the properties
             prop_ids = self.property_manager.get_indexes(len(node_properties))
             self.logger.debug("Node properties: %s" % (node_properties,))
+            # Store all the properties
             for i, idx in enumerate(prop_ids):
+                # Get current property type and value for the type
                 prop_type, prop_val = node_properties[i]
                 kwargs = {
                     "index": idx,
                     "prop_type": prop_type
                 }
+                # Non edge cases, prop_ids non-zero
                 if i > 0:
                     kwargs["prev_prop_id"] = prop_ids[i - 1]
-                elif i < len(prop_ids) - 1:
+                if i < len(prop_ids) - 1:
                     kwargs["next_prop_id"] = prop_ids[i + 1]
 
-                # string, so write name
+                # String, so write name
                 if prop_type == Property.PropertyType.string:
                     kwargs["prop_block_id"] = \
                         self.prop_string_manager.write_name(prop_val)
-                # array, so use array manager
+                # Array, so use array manager
                 elif prop_type.value >= Property.PropertyType.intArray.value:
                     kwargs["prop_block_id"] = \
                         self.array_manager.write_array(prop_val, prop_type)
-                # otherwise primitive
+                # Otherwise primitive
                 else:
                     kwargs["prop_block_id"] = prop_val
+                # Create property and add it to the list of properties
                 stored_prop = self.property_manager.create_item(**kwargs)
                 properties.append(stored_prop)
             self.logger.debug("Final properties: %s" % (node_properties,))
+            # Create node with the ID of first property and index of node type
             new_node = self.node_manager.create_item(prop_id=prop_ids[0],
                                                      node_type=node_type.index)
+        # Node with no properties
         else:
             new_node = self.node_manager.create_item(node_type=node_type.index)
         # Update cache with new values and sync with store
@@ -422,10 +438,21 @@ class StorageManager:
         self.nodeprop.sync()
         return (new_node, properties)
 
+    def update_node(self):
+        #TODO
+        pass
+
     def get_node_type(self, node):
         return self.nodeTypeManager.get_item_at_index(node.nodeType)
 
     def get_property_value(self, prop):
+        """
+        Gets the data value for the given property
+
+        :param prop: Property to get value for
+        :type prop: Property
+        :return: Value
+        """
         if prop.type == Property.PropertyType.string:
             return self.prop_string_manager.read_name_at_index(prop.propBlockId)
         elif prop.type.value >= Property.PropertyType.intArray.value:
@@ -454,6 +481,7 @@ class StorageManager:
             if node is not None and node.type == node_type:
                 yield node
 
+# --- Relationship Specific Storage Methods --- #
     def insert_relation(self, rel_type, rel_properties, src_node, dst_node):
         """
         Creates a directed relationship (rel_type) from src_node to dst_node.
@@ -476,7 +504,7 @@ class StorageManager:
                 }
                 if i > 0:
                     prop_kwargs["prev_prop_id"] = prop_ids[i - 1]
-                elif i < len(prop_ids) - 1:
+                if i < len(prop_ids) - 1:
                     prop_kwargs["next_prop_id"] = prop_ids[i + 1]
 
                 if prop_type == Property.PropertyType.string:

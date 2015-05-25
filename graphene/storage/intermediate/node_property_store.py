@@ -9,11 +9,12 @@ class NodePropertyStore:
         Set up the node-property store, which associates
         nodes with their properties.
 
-        :type prop_manager: GeneralStoreManager
+        :param node_manager: Store manager for nodes
         :type node_manager: GeneralStoreManager
+        :param prop_manager: Store manager for properties
+        :type prop_manager: GeneralStoreManager
+        :param prop_string_manager: Store manager for strings
         :type prop_string_manager: GeneralNameManager
-        :param node_manager: store manager for nodes
-        :param prop_manager: store manager for properties
         :return:
         """
         self.node_manager = node_manager
@@ -41,8 +42,7 @@ class NodePropertyStore:
             for prop in properties:
                 self.prop_manager.write_item(prop)
         else:
-            # TODO: Throw an error here
-            pass
+            raise ValueError("Given value is not a Node instance")
 
     def __delitem__(self, key):
         node = self.node_manager.get_item_at_index(key)
