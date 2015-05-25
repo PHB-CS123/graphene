@@ -27,6 +27,9 @@ class GeneralNameManager:
         self.storeManager = GeneralStoreManager(NameStore(filename, block_size))
         self.logger = logging.getLogger(self.__class__.__name__)
 
+    def __del__(self):
+        del self.storeManager
+
     def write_name(self, name):
         """
         Write the given variable-length name to the name store

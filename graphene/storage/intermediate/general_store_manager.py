@@ -17,6 +17,10 @@ class GeneralStoreManager:
         self.store = store
         self.idStore = IdStore(store.filename + ".id")
 
+    def __del__(self):
+        del self.idStore
+        del self.store
+
     def create_item(self, index=0, **kwargs):
         """
         Creates an item with the type of the store being managed.

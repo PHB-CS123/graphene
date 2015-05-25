@@ -103,6 +103,31 @@ class StorageManager:
             GeneralNameManager(self.RELATIONSHIP_TYPE_TYPE_STORE_NAMES_FILENAME,
                                self.NAME_BLOCK_SIZE)
 
+    def __del__(self):
+        # Delete the property string manager
+        del self.prop_string_manager
+
+        # Delete the base managers
+        del self.node_manager
+        del self.property_manager
+        del self.relationship_manager
+        del self.array_manager
+
+        # Delete the node type managers
+        del self.nodeTypeManager
+        del self.nodeTypeNameManager
+
+        # Delete the node type-type managers
+        del self.nodeTypeTypeManager
+        del self.nodeTypeTypeNameManager
+
+        # Delete the relation type managers
+        del self.relTypeManager
+        del self.relTypeNameManager
+
+        # Delete the relation type-type managers
+        del self.relTypeTypeManager
+        del self.relTypeTypeNameManager
 
     # --- Node Storage Methods --- #
 
