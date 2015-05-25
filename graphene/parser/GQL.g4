@@ -159,12 +159,15 @@ delete_stmt returns [cmd]
   @init {$cmd = None}
   : K_DELETE ( dt=delete_type
              | dr=delete_relation
+             | dn=delete_node
              )
 {
 if $dt.ctx is not None:
     $cmd = DeleteTypeCommand($dt.ctx)
 if $dr.ctx is not None:
     $cmd = DeleteRelationCommand($dr.ctx)
+if $dn.ctx is not None:
+    $cmd = DeleteNodeCommand($dn.ctx)
 }
   ;
 
@@ -174,6 +177,10 @@ delete_type
 
 delete_relation
   : K_RELATION (t=(I_RELATION|I_TYPE) {$t.text.isupper()}? {$t=$t.text})
+  ;
+
+delete_node
+  : K_NODE (t=I_TYPE {$t=$t.text}) '(' (q=query_chain)? ')'
   ;
 
 // SHOW command

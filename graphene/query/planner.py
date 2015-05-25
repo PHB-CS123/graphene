@@ -129,23 +129,8 @@ class QueryPlanner:
                 elif num_occur == 0:
                     raise NonexistentPropertyException("Property name `%s` does not exist." % right[1])
 
-    def execute(self, node_chain, query_chain, return_chain):
-        """
-        Executes a query plan given a node chain, query chain and return chain.
-        Handles any projection necessary and creates a relation tree for
-        traversal.
-        """
-        if return_chain is None:
-            return_chain = ()
-        # Gather schema information from node chain. Collects all property names
+    def get_iter_tree(self, node_chain, query_chain):
         schema = self.get_schema(node_chain, fullset=True)
-
-        # Check query against schema to ensure no ambiguous or nonexistent properties are being queried
-        schema_names = [n for n, tt in schema]
-        self.check_query(schema, query_chain)
-
-        # Gather results
-        results = []
 
         # Generate traversal tree
         iter_tree = self.create_relation_tree(node_chain)
@@ -154,6 +139,29 @@ class QueryPlanner:
         query = Query.parse_chain(self.sm, query_chain, schema)
         if query is not None:
             query.apply_to(iter_tree)
+
+        return iter_tree
+
+    def execute(self, node_chain, query_chain, return_chain):
+        """
+        Executes a query plan given a node chain, query chain and return chain.
+        Handles any projection necessary and creates a relation tree for
+        traversal.
+        """
+        if return_chain is None:
+            return_chain = ()
+
+        # Gather schema information from node chain. Collects all property names
+        schema = self.get_schema(node_chain, fullset=True)
+
+        # Check query against schema to ensure no ambiguous or nonexistent properties are being queried
+        schema_names = [n for n, tt in schema]
+        self.check_query(schema, query_chain)
+
+        iter_tree = self.get_iter_tree(node_chain, query_chain)
+
+        # Gather results
+        results = []
 
         # TODO: Make it so NodeIterator and RelationIterator return same
         # kind of thing (i.e. RI returns (props, rightNode), NI returns a
