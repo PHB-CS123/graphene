@@ -197,7 +197,7 @@ class TestNameStoreMethods(unittest.TestCase):
 
         # Verify deleted name is deleted
         deleted_name_data1_file = name_store.item_at_index(name_data1.index)
-        self.assertEquals(deleted_name_data1_file, None)
+        self.assertIsNone(deleted_name_data1_file)
 
         # Verify unaffected name is as expected
         name_data2_file = name_store.item_at_index(name_data2.index)
@@ -205,5 +205,5 @@ class TestNameStoreMethods(unittest.TestCase):
 
         # Verify deleted name is deleted
         deleted_name_data3_file = name_store.item_at_index(name_data3.index)
-        self.assertEquals(deleted_name_data3_file, None)
+        self.assertEquals(deleted_name_data3_file, EOF)
 

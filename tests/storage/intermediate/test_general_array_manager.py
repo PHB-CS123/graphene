@@ -54,8 +54,8 @@ class TestGeneralArrayManagerMethods(unittest.TestCase):
         """
         array_manager = GeneralArrayManager(self.TEST_BLOCK_SIZE,
                                             self.TEST_STRING_BLOCK_SIZE)
-        with self.assertRaises(EOFError):
-            array_manager.read_array_at_index(1)
+        result = array_manager.read_array_at_index(1)
+        self.assertEquals(result, EOF)
 
     def test_write_read_array_1_block(self):
         """
@@ -278,24 +278,49 @@ class TestGeneralArrayManagerMethods(unittest.TestCase):
 
     def test_mangled_return_none(self):
         """
-        Test that when reading a mangled array, the method returns None
+        Test that when reading a mangled array, the method returns None.
+        Assuming the mangling is not at the end of the file
         """
         array_manager = GeneralArrayManager(self.TEST_BLOCK_SIZE,
                                             self.TEST_STRING_BLOCK_SIZE)
 
         # Create an arbitrary int array
         array_size = self.TEST_BLOCK_SIZE / 4
-        rand_size = randint(1, 3) * array_size + randint(0, array_size - 1)
+        rand_size = randint(2, 4) * array_size + randint(0, array_size - 1)
         array = [randint(-2**31, 2**31 - 1) for _ in range(0, rand_size + 1)]
         # Write it to the array manager
         array_idx = array_manager.write_array(array,
                                               Property.PropertyType.intArray)
 
-        # Mangle the array by deleting from the second block (first block intact)
+        # Mangle the array by deleting from the 2nd block (first block intact)
         array_manager.storeManager.delete_item_at_index(array_idx + 1)
 
-        # Make sure that the read_name_at_index method returns None
-        self.assertEquals(array_manager.read_array_at_index(array_idx), None)
+        # Make sure that the read_name_at_index method returns None or EOF
+        result = array_manager.read_array_at_index(array_idx)
+        self.assertTrue(result is None or result is EOF)
+
+    def test_mangled_return_EOF(self):
+        """
+        Test that when reading a mangled array, the method returns None.
+        Assuming the mangling is at the end of the file (the file is truncated)
+        """
+        array_manager = GeneralArrayManager(self.TEST_BLOCK_SIZE,
+                                            self.TEST_STRING_BLOCK_SIZE)
+
+        # Create an arbitrary int array
+        array_size = self.TEST_BLOCK_SIZE / 4
+        rand_size = array_size + randint(0, array_size - 1)
+        array = [randint(-2**31, 2**31 - 1) for _ in range(0, rand_size + 1)]
+        # Write it to the array manager
+        array_idx = array_manager.write_array(array,
+                                              Property.PropertyType.intArray)
+
+        # Mangle the array by deleting from the 2nd block (first block intact)
+        array_manager.storeManager.delete_item_at_index(array_idx + 1)
+
+        # Make sure that the read_name_at_index method returns None or EOF
+        result = array_manager.read_array_at_index(array_idx)
+        self.assertTrue(result is None or result is EOF)
 
     def test_invalid_delete(self):
         """
@@ -334,7 +359,7 @@ class TestGeneralArrayManagerMethods(unittest.TestCase):
 
         # Mangle the array by deleting from the 2nd block (first block intact)
         array_manager.storeManager.delete_item_at_index(array_idx + 1)
-        # Make sure that the read_name_at_index method returns None
+        # Make sure that the deleting the mangled array fails
         self.assertEquals(array_manager.delete_array_at_index(array_idx), False)
 
     def test_find_array_item(self):
@@ -401,8 +426,9 @@ class TestGeneralArrayManagerMethods(unittest.TestCase):
 
         # Delete the array from the array store
         array_manager.delete_array_at_index(array_idx)
-        # Try to read the array, it should return None
-        self.assertEquals(array_manager.read_array_at_index(array_idx), None)
+        # Try to read the array, it should return None or EOF
+        array = array_manager.read_array_at_index(array_idx)
+        self.assertTrue(array is None or array is EOF)
 
     def test_delete_arrays_at_index_multiple(self):
         """
@@ -438,24 +464,30 @@ class TestGeneralArrayManagerMethods(unittest.TestCase):
 
         # Delete the 2nd array from the array store
         array_manager.delete_array_at_index(array_idx2)
-        # Try to read the array, it should return None
-        self.assertEquals(array_manager.read_array_at_index(array_idx2), None)
+        # Try to read the array, it should return None or EOF
+        array2 = array_manager.read_array_at_index(array_idx2)
+        self.assertTrue(array2 is None or array2 is EOF)
         # Check that the other two are as expected
         self.assertEquals(array1, array_manager.read_array_at_index(array_idx1))
         self.assertEquals(array3, array_manager.read_array_at_index(array_idx3))
 
         # Delete the 1st array from the array store
         array_manager.delete_array_at_index(array_idx1)
-        # Try to read the array, it should return None
-        self.assertEquals(array_manager.read_array_at_index(array_idx1), None)
+        # Try to read the array, it should return None or EOF
+        array1 = array_manager.read_array_at_index(array_idx1)
+        self.assertTrue(array1 is None or array1 is EOF)
         # Check that the other two are as expected
-        self.assertEquals(array_manager.read_array_at_index(array_idx2), None)
+        array2 = array_manager.read_array_at_index(array_idx2)
+        self.assertTrue(array2 is None or array2 is EOF)
         self.assertEquals(array3, array_manager.read_array_at_index(array_idx3))
 
         # Delete the 3rd array from the array store
         array_manager.delete_array_at_index(array_idx3)
-        # Try to read the array, it should return None
-        self.assertEquals(array_manager.read_array_at_index(array_idx3), None)
+        # Try to read the array, it should return None or EOF
+        array3 = array_manager.read_array_at_index(array_idx3)
+        self.assertTrue(array3 is None or array3 is EOF)
         # Check that the other two are as expected
-        self.assertEquals(array_manager.read_array_at_index(array_idx2), None)
-        self.assertEquals(array_manager.read_array_at_index(array_idx1), None)
+        array2 = array_manager.read_array_at_index(array_idx2)
+        self.assertTrue(array2 is None or array2 is EOF)
+        array1 = array_manager.read_array_at_index(array_idx1)
+        self.assertTrue(array1 is None or array1 is EOF)

@@ -366,16 +366,16 @@ class TestPropertyStoreMethods(unittest.TestCase):
 
         # Delete properties 1 and 3
         property_store.delete_item(property1)
+        # Deleting from end of file, should return EOF when read
         property_store.delete_item(property3)
 
-        # Verify deleted property is deleted
+        # Verify deleted properties are deleted
         del_property1_file = property_store.item_at_index(property1.index)
-        self.assertEquals(del_property1_file, None)
+        self.assertIsNone(del_property1_file)
+        del_property3_file = property_store.item_at_index(property3.index)
+        self.assertEquals(del_property3_file, EOF)
 
         # Verify unaffected property is as expected
         property2_file = property_store.item_at_index(property2.index)
         self.assertEquals(property2, property2_file)
 
-        # Verify deleted property is deleted
-        del_property3_file = property_store.item_at_index(property3.index)
-        self.assertEquals(del_property3_file, None)
