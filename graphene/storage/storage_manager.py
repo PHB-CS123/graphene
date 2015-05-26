@@ -562,6 +562,21 @@ class StorageManager:
 
     # --- Deletion methods --- #
     def update_relation_links(self, node_id, prev_rel_id, next_rel_id):
+        """
+        Update the linked lists this relation was attached to for a given node
+        (left node or right node)
+
+        Three cases to handle:
+        1.  Previous and next relation ID = 0: This was the only relation
+            attached to the given node, so we don't have to do anything other
+            than remove the node's reference to this relation.
+        2.  Previous relation ID = 0: This was the first relation for the node,
+            so make whatever was after this relation the first relation for the
+            original node.
+        3.  Both previous and next relations exist: We are in the middle of the
+            list. Pop the relation from the linked list, reattaching the
+            relations on either side together.
+        """
         if prev_rel_id == 0:
             cur_node, cur_node_props = self.nodeprop[node_id]
             cur_node.relId = next_rel_id
@@ -585,6 +600,7 @@ class StorageManager:
             else:
                 prev_rel.secondNextRelId = next_rel_id
             self.relprop[prev_rel.index] = (prev_rel, prev_props)
+
             if next_rel_id != 0:
                 # set next relation's previous relation to this relation's previous relation
                 next_rel, next_props = self.relprop[next_rel_id]
@@ -596,21 +612,31 @@ class StorageManager:
             self.relprop.sync()
 
     def delete_relation(self, rel):
-        self.logger.debug("Deleting relationship #%d" % rel.index)
-
+        """
+        Deletes a relation and anything referencing it. Also makes sure to
+        update linked lists that may have passed through this relation.
+        """
+        # Delete the properties the relation references
         cur_prop_id = rel.propId
         while cur_prop_id != 0:
             prop = self.property_manager.get_item_at_index(cur_prop_id)
             cur_prop_id = prop.nextPropId
-            self.logger.debug("Deleting rel %d, prop #%d" % (rel.index, prop.index))
             self.delete_property(prop)
 
-        self.update_relation_links(rel.firstNodeId, rel.firstPrevRelId, rel.firstNextRelId)
-        self.update_relation_links(rel.secondNodeId, rel.secondPrevRelId, rel.secondNextRelId)
+        # Update the links between relations to ensure that the lists are
+        # attached properly
+        self.update_relation_links(rel.firstNodeId, rel.firstPrevRelId,
+            rel.firstNextRelId)
+        self.update_relation_links(rel.secondNodeId, rel.secondPrevRelId,
+            rel.secondNextRelId)
 
+        # Delete relation itself
         self.relationship_manager.delete_item(rel)
 
     def delete_property(self, prop):
+        """
+        Deletes a property and, if necessary, the string or array it references.
+        """
         if prop.type == Property.PropertyType.string:
             # The property has a string type, so we have to make sure we delete
             # that string
@@ -619,9 +645,14 @@ class StorageManager:
             # Property has an array type, so delete the array
             self.array_manager.delete_array_at_index(prop.propBlockId)
 
+        # Delete property itself
+
         self.property_manager.delete_item(prop)
 
     def delete_node(self, node):
+        """
+        Deletes a node and everything that contains it as a reference.
+        """
         # Delete all properties referred to by this node
         cur_prop_id = node.propId
         while cur_prop_id != 0:
@@ -629,15 +660,20 @@ class StorageManager:
             cur_prop_id = prop.nextPropId
             self.delete_property(prop)
 
+        # Delete all relations that are attached to this node (since they can't
+        # be attached to nothing)
         cur_rel_id = node.relId
         while cur_rel_id != 0:
             rel = self.relationship_manager.get_item_at_index(cur_rel_id)
+            # Determine which list to pass through
             if rel.firstNodeId == node.index:
                 cur_rel_id = rel.firstNextRelId
             else:
                 cur_rel_id = rel.secondNextRelId
-            self.delete_relation(rel)
+            # Delete the cache instance of the relation (will trigger proper
+            # deletion of relation through storage manager too)
             del self.relprop[rel.index]
             self.relprop.sync()
 
+        # Delete node itself
         self.node_manager.delete_item(node)

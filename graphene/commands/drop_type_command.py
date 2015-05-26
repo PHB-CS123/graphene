@@ -1,6 +1,9 @@
 from graphene.commands.command import Command
 
 class DropTypeCommand(Command):
+    """
+    Used to delete node types from the database.
+    """
     def __init__(self, data):
         self.type_name = data.t
 
