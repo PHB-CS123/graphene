@@ -10,16 +10,23 @@ class IdStore:
     """
 
     # Format string used to compact these values
-    # '=': native byte order representation, standard size, no alignment
     # 'I': unsigned int
-    STRUCT_FORMAT_STR = "= I"
+    INT_FORMAT_STR = "I"
+    ''':type: str'''
+    # '=': native byte order representation, standard size, no alignment
+    ENDIAN_FORMAT_STR = "= "
+    ''':type: str'''
+    # Complete struct format string
+    STRUCT_FORMAT_STR = ENDIAN_FORMAT_STR + INT_FORMAT_STR
     ''':type: str'''
 
     # Size of an individual record (bytes)
     RECORD_SIZE = struct.calcsize(STRUCT_FORMAT_STR)
+    ''':type: int'''
 
     # Return value when no ID is available
     NO_ID = -1
+    ''':type: int'''
 
     # Type stored by this class
     STORAGE_TYPE = int
@@ -54,8 +61,19 @@ class IdStore:
                 # Open it so that it can be read/written
                 self.storeFile = open(file_path, "r+b")
         except IOError:
-            raise IOError("ERROR: unable to open IdStore file: " +
-                          file_path)
+            raise IOError("ERROR: unable to open IdStore file: " + file_path)
+
+    def get_file_size(self):
+        """
+        Get the size of the currently open file
+
+        :return: Size of the file currently open (bytes)
+        :rtype: long
+        """
+        # Seek to the end of the file
+        self.storeFile.seek(0, os.SEEK_END)
+
+        return self.storeFile.tell()
 
     def store_id(self, id_value):
         """
@@ -100,3 +118,51 @@ class IdStore:
         self.storeFile.truncate()
 
         return id_value
+
+    def get_all_ids(self):
+        """
+        Gets all the IDs from the file. Used for truncation and defragmentation
+
+        :return: List of IDs
+        :rtype: list
+        """
+        # Get the size of the file
+        amt_ids = self.get_file_size() / self.RECORD_SIZE
+        # No IDs available
+        if amt_ids == 0:
+            return None
+        else:
+            # Seek to begining of file
+            self.storeFile.seek(0, os.SEEK_SET)
+            f_str = self.ENDIAN_FORMAT_STR + str(amt_ids) + self.INT_FORMAT_STR
+            ids_struct = struct.Struct(f_str)
+            ids = ids_struct.unpack(
+                self.storeFile.read(amt_ids * self.RECORD_SIZE))
+            return list(ids)
+
+    def write_all_ids(self, ids):
+        """
+        Overwrites the current ID file with the given IDs
+
+        :param ids: IDs to overwrite file with
+        :type ids: list
+        :return: Nothing
+        :rtype: None
+        """
+        # Get the existing filename
+        file_name = self.storeFile.name
+        try:
+            # Overwrite the old file
+            self.storeFile = open(file_name, "w")
+
+            # Write the new IDs
+            f_str = self.ENDIAN_FORMAT_STR + str(len(ids)) + self.INT_FORMAT_STR
+            ids_struct = struct.Struct(f_str)
+            ids_packed = ids_struct.pack(*ids)
+            self.storeFile.write(ids_packed)
+            self.storeFile.close()
+
+            # Re-open it so that it can be read/written
+            self.storeFile = open(file_name, "r+b")
+        except IOError:
+            raise IOError("ERROR: unable to open IdStore file: " + file_name)

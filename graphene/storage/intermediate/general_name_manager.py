@@ -1,6 +1,8 @@
 from graphene.storage.base.name_store import *
 from graphene.storage.intermediate.general_store_manager import *
 
+import logging
+
 
 class GeneralNameManager:
     """
@@ -23,6 +25,10 @@ class GeneralNameManager:
         self.blockSize = block_size
         # Create a manager for the name store
         self.storeManager = GeneralStoreManager(NameStore(filename, block_size))
+        self.logger = logging.getLogger(self.__class__.__name__)
+
+    def __del__(self):
+        del self.storeManager
 
     def write_name(self, name):
         """
@@ -105,7 +111,8 @@ class GeneralNameManager:
             if name_block is None:
                 return None
             elif name_block == EOF:
-                raise EOFError("Corrupted data, unexpected EOF.")
+                self.logger.warn("Corrupted data, unexpected EOF.")
+                return EOF
             # Add the next block name to the list
             names.append(name_block.name)
             # Update index with the index of the next block
@@ -131,7 +138,7 @@ class GeneralNameManager:
             name_block = self.storeManager.get_item_at_index(index)
             # Check if either the name was deleted, or the linked list
             # was broken (only part of a block was deleted)
-            if name_block is None:
+            if name_block is None or name_block is EOF:
                 return False
             # Make sure that deletion is starting from start of the linked list
             elif index == start_index and name_block.previousBlock != 0:

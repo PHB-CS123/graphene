@@ -2,7 +2,7 @@ from graphene.storage.intermediate.general_name_manager import *
 from graphene.storage.base.array_store import *
 
 from itertools import chain
-
+import logging
 
 class GeneralArrayManager:
     """
@@ -19,6 +19,11 @@ class GeneralArrayManager:
         # Create a manager for the strings in string arrays
         self.stringStoreManager = GeneralNameManager(self.STR_ARRAY_FILENAME,
                                                      string_block_size)
+        self.logger = logging.getLogger(self.__class__.__name__)
+
+    def __del__(self):
+        del self.stringStoreManager
+        del self.storeManager
 
     def write_array(self, array, array_type):
         """
@@ -31,8 +36,6 @@ class GeneralArrayManager:
         :return: Starting index of the stored array
         :rtype: int
         """
-        # TODO: subclass the linked list creation with the general_name_manager
-
         # Create an array with string IDs for all the string items
         if array_type == Property.PropertyType.stringArray:
             array = self.string_ids_for_strings(array)
@@ -115,8 +118,9 @@ class GeneralArrayManager:
             # broken (only part of a block was deleted)
             if array_block is None:
                 return None
-            elif array_block == EOF:
-                raise EOFError("Corrupted data, unexpected EOF.")
+            elif array_block is EOF:
+                self.logger.warn("Corrupted data, unexpected EOF.")
+                return EOF
             # Get the type of the array
             array_type = array_block.type
             # Add the next array block to the list
@@ -151,7 +155,7 @@ class GeneralArrayManager:
             array_block = self.storeManager.get_item_at_index(index)
             # Check if either the array was deleted, or the linked list
             # was broken (only part of a block was deleted)
-            if array_block is None:
+            if array_block is None or array_block is EOF:
                 return False
             # Make sure that deletion is starting from start of the linked list
             elif index == start_index and array_block.previousBlock != 0:

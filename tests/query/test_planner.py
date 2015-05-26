@@ -36,6 +36,7 @@ class TestQueryPlanner(unittest.TestCase):
         """
         Clean the database so that the tests are independent of one another
         """
+        del cls.sm
         graphene_store = GrapheneStore()
         graphene_store.remove_test_datafiles()
 

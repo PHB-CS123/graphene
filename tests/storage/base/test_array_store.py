@@ -386,6 +386,7 @@ class TestArrayStoreMethods(unittest.TestCase):
 
         # Delete properties 1 and 3
         array_store.delete_item(array1)
+        # Deleting from end of file, should return EOF when read
         array_store.delete_item(array3)
 
         # Verify deleted array is deleted
@@ -398,4 +399,4 @@ class TestArrayStoreMethods(unittest.TestCase):
 
         # Verify deleted array is deleted
         del_array3_file = array_store.item_at_index(array3.index)
-        self.assertIsNone(del_array3_file)
+        self.assertEquals(del_array3_file, EOF)
