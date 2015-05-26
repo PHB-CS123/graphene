@@ -3,6 +3,36 @@ from graphene.query import ProjectStream
 from graphene.expressions import MatchNode, MatchRelation
 from graphene.errors import *
 
+class PlannerErrors:
+    """
+    A class to store common errors in the query planner
+    """
+    @staticmethod
+    def property_dne(name):
+        """
+        The desired property does not exist.
+        """
+        msg = "Property name `%s` does not exist."
+        return NonexistentPropertyException(msg % name)
+
+    @staticmethod
+    def ambiguous_prop(name):
+        """
+        The property name given is ambiguous and cannot uniquely define a
+        property for the query.
+        """
+        msg = "Property name `%s` is ambiguous. Please add an identifier."
+        return AmbiguousPropertyException(msg % name)
+
+    @staticmethod
+    def duplicate_prop(name):
+        """
+        Two properties have identical names, potentially due to using the same
+        identifier.
+        """
+        msg = "Duplicate property name `%s` in query. Try adding an identifier."
+        return DuplicatePropertyException(msg % name)
+
 class QueryPlanner:
     def __init__(self, storage_manager):
         self.sm = storage_manager
@@ -71,13 +101,11 @@ class QueryPlanner:
                     # not just a subset, since we only care about there being
                     # duplicates at the end. Otherwise this is ok.
                     if all_unidentified and key in schema_keys and fullset:
-                        raise DuplicatePropertyException("Duplicate property name `%s` in query. " \
-                            "Try adding an identifier." % key)
+                        raise PlannerErrors.duplicate_prop(key)
                 else:
                     key = "%s.%s" % (ident, tt_name)
                     if key in schema_keys:
-                        raise DuplicatePropertyException("Duplicate property name `%s` in query. " \
-                            "Try adding an identifier." % key)
+                        raise PlannerErrors.duplicate_prop(key)
 
                 schema_keys.append(key)
                 schema.append((key, tt_type))
@@ -105,31 +133,35 @@ class QueryPlanner:
             if left[0] is not None:
                 key = "%s.%s" % (left[0], left[1])
                 if key not in schema_names:
-                    raise NonexistentPropertyException("Property name `%s` does not exist." % key)
+                    raise PlannerErrors.property_dne(key)
             # Otherwise check the base names
             if type(right) is tuple:
                 # Checking with an identifier
                 if right[0] is not None:
                     key = "%s.%s" % (right[0], right[1])
                     if key not in schema_names:
-                        raise NonexistentPropertyException("Property name `%s` does not exist." % key)
+                        raise PlannerErrors.property_dne(key)
             # Then check base names for left and right
             if left[0] is None:
                 num_occur = base_names.count(left[1])
                 # Occurs more than once, it's ambiguous
                 if num_occur > 1:
-                    raise AmbiguousPropertyException("Property name `%s` is ambiguous. Please add an identifier." % left[1])
+                    raise PlannerErrors.ambiguous_prop(left[1])
                 elif num_occur == 0:
-                    raise NonexistentPropertyException("Property name `%s` does not exist." % left[1])
+                    raise PlannerErrors.property_dne(left[1])
             if type(right) is tuple and right[0] is None:
                 num_occur = base_names.count(right[1])
                 # Occurs more than once, it's ambiguous
                 if num_occur > 1:
-                    raise AmbiguousPropertyException("Property name `%s` is ambiguous. Please add an identifier." % right[1])
+                    raise PlannerErrors.ambiguous_prop(right[1])
                 elif num_occur == 0:
-                    raise NonexistentPropertyException("Property name `%s` does not exist." % right[1])
+                    raise PlannerErrors.property_dne(right[1])
 
     def get_iter_tree(self, node_chain, query_chain):
+        """
+        Generate a traversal tree and apply queries to it. Helper method for
+        execution but also used elsewhere when iteration is needed.
+        """
         schema = self.get_schema(node_chain, fullset=True)
 
         # Generate traversal tree
