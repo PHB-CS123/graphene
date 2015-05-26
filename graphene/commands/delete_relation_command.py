@@ -13,6 +13,17 @@ class DeleteRelationCommand(Command):
         self.left_node = data.nl
         self.right_node = data.nr
 
+    def get_prop_dict(self, schema, properties):
+        """
+        Given a schema (with structure [(name, type)]) and a set of properties,
+        create the dict with keys as the names and values with structure
+        (property_value, type).
+        """
+        # Zip these together so that the property information is combined with
+        # the property value
+        zipped = zip(schema, properties)
+        return dict((sch[0], (value, sch[1])) for sch, value in zipped)
+
     def rel_iter(self, storage_manager, rel_data):
         """
         Iterates over relations based on a query if applicable.
@@ -21,8 +32,7 @@ class DeleteRelationCommand(Command):
         for relprop in storage_manager.get_relations_of_type(rel_type):
             # Check that relation matches query if it exists
             if rel_query is not None:
-                zipped = zip(rel_schema, relprop.properties)
-                prop_dict = dict((sch[0], (value, sch[1])) for sch, value in zipped)
+                prop_dict = self.get_prop_dict(rel_schema, relprop.properties)
                 if not rel_query.test(prop_dict):
                     continue
 
@@ -44,8 +54,7 @@ class DeleteRelationCommand(Command):
                 continue
             # Check that left node matches left query
             if node_query is not None:
-                zipped = zip(node_schema, left_props)
-                prop_dict = dict((sch[0], (value, sch[1])) for sch, value in zipped)
+                prop_dict = self.get_prop_dict(node_schema, left_props)
                 if not node_query.test(prop_dict):
                     continue
 
@@ -66,8 +75,7 @@ class DeleteRelationCommand(Command):
                 continue
             # Check that right node matches right query
             if node_query is not None:
-                zipped = zip(node_schema, right_props)
-                prop_dict = dict((sch[0], (value, sch[1])) for sch, value in zipped)
+                prop_dict = self.get_prop_dict(node_schema, right_props)
                 if not node_query.test(prop_dict):
                     continue
             yield rel
@@ -88,8 +96,7 @@ class DeleteRelationCommand(Command):
                 continue
             # Check that right node matches right query
             if node_query is not None:
-                zipped = zip(node_schema, right_props)
-                prop_dict = dict((sch[0], (value, sch[1])) for sch, value in zipped)
+                prop_dict = self.get_prop_dict(node_schema, right_props)
                 if not node_query.test(prop_dict):
                     continue
             yield rel
