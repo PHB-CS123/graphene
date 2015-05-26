@@ -55,8 +55,6 @@ class TestGeneralStoreManagerMethods(unittest.TestCase):
 
         # Create an item with type TEST_STORE.STORAGE_TYPE (pass no kwargs)
         item = store_manager.create_item()
-        # Store the item
-        store_manager.write_item(item)
         # Check that the created item is as expected
         self.assertEquals(item, self.TEST_STORE.STORAGE_TYPE(index=item.index))
         # Check that when reading the item from the store it is the same
@@ -71,8 +69,6 @@ class TestGeneralStoreManagerMethods(unittest.TestCase):
 
         # Create an item with type TEST_STORE.STORAGE_TYPE (pass no kwargs)
         item = store_manager.create_item()
-        # Store the item
-        store_manager.write_item(item)
         # Check that the created item is as expected
         self.assertEquals(item, self.TEST_STORE.STORAGE_TYPE(index=item.index))
         # Check that when reading the item from the store it is the same
@@ -94,17 +90,13 @@ class TestGeneralStoreManagerMethods(unittest.TestCase):
         store_manager = GeneralStoreManager(self.TEST_STORE())
 
         # Create and write one blank item
-        item1 = store_manager.create_item()
-        store_manager.write_item(item1)
+        store_manager.create_item()
         # Store the file size with only one item
         one_item_size = store_manager.store.get_file_size()
         # Create and write 3 more items
         item2 = store_manager.create_item()
-        store_manager.write_item(item2)
         item3 = store_manager.create_item()
-        store_manager.write_item(item3)
         item4 = store_manager.create_item()
-        store_manager.write_item(item4)
 
         # Delete the 2nd, then 3rd, then 4th item, this should leave items
         # 2 and 3 untruncated. If the file is properly truncated, it should
@@ -128,10 +120,8 @@ class TestGeneralStoreManagerMethods(unittest.TestCase):
         self.assertEquals(index1, store_manager.store.get_last_file_index())
         self.assertEquals(index2, store_manager.store.get_last_file_index() + 1)
         # Create and write two items with the given index
-        item1 = store_manager.create_item(index1)
-        item2 = store_manager.create_item(index2)
-        store_manager.write_item(item1)
-        store_manager.write_item(item2)
+        store_manager.create_item(index1)
+        store_manager.create_item(index2)
         # Delete the item, the index should now be in the recycled IDs
         store_manager.delete_item_at_index(index1)
 
@@ -146,13 +136,10 @@ class TestGeneralStoreManagerMethods(unittest.TestCase):
         self.assertEquals(store_manager.store.get_last_file_index(), index2)
 
         # Create and write two items with the indexes
-        item1 = store_manager.create_item(index1_new)
-        store_manager.write_item(item1)
-        item2 = store_manager.create_item(index2)
-        store_manager.write_item(item2)
+        store_manager.create_item(index1_new)
+        store_manager.create_item(index2)
         # And a third without an index argument
-        item3 = store_manager.create_item()
-        store_manager.write_item(item3)
+        store_manager.create_item()
         # Delete the second item (second index)
         store_manager.delete_item_at_index(index2)
 

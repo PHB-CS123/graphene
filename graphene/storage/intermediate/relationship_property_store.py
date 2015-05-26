@@ -36,8 +36,7 @@ class RelationshipPropertyStore:
             for prop in properties:
                 self.prop_manager.write_item(prop)
         else:
-            # TODO: Throw an error here
-            pass
+            raise ValueError("Given value is not a Relationship instance")
 
     def __delitem__(self, key):
         rel = self.relationship_manager.get_item_at_index(key)
