@@ -21,6 +21,13 @@ class TestStorageManagerMethods(unittest.TestCase):
         graphene_store = GrapheneStore()
         graphene_store.remove_test_datafiles()
 
+    def assertIsNoneOrEOF(self, item):
+        """
+        Since values at the end of a file are still nonexistent, both None and
+        EOF are OK
+        """
+        self.assertTrue(item is None or item is EOF)
+
     def test_get_empty_type_data(self):
         """
         Test the get_type_data method when no types exist
@@ -102,25 +109,25 @@ class TestStorageManagerMethods(unittest.TestCase):
         idx = t.index
         self.sm.delete_node_type("T")
         item = self.sm.nodeTypeManager.get_item_at_index(idx)
-        self.assertTrue(item is None or item is EOF)
+        self.assertIsNoneOrEOF(item)
         with self.assertRaises(TypeDoesNotExistException):
             self.sm.get_node_data("T")
         item = self.sm.node_manager.get_item_at_index(n1i)
-        self.assertTrue(item is None or item is EOF)
+        self.assertIsNoneOrEOF(item)
         item = self.sm.node_manager.get_item_at_index(n2i)
-        self.assertTrue(item is None or item is EOF)
+        self.assertIsNoneOrEOF(item)
         item = self.sm.node_manager.get_item_at_index(n3i)
-        self.assertTrue(item is None or item is EOF)
+        self.assertIsNoneOrEOF(item)
 
         for i in p1i:
             item = self.sm.property_manager.get_item_at_index(i)
-            self.assertTrue(item is None or item is EOF)
+            self.assertIsNoneOrEOF(item)
         for i in p2i:
             item = self.sm.property_manager.get_item_at_index(i)
-            self.assertTrue(item is None or item is EOF)
+            self.assertIsNoneOrEOF(item)
         for i in p3i:
             item = self.sm.property_manager.get_item_at_index(i)
-            self.assertTrue(item is None or item is EOF)
+            self.assertIsNoneOrEOF(item)
 
     def test_create_multiple_types(self):
         """
@@ -158,7 +165,7 @@ class TestStorageManagerMethods(unittest.TestCase):
         idx = t.index
         self.sm.delete_node_type("Person")
         item = self.sm.nodeTypeManager.get_item_at_index(idx)
-        self.assertTrue(item is None or item is EOF)
+        self.assertIsNoneOrEOF(item)
         with self.assertRaises(TypeDoesNotExistException):
             self.sm.get_node_data("Person")
 
@@ -168,7 +175,7 @@ class TestStorageManagerMethods(unittest.TestCase):
         idx = t.index
         self.sm.delete_relationship_type("R")
         item = self.sm.relTypeManager.get_item_at_index(idx)
-        self.assertTrue(item is None or item is EOF)
+        self.assertIsNoneOrEOF(item)
         with self.assertRaises(TypeDoesNotExistException):
             self.sm.get_relationship_data("R")
 
@@ -339,11 +346,11 @@ class TestStorageManagerMethods(unittest.TestCase):
         self.assertEqual(n3.relId, r3i)
 
         # Ensure every property is now None in the manager (i.e. it was deleted)
-        map(self.assertIsNone,
+        map(self.assertIsNoneOrEOF,
             map(self.sm.property_manager.get_item_at_index,
                 map(lambda p: p.index, rp2)))
-        self.assertIsNone(self.sm.prop_string_manager.read_name_at_index(rp2[1].propBlockId))
-        self.assertIsNone(self.sm.array_manager.read_array_at_index(rp2[2].propBlockId))
+        self.assertIsNoneOrEOF(self.sm.prop_string_manager.read_name_at_index(rp2[1].propBlockId))
+        self.assertIsNoneOrEOF(self.sm.array_manager.read_array_at_index(rp2[2].propBlockId))
 
         self.assertEqual(r3.secondNextRelId, 0)
         self.assertEqual(r1.firstPrevRelId, 0)
@@ -355,11 +362,11 @@ class TestStorageManagerMethods(unittest.TestCase):
         n2, p2 = self.sm.nodeprop[n2.index]
         n3, p3 = self.sm.nodeprop[n3.index]
 
-        map(self.assertIsNone,
+        map(self.assertIsNoneOrEOF,
             map(self.sm.property_manager.get_item_at_index,
                 map(lambda p: p.index, rp3)))
-        self.assertIsNone(self.sm.prop_string_manager.read_name_at_index(rp3[1].propBlockId))
-        self.assertIsNone(self.sm.array_manager.read_array_at_index(rp3[2].propBlockId))
+        self.assertIsNoneOrEOF(self.sm.prop_string_manager.read_name_at_index(rp3[1].propBlockId))
+        self.assertIsNoneOrEOF(self.sm.array_manager.read_array_at_index(rp3[2].propBlockId))
 
         self.assertEqual(n3.relId, 0)
         self.assertEqual(n2.relId, r1i)
@@ -369,11 +376,11 @@ class TestStorageManagerMethods(unittest.TestCase):
         n1, p1 = self.sm.nodeprop[n1.index]
         n2, p2 = self.sm.nodeprop[n2.index]
 
-        map(self.assertIsNone,
+        map(self.assertIsNoneOrEOF,
             map(self.sm.property_manager.get_item_at_index,
                 map(lambda p: p.index, rp1)))
-        self.assertIsNone(self.sm.prop_string_manager.read_name_at_index(rp1[1].propBlockId))
-        self.assertIsNone(self.sm.array_manager.read_array_at_index(rp1[2].propBlockId))
+        self.assertIsNoneOrEOF(self.sm.prop_string_manager.read_name_at_index(rp1[1].propBlockId))
+        self.assertIsNoneOrEOF(self.sm.array_manager.read_array_at_index(rp1[2].propBlockId))
 
         self.assertEqual(n1.relId, 0)
         self.assertEqual(n2.relId, 0)
