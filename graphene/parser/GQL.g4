@@ -186,7 +186,7 @@ delete_stmt returns [cmd]
 if $dn.ctx is not None:
     $cmd = DeleteNodeCommand($dn.ctx)
 if $dr.ctx is not None:
-    $cmd = DeleteRelationCommand($dr.ctx)
+    $cmd = DeleteRelationCommand($dr.ctx.t, $dr.ctx.q, $dr.ctx.nl, $dr.ctx.nr)
 }
   ;
 

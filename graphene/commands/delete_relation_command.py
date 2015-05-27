@@ -7,11 +7,11 @@ class DeleteRelationCommand(Command):
     """
     Used to delete individual relations from the database.
     """
-    def __init__(self, data):
-        self.rel_type = data.t
-        self.qc = data.q
-        self.left_node = data.nl
-        self.right_node = data.nr
+    def __init__(self, rel_type, query_chain, left_node, right_node):
+        self.rel_type = rel_type
+        self.qc = query_chain
+        self.left_node = left_node
+        self.right_node = right_node
 
     def get_prop_dict(self, schema, properties):
         """
@@ -116,7 +116,7 @@ class DeleteRelationCommand(Command):
             left_type, left_qc = self.left_node
             node_schema = planner.get_schema([MatchNode(None, left_type)])
             node_type, _ = storage_manager.get_node_data(left_type)
-            if len(left_qc) > 0:
+            if left_qc is not None and len(left_qc) > 0:
                 node_query = Query.parse_chain(storage_manager, left_qc, node_schema)
             else:
                 node_query = None
@@ -126,7 +126,7 @@ class DeleteRelationCommand(Command):
             right_type, right_qc = self.right_node
             node_schema = planner.get_schema([MatchNode(None, right_type)])
             node_type, _ = storage_manager.get_node_data(right_type)
-            if len(right_qc) > 0:
+            if right_qc is not None and len(right_qc) > 0:
                 node_query = Query.parse_chain(storage_manager, right_qc, node_schema)
             else:
                 node_query = None
