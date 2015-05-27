@@ -15,7 +15,7 @@ class TestRelationshipPropertyStore(unittest.TestCase):
         self.sm = StorageManager()
         self.relationship_manager = self.sm.relationship_manager
         self.prop_manager = self.sm.property_manager
-        self.relprop = RelationshipPropertyStore(self.relationship_manager, self.prop_manager)
+        self.relprop = RelationshipPropertyStore(self.sm)
         self.type = self.sm.create_relationship_type("RA", ())
         self.type_props = self.sm.create_relationship_type("RB", (("a", "int"),))
 
