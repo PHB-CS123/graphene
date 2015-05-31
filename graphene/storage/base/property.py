@@ -3,6 +3,10 @@ from enum import Enum
 
 class Property:
     class PropertyType(Enum):
+        """
+        Types of properties. NOTE: change is_primitive, is_string, and is_array
+        methods below if changing values.
+        """
         # Undefined type
         undefined = 0
         # Primitive types
@@ -100,3 +104,29 @@ class Property:
         return "Property: %d. Type: %s, nameID: %s, prevPropertyID: %s, " \
                "nextPropertyID: %s, propBlockID: %s" % args
 
+    def is_primitive(self):
+        """
+        Returns whether the property is a primitive
+
+        :return: True if primitive, False otherwise
+        :rtype: bool
+        """
+        return self.type.value >= 1 and self.type.value <= 7
+
+    def is_string(self):
+        """
+        Returns whether the property is a string
+
+        :return: True if string, False otherwise
+        :rtype: bool
+        """
+        return self.type.value == 8
+
+    def is_array(self):
+        """
+        Returns whether the property is a string
+
+        :return: True if string, False otherwise
+        :rtype: bool
+        """
+        return self.type.value >= 9

@@ -186,7 +186,8 @@ class QueryPlanner:
         # Gather schema information from node chain. Collects all property names
         schema = self.get_schema(node_chain, fullset=True)
 
-        # Check query against schema to ensure no ambiguous or nonexistent properties are being queried
+        # Check query against schema to ensure no ambiguous or nonexistent
+        # properties are being queried
         schema_names = [n for n, tt in schema]
         self.check_query(schema, query_chain)
 
@@ -199,7 +200,7 @@ class QueryPlanner:
         # kind of thing (i.e. RI returns (props, rightNode), NI returns a
         # NodeProperty instance)
         if len(node_chain) == 1:
-            # NodeIterator returns slightly different structure than RelationshipIterator
+            # Node iterator returns slightly diff. struct. than Rel. iterator
             for nodeprop in iter_tree:
                 results.append(nodeprop.properties)
         else:

@@ -164,6 +164,20 @@ class GeneralArrayManager:
             index = next_index
         return True
 
+    def update_array_at_index(self, index, new_array):
+        """
+        Updates the array at the given starting index
+
+        :param index: Index of original array
+        :type index: int
+        :param new_array: New array to store
+        :type new_array: list
+        :return: Nothing
+        :rtype: None
+        """
+        # TODO: *cries*
+        pass
+
     def find_array_items(self, items, limit=0, array_type=None):
         """
         Finds the starting index of the arrays containing the requested item(s)

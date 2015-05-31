@@ -127,7 +127,7 @@ class StorageManager:
         del self.relTypeTypeManager
         del self.relTypeTypeNameManager
 
-# --- Node Storage Methods --- #
+# --- Node Storage Interface Methods --- #
 
     def create_node_type(self, type_name, schema):
         """
@@ -163,7 +163,7 @@ class StorageManager:
         """
         return self.get_type_data(type_name, True)
 
-# --- Relationship Storage Methods --- #
+# --- Relationship Storage Interface Methods --- #
 
     def create_relationship_type(self, type_name, schema):
         """
@@ -199,7 +199,7 @@ class StorageManager:
         """
         return self.get_type_data(type_name, False)
 
-# --- Private Storage Methods --- #
+# --- Type Storage Methods --- #
 
     def create_type(self, type_name, schema, node_flag):
         """
@@ -290,6 +290,7 @@ class StorageManager:
             # type name manager, so the following does not suffice.
             # self.prop_string_manager.delete_name_at_index(type_type.typeName)
             pass
+        # TODO: same for array type_type
 
         type_type_name_manager.delete_name_at_index(type_type.typeName)
         type_type_manager.delete_item(type_type)
@@ -436,11 +437,15 @@ class StorageManager:
         self.nodeprop.sync()
         return (new_node, properties)
 
-    def update_node(self):
-        #TODO
-        pass
-
     def get_node_type(self, node):
+        """
+        Get the type of the given node
+
+        :param node: Node to get type for
+        :type node: Node
+        :return: Node type for node
+        :rtype: GeneralType
+        """
         return self.nodeTypeManager.get_item_at_index(node.nodeType)
 
     def get_property_value(self, prop):
@@ -450,6 +455,7 @@ class StorageManager:
         :param prop: Property to get value for
         :type prop: Property
         :return: Value
+        :rtype: Any
         """
         if prop.type == Property.PropertyType.string:
             return self.prop_string_manager.read_name_at_index(prop.propBlockId)
@@ -459,6 +465,13 @@ class StorageManager:
             return prop.propBlockId
 
     def get_node(self, index):
+        """
+        Gets the NodeProperty at the given index
+        :param index: Index of node
+        :type index: int
+        :return: NodeProperty at given node index
+        :rtype: NodeProperty
+        """
         nodeprop = self.nodeprop[index]
         if nodeprop is None or nodeprop == GeneralStore.EOF:
             return nodeprop
@@ -470,6 +483,14 @@ class StorageManager:
         return NodeProperty(node, properties, node_type, type_name)
 
     def get_nodes_of_type(self, node_type):
+        """
+        Get NodeProperty items of the given type. Generator
+
+        :param node_type: Type index of node
+        :type node_type: int
+        :return: NodeProperty generator
+        :rtype: NodeProperty
+        """
         i = 1
         while True:
             node = self.get_node(i)
@@ -610,7 +631,7 @@ class StorageManager:
             if relation is not None and relation.type == relation_type:
                 yield relation
 
-    # --- Deletion methods --- #
+# --- Deletion methods --- #
     def update_relation_links(self, node_id, prev_rel_id, next_rel_id):
         """
         Update the linked lists this relation was attached to for a given node
@@ -643,7 +664,7 @@ class StorageManager:
                 self.relprop[next_rel.index] = (next_rel, next_props)
                 self.relprop.sync()
         else:
-            # set previous relation's next relation to this relation's next relation
+            # Set prev. relation's next rel to this relation's next rel.
             prev_rel, prev_props = self.relprop[prev_rel_id]
             if prev_rel.firstNodeId == node_id:
                 prev_rel.firstNextRelId = next_rel_id
@@ -652,7 +673,7 @@ class StorageManager:
             self.relprop[prev_rel.index] = (prev_rel, prev_props)
 
             if next_rel_id != 0:
-                # set next relation's previous relation to this relation's previous relation
+                # Set next relation's prev. rel to this relation's prev. rel
                 next_rel, next_props = self.relprop[next_rel_id]
                 if next_rel.firstNodeId == node_id:
                     next_rel.firstPrevRelId = prev_rel_id
@@ -696,7 +717,6 @@ class StorageManager:
             self.array_manager.delete_array_at_index(prop.propBlockId)
 
         # Delete property itself
-
         self.property_manager.delete_item(prop)
 
     def delete_node(self, node):
@@ -727,6 +747,103 @@ class StorageManager:
 
         # Delete node itself
         self.node_manager.delete_item(node)
+
+# --- Update Interface Methods --- #
+    def update_nodes(self, nodeprops, updates):
+        """
+        Updates the properties of the given nodes
+
+        :param nodeprops: Nodeprop iterator to get nodes and properties from
+        :type nodeprops: NodeIterator
+        :param updates: Dict. containing property names and their update values
+        :type updates: dict
+        :return: Nothing
+        :rtype: None
+        """
+        self.update_properties(nodeprops, updates, True)
+
+    def update_relations(self, relprops, updates):
+        """
+        Updates the properties of the given relationships
+
+        :param relprops: Nodeprop iterator to get nodes and properties from
+        :type relprops: RelationshipIterator
+        :param updates: Dict. containing property names and their update values
+        :type updates: dict
+        :return: Nothing
+        :rtype: None
+        """
+        self.update_properties(relprops, updates, False)
+
+# --- Update methods --- #
+    def update_properties(self, itemprops, updates, node_flag):
+        """
+        Updates the given nodes or relationship properties
+        :param itemprops: nodeprops or relprops to update
+        :type itemprops: NodeProperty | RelationProperty
+        :param updates: Dict. containing property names and their update values
+        :type updates: dict[str, Any]
+        :param node_flag: Flag specifying whether we are getting data for
+                  a node type (True) or a relationship type (False)
+        :type node_flag: bool
+        :return: Nothing
+        :rtype: None
+        """
+        if node_flag:
+            cache = self.nodeprop
+        else:
+            cache = self.relprop
+
+        # Sync cache before updates
+        cache.sync()
+        # Get property IDs from property names
+        updates = self.names_to_ids(updates, node_flag)
+
+        for itemprop in itemprops:
+            # For every property of an item
+            for prop in itemprop.properties:
+                # Get property index
+                prop_idx = prop.index
+                # Property to update
+                if prop_idx in updates:
+                    # Old value (index of name or array, won't be changed)
+                    old_val = prop.propBlockId
+                    new_val = updates[prop_idx]
+                    # -- Update property value -- #
+                    # String, so update name
+                    if prop.is_string():
+                        self.prop_string_manager.\
+                            update_name_at_index(old_val, new_val)
+                    # Array, so use array manager
+                    elif prop.is_array():
+                        self.array_manager.\
+                            update_array_at_index(old_val, new_val)
+                    # Otherwise primitive
+                    else:
+                        prop.propBlockId = new_val
+                        self.property_manager.write_item(prop)
+        # Done with updates, clear cache
+        cache.clear()
+
+    def names_to_ids(self, updates, node_flag):
+        """
+
+        :param updates: Dict. containing property names and their update values
+        :type updates: dict
+        :param node_flag: Flag specifying whether we are getting data for
+                          a node type (True) or a relationship type (False)
+        :type node_flag: bool
+        :return: Dict. with property names mapped to their ID values
+        :rtype: dict
+        """
+        if node_flag:
+            type_type_manager = self.nodeTypeTypeNameManager
+        else:
+            type_type_manager = self.relTypeTypeNameManager
+        # Get corresponding ids for dictionary keys
+        corr_ids = type_type_manager.find_names(updates.keys())
+        # Map the found ids to their corresponding names
+        return dict(zip(corr_ids, updates.itervalues()))
 
 # --- Tools --- #
     def cache_diagnostic(self):

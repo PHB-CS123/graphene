@@ -146,6 +146,20 @@ class GeneralNameManager:
             index = next_index
         return True
 
+    def update_name_at_index(self, index, new_name):
+        """
+        Updates the name at the given index
+
+        :param index: Index of original name
+        :type index: int
+        :param new_name: New name to place at the starting index
+        :type new_name: str
+        :return: Nothing
+        :rtype: None
+        """
+        # TODO: *cries*
+        pass
+
     def split_name(self, name):
         """
         Splits the given name based on the blockSize
@@ -160,7 +174,8 @@ class GeneralNameManager:
 
     def find_name(self, name):
         """
-        Finds the starting index of the given name
+        Finds the starting index of the given name.
+        Complexity: O(|file|)
 
         :param name: Name to look for
         :type name: str
@@ -175,6 +190,41 @@ class GeneralNameManager:
                self.read_name_at_index(idx) == name:
                 return idx
         return None
+
+    def find_names(self, names):
+        """
+        Finds the starting indexes of the given names, allows for only one
+        file scan for names. Complexity: O(|names|^|file|).
+        Do not use if the file contains duplicates
+
+        :param names: Names to find starting indexes for
+        :type names: list
+        :return: List with indexes for property names at corresponding indexes
+        :rtype: list
+        """
+        names_amt = len(names)
+        found_amt = 0
+        indexes = [0] * names_amt
+
+        # Last index in the name store file
+        last_index = self.storeManager.store.get_last_file_index()
+        for idx in range(1, last_index):
+            cur_name_part = self.storeManager.get_item_at_index(idx)
+            # If valid index, check if names is one of the names
+            if cur_name_part is not None and cur_name_part.previousBlock == 0:
+                cur_name = self.read_name_at_index(idx)
+                for (i, name) in enumerate(names):
+                    # TODO: optimize to skip already found names
+                    # Name matches
+                    if name == cur_name:
+                        indexes[i] = idx
+                        found_amt += 1
+            # Terminate if all names are found
+            if names_amt == found_amt:
+                break
+        return indexes
+
+    # TODO: write find_name_mult and find_names_mult for multiple names
 
     @staticmethod
     def combine_names(names):
