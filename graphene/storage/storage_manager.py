@@ -584,7 +584,6 @@ class StorageManager:
 
         self.relprop[new_rel.index] = (new_rel, properties)
         self.relprop.sync()
-
         print("new rel: %s" % new_rel)
         return new_rel
 
@@ -608,3 +607,14 @@ class StorageManager:
             i += 1
             if relation is not None and relation.type == relation_type:
                 yield relation
+
+# --- Tools --- #
+    def cache_diagnostic(self):
+        """
+        Print out diagnostic information about the pylru cache
+
+        :return: Nothing
+        :rtype: None
+        """
+        self.logger.debug("Node cache size: %d" % len(self.nodeprop.cache))
+        self.logger.debug("Relationship cache size: %d" % len(self.relprop.cache))
