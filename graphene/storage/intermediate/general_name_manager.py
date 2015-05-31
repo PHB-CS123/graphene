@@ -157,8 +157,113 @@ class GeneralNameManager:
         :return: Nothing
         :rtype: None
         """
-        # TODO: *cries*
-        pass
+        # Get parts of name (separated based on the block size)
+        name_parts = self.split_name(new_name)
+        # Number of parts
+        new_length = len(name_parts)
+
+        # Get first name block
+        cur_block = self.storeManager.get_item_at_index(index)
+        # IDs available
+        old_length = cur_block.length
+
+        # Get IDs to store the remaining blocks into
+        if old_length < new_length:
+            ids = self.storeManager.get_indexes(new_length - old_length)
+        else:
+            ids = None
+
+        # Initialize IDs according to first block
+        cur_id = cur_block.index
+        next_id = cur_block.nextBlock
+
+        # If next ID is 0, then there are no more blocks available
+        if next_id == 0 and ids is not None:
+            no_blocks = True
+            next_free_id_idx = 1
+            next_id = ids[0]
+        else:
+            no_blocks = False
+            next_free_id_idx = 0
+
+        # Block of length 1
+        if new_length == 1:
+            kwargs = {'in_use': False,
+                      'previous_block': 0,
+                      'length': new_length,
+                      'next_block': 0,
+                      'name': name_parts[0]}
+        else:
+            kwargs = {'in_use': False,
+                      'previous_block': 0,
+                      'length': new_length,
+                      'next_block': next_id,
+                      'name': name_parts[0]}
+
+        # Create first block using kwargs
+        self.storeManager.create_item(cur_id, **kwargs)
+
+        # Create rest of linked list
+        for i in range(1, new_length):
+            # Prepare IDs for next block
+            prev_id = cur_id
+            cur_id = next_id
+
+            # No more blocks and not at end of list (does not need a next_id)
+            if no_blocks and i != new_length - 1:
+                next_id = ids[next_free_id_idx]
+                next_free_id_idx += 1
+            # Read the next block in this case
+            elif not no_blocks:
+                cur_block = self.storeManager.get_item_at_index(cur_id)
+                next_id = cur_block.nextBlock
+            # else: no_blocks, but i == new_length - 1, so next_id is not needed
+
+            # If this update needs IDs, next block does not exist, and not at
+            # the end of the list (which does not need a next_id)
+            if (ids is not None) and (next_id == 0) and (i != new_length - 1):
+                no_blocks = True
+                next_id = ids[next_free_id_idx]
+                next_free_id_idx += 1
+
+            # Last item in linked list
+            if i == new_length - 1:
+                kwargs = {'in_use': False,
+                          'previous_block': prev_id,
+                          'length': new_length,
+                          'next_block': 0,
+                          'name': name_parts[i]}
+            # Create kwargs for middle block
+            else:
+                kwargs = {'in_use': False,
+                          'previous_block': prev_id,
+                          'length': new_length,
+                          'next_block': next_id,
+                          'name': name_parts[i]}
+            # Create next block
+            self.storeManager.create_item(cur_id, **kwargs)
+
+        # Last item in linked list, but items remain from old name
+        if old_length > new_length:
+            self.delete_rest(next_id)
+
+    def delete_rest(self, index):
+        """
+        PRIVATE METHOD. Deletes the list starting at the given index; does not
+        need to be at start of list.
+
+        :param index: Index to start deletion on
+        :type index: int
+        :return: Nothing
+        :rtype: None
+        """
+        # Get first name block, set its previousBlock so 0, and
+        # write it so interface deletion can be used
+        first_block = self.storeManager.get_item_at_index(index)
+        first_block.previousBlock = 0
+        self.storeManager.write_item(first_block)
+        # Delete the items starting with the first item
+        self.delete_name_at_index(index)
 
     def split_name(self, name):
         """
@@ -202,6 +307,8 @@ class GeneralNameManager:
         :return: List with indexes for property names at corresponding indexes
         :rtype: list
         """
+        if not names:
+            return None
         names_amt = len(names)
         found_amt = 0
         indexes = [0] * names_amt
