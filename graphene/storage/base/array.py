@@ -1,7 +1,7 @@
 from graphene.storage.base.property import *
 
 
-class Array():
+class Array:
     def __init__(self, index=0, in_use=True,
                  array_type=Property.PropertyType.undefined,
                  previous_block=0, amount=0, next_block=0, items=None):
@@ -14,7 +14,7 @@ class Array():
         :type in_use: bool
         :param previous_block: Index of previous block of data
         :type previous_block: int
-        :param amount: Number of items stored in this array block
+        :param amount: Number of blocks for the whole array
         :type amount: int
         :param next_block: Index of next block of data
         :type next_block: int
@@ -90,6 +90,15 @@ class Array():
                    (self.nextBlock == other.nextBlock) and almost_equal
         else:
             return False
+
+    def is_string_array(self):
+        """
+        Returns whether this is a string array
+
+        :return: True if string array, False otherwise
+        :rtype: bool
+        """
+        return self.type == Property.PropertyType.stringArray
 
     @staticmethod
     def almost_equal_values(x, y, precision):

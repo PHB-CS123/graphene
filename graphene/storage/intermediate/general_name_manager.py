@@ -46,6 +46,7 @@ class GeneralNameManager:
         # Get IDs to store the blocks into
         ids = self.storeManager.get_indexes(length)
 
+        # TODO: refactor length to amount
         # Block of length 1
         if length == 1:
             kwargs = {'in_use': False,
@@ -61,7 +62,7 @@ class GeneralNameManager:
                       'name': name_parts[0]}
 
         # Create first block using kwargs
-        block = self.storeManager.create_item(ids[0], **kwargs)
+        self.storeManager.create_item(ids[0], **kwargs)
         # First index in linked list
         first_index = ids[0]
 
@@ -82,7 +83,7 @@ class GeneralNameManager:
                           'next_block': ids[i + 1],
                           'name': name_parts[i]}
             # Create next block
-            block = self.storeManager.create_item(ids[i], **kwargs)
+            self.storeManager.create_item(ids[i], **kwargs)
         # Return the first index of the name in the store
         return first_index
 

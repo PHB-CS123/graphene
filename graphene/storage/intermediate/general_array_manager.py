@@ -40,10 +40,9 @@ class GeneralArrayManager:
         if array_type == Property.PropertyType.stringArray:
             array = self.string_ids_for_strings(array)
 
-
         # Get parts of the array (separated based on the block size and type)
         capacity = ArrayStore.capacity_for_type(array_type, self.blockSize)
-        parts = self.array_chunks(array, capacity)
+        parts = self.split_array(array, capacity)
 
         # Number of parts we need to store
         amt_parts = len(parts)
@@ -55,18 +54,18 @@ class GeneralArrayManager:
             kwargs = {'in_use': False,
                       'array_type': array_type,
                       'previous_block': 0,
-                      'amount': len(parts[0]),
+                      'amount': amt_parts,
                       'next_block': 0,
                       'items': parts[0]}
         else:
             kwargs = {'in_use': False,
                       'array_type': array_type,
                       'previous_block': 0,
-                      'amount': len(parts[0]),
+                      'amount': amt_parts,
                       'next_block': ids[1],
                       'items': parts[0]}
         # Create first block using kwargs
-        block = self.storeManager.create_item(ids[0], **kwargs)
+        self.storeManager.create_item(ids[0], **kwargs)
         # First index in linked list
         first_index = ids[0]
 
@@ -89,7 +88,7 @@ class GeneralArrayManager:
                           'next_block': ids[i + 1],
                           'items': parts[i]}
             # Create next block
-            block = self.storeManager.create_item(ids[i], **kwargs)
+            self.storeManager.create_item(ids[i], **kwargs)
         # Return the first index of the array in the store
         return first_index
 
@@ -156,6 +155,9 @@ class GeneralArrayManager:
             # Make sure that deletion is starting from start of the linked list
             elif index == start_index and array_block.previousBlock != 0:
                 raise IndexError("Cannot begin deletion from non-start index")
+            # Delete strings if string array
+            if array_block.is_string_array():
+                self.delete_names_at_indexes(array_block.items)
             # Get the next index
             next_index = array_block.nextBlock
             # Delete the current block
@@ -175,8 +177,136 @@ class GeneralArrayManager:
         :return: Nothing
         :rtype: None
         """
-        # TODO: *cries*
-        pass
+        # Get first array block
+        cur_block = self.storeManager.get_item_at_index(index)
+        # IDs available
+        old_length = cur_block.length
+        # Get type of array
+        array_type = cur_block.type
+        # Whether it's a string array
+        is_string_array = cur_block.is_string_array()
+
+        # Get parts of the array (separated based on the block size and type)
+        capacity = ArrayStore.capacity_for_type(array_type, self.blockSize)
+        array_parts = self.split_array(new_array, capacity)
+        # Number of parts
+        new_length = len(array_parts)
+
+        # Get IDs to store the remaining blocks into
+        if old_length < new_length:
+            ids = self.storeManager.get_indexes(new_length - old_length)
+        else:
+            ids = None
+
+        # Initialize IDs according to first block
+        cur_id = cur_block.index
+        next_id = cur_block.nextBlock
+
+        # If next ID is 0, then there are no more blocks available
+        if next_id == 0 and ids is not None:
+            no_blocks = True
+            next_free_id_idx = 1
+            next_id = ids[0]
+        else:
+            no_blocks = False
+            next_free_id_idx = 0
+
+        # String array, store the name parts
+        if is_string_array:
+            array_parts[0] = \
+                self.update_names_at_indexes(cur_block.items, array_parts[0])
+
+        # Block of length 1
+        if new_length == 1:
+            kwargs = {'in_use': False,
+                      'array_type': array_type,
+                      'previous_block': 0,
+                      'amount': new_length,
+                      'next_block': 0,
+                      'items': array_parts[0]}
+        else:
+            kwargs = {'in_use': False,
+                      'array_type': array_type,
+                      'previous_block': 0,
+                      'amount': new_length,
+                      'next_block': next_id,
+                      'items': array_parts[0]}
+
+        # Create first block using kwargs
+        self.storeManager.create_item(cur_id, **kwargs)
+
+        # Create rest of linked list
+        for i in range(1, new_length):
+            # Prepare IDs for next block
+            prev_id = cur_id
+            cur_id = next_id
+
+            block_ids = None
+            # No more blocks and not at end of list (does not need a next_id)
+            if no_blocks:
+                # Next ID is not needed at the end of the list
+                if i != new_length - 1:
+                    next_id = ids[next_free_id_idx]
+                    next_free_id_idx += 1
+            # Read the next block in this case
+            else:
+                cur_block = self.storeManager.get_item_at_index(cur_id)
+                next_id = cur_block.nextBlock
+                # If string array, get IDs of current block to use for update
+                block_ids = cur_block.items if is_string_array else None
+            # Update names for string array based on block_ids, if no block ids,
+            # create new ids (i.e. no blocks so block_ids will be None)
+            if is_string_array:
+                array_parts[i] = \
+                    self.update_names_at_indexes(block_ids, array_parts[i])
+
+            # If this update needs IDs, next block does not exist, and not at
+            # the end of the list (which does not need a next_id)
+            if (ids is not None) and (next_id == 0) and (i != new_length - 1):
+                no_blocks = True
+                next_id = ids[next_free_id_idx]
+                next_free_id_idx += 1
+
+            # Last item in linked list
+            if i == new_length - 1:
+                kwargs = {'in_use': False,
+                          'array_type': array_type,
+                          'previous_block': prev_id,
+                          'amount': new_length,
+                          'next_block': 0,
+                          'items': array_parts[i]}
+            # Create kwargs for middle block
+            else:
+                kwargs = {'in_use': False,
+                          'array_type': array_type,
+                          'previous_block': prev_id,
+                          'amount': new_length,
+                          'next_block': next_id,
+                          'items': array_parts[i]}
+            # Create next block
+            self.storeManager.create_item(cur_id, **kwargs)
+
+        # Last item in linked list, but items remain from old array
+        if old_length > new_length:
+            self.delete_rest(next_id)  # Handles string deletion as well
+
+    def delete_rest(self, index):
+        """
+        PRIVATE METHOD. Deletes the list starting at the given index; does not
+        need to be at start of list.
+
+        :param index: Index to start deletion on
+        :type index: int
+        :return: Nothing
+        :rtype: None
+        """
+        # Get first array block, set its previousBlock so 0, and
+        # write it so interface deletion can be used
+        first_block = self.storeManager.get_item_at_index(index)
+        first_block.previousBlock = 0
+        self.storeManager.write_item(first_block)
+        # Delete the items starting with the first item
+        self.delete_array_at_index(index)
 
     def find_array_items(self, items, limit=0, array_type=None):
         """
@@ -234,8 +364,63 @@ class GeneralArrayManager:
         """
         return map(lambda x: self.stringStoreManager.read_name_at_index(x), ids)
 
+    def delete_names_at_indexes(self, ids):
+        """
+        Deletes the names at the given list of first indexes
+
+        :param ids: First IDs of strings to delete
+        :type ids: list
+        :return: Whether any of the deletes failed
+        :rtype: bool
+        """
+        return all(map(lambda x:
+                       self.stringStoreManager.delete_name_at_index(x), ids))
+
+    def update_names_at_indexes(self, ids, new_names):
+        """
+        Updates the names at the starting indexes with the new names, 3 cases:
+        1) len(ids) > len(new_names): Delete ids not used for update, then (3)
+        2) len(ids) < len(new_names): Use given IDs, create new strings, done.
+        3) len(ids) == len(new_names): Easy case, just use given IDs
+
+        :param ids: Starting indexes of old names
+        :type ids: list[int]
+        :param new_names: New names to place at these starting indexes
+        :type new_names: list[str]
+        :return: List of IDs where respective names were stored
+        :rtype: list[int]
+        """
+        # If no IDs are given, default to just creating ids for new names
+        if not ids:
+            return self.string_ids_for_strings(new_names)
+
+        num_ids = len(ids)
+        num_names = len(new_names)
+        # Delete extraneous IDs
+        if num_ids > num_names:
+            self.delete_names_at_indexes(ids[num_names:])
+            ids = ids[:num_names]
+        # Use IDs given and create new strings in the store for the rest
+        elif num_ids < num_names:
+            # Names without IDs that need to be stored
+            remaining_names = new_names[num_ids:]
+            new_names = new_names[:num_ids]
+            # Update the names
+            map(lambda x, y:
+                self.stringStoreManager.update_name_at_index(x, y),
+                ids, new_names)
+            # Now store the remaining names
+            rest_ids = map(lambda x: self.stringStoreManager.write_name(x),
+                           remaining_names)
+            # Return the updated IDs and the created IDs
+            return ids + rest_ids
+        # else: len(ids) == len(new_names), perform update for names with ids
+        map(lambda x, y:
+            self.stringStoreManager.update_name_at_index(x, y), ids, new_names)
+        return ids
+
     @staticmethod
-    def array_chunks(array, n):
+    def split_array(array, n):
         """
         Break up the given array into chunks of size n
 
