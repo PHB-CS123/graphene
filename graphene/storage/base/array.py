@@ -14,7 +14,7 @@ class Array:
         :type in_use: bool
         :param previous_block: Index of previous block of data
         :type previous_block: int
-        :param amount: Number of blocks for the whole array
+        :param amount: Number of items stored in this array block
         :type amount: int
         :param next_block: Index of next block of data
         :type next_block: int

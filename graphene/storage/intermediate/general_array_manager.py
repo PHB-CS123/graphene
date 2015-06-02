@@ -54,14 +54,14 @@ class GeneralArrayManager:
             kwargs = {'in_use': False,
                       'array_type': array_type,
                       'previous_block': 0,
-                      'amount': amt_parts,
+                      'amount': len(parts[0]),
                       'next_block': 0,
                       'items': parts[0]}
         else:
             kwargs = {'in_use': False,
                       'array_type': array_type,
                       'previous_block': 0,
-                      'amount': amt_parts,
+                      'amount': len(parts[0]),
                       'next_block': ids[1],
                       'items': parts[0]}
         # Create first block using kwargs
