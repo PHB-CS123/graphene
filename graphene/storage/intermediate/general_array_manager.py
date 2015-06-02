@@ -55,6 +55,7 @@ class GeneralArrayManager:
                       'array_type': array_type,
                       'previous_block': 0,
                       'amount': len(parts[0]),
+                      'blocks': amt_parts,
                       'next_block': 0,
                       'items': parts[0]}
         else:
@@ -62,6 +63,7 @@ class GeneralArrayManager:
                       'array_type': array_type,
                       'previous_block': 0,
                       'amount': len(parts[0]),
+                      'blocks': amt_parts,
                       'next_block': ids[1],
                       'items': parts[0]}
         # Create first block using kwargs
@@ -77,6 +79,7 @@ class GeneralArrayManager:
                           'array_type': array_type,
                           'previous_block': ids[i - 1],
                           'amount': len(parts[i]),
+                          'blocks': amt_parts,
                           'next_block': 0,
                           'items': parts[i]}
             # Create kwargs for middle block
@@ -85,6 +88,7 @@ class GeneralArrayManager:
                           'array_type': array_type,
                           'previous_block': ids[i - 1],
                           'amount': len(parts[i]),
+                          'blocks': amt_parts,
                           'next_block': ids[i + 1],
                           'items': parts[i]}
             # Create next block
@@ -221,14 +225,16 @@ class GeneralArrayManager:
             kwargs = {'in_use': False,
                       'array_type': array_type,
                       'previous_block': 0,
-                      'amount': new_length,
+                      'amount': len(array_parts[0]),
+                      'blocks': new_length,
                       'next_block': 0,
                       'items': array_parts[0]}
         else:
             kwargs = {'in_use': False,
                       'array_type': array_type,
                       'previous_block': 0,
-                      'amount': new_length,
+                      'amount': len(array_parts[0]),
+                      'blocks': new_length,
                       'next_block': next_id,
                       'items': array_parts[0]}
 
@@ -272,7 +278,8 @@ class GeneralArrayManager:
                 kwargs = {'in_use': False,
                           'array_type': array_type,
                           'previous_block': prev_id,
-                          'amount': new_length,
+                          'amount': len(array_parts[i]),
+                          'blocks': new_length,
                           'next_block': 0,
                           'items': array_parts[i]}
             # Create kwargs for middle block
@@ -280,7 +287,8 @@ class GeneralArrayManager:
                 kwargs = {'in_use': False,
                           'array_type': array_type,
                           'previous_block': prev_id,
-                          'amount': new_length,
+                          'amount': len(array_parts[i]),
+                          'blocks': new_length,
                           'next_block': next_id,
                           'items': array_parts[i]}
             # Create next block

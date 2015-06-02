@@ -6,7 +6,7 @@ class ArrayStore(GeneralStore):
     """
     Handles storage of arrays to a file. It stores the arrays using
     the format:
-    (inUse, type, previousBlock, amount, nextBlock, data)
+    (inUse, type, previousBlock, amount, blocks, nextBlock, data)
     String arrays are stored as an array of integers where the integers refer
     to the starting position of the string in a StringStore
     """
@@ -16,7 +16,7 @@ class ArrayStore(GeneralStore):
     # '?': boolean
     # 'B': unsigned char
     # 'I': unsigned int
-    HEADER_STRUCT_FORMAT_STR = "= ? B I I I"
+    HEADER_STRUCT_FORMAT_STR = "= ? B I I I I"
     ''':type str'''
 
     # Size of header struct (bytes)
@@ -116,17 +116,19 @@ class ArrayStore(GeneralStore):
         array_type = Property.PropertyType(unpacked_header_data[1])
         previous_block = unpacked_header_data[2]
         amount = unpacked_header_data[3]
-        next_block = unpacked_header_data[4]
+        blocks = unpacked_header_data[4]
+        next_block = unpacked_header_data[5]
 
         # Empty data, deleted item
         if in_use is False and array_type == Property.PropertyType.undefined \
-           and previous_block == 0 and amount == 0 and next_block == 0:
+           and previous_block == 0 and amount == 0 and blocks == 0 \
+           and next_block == 0:
             return None
 
         # Unpack the block data
         items = self.items_from_data(array_type, block_data, amount)
         return Array(index, in_use, array_type, previous_block, amount,
-                     next_block, items)
+                     blocks, next_block, items)
 
     def packed_data_from_item(self, item):
         """
@@ -142,7 +144,7 @@ class ArrayStore(GeneralStore):
         header_struct = struct.Struct(self.HEADER_STRUCT_FORMAT_STR)
         packed_header = header_struct.pack(item.inUse, item.type.value,
                                            item.previousBlock, item.amount,
-                                           item.nextBlock)
+                                           item.blocks, item.nextBlock)
         # Pack the data block
         packed_block = self.items_to_data(item.type, item.items)
         # Concatenate the two
@@ -201,7 +203,7 @@ class ArrayStore(GeneralStore):
         """
         # Create an empty header struct
         empty_header_struct = struct.Struct(self.HEADER_STRUCT_FORMAT_STR)
-        packed_header = empty_header_struct.pack(0, 0, 0, 0, 0)
+        packed_header = empty_header_struct.pack(0, 0, 0, 0, 0, 0)
 
         # Create an empty data payload (using BOOL_FORMAT_STR for easy padding)
         empty_data = struct.Struct(self.BOOL_FORMAT_STR * self.blockSize)
