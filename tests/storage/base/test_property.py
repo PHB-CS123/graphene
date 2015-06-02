@@ -59,3 +59,23 @@ class TestPropertyMethods(unittest.TestCase):
         self.assertNotEqual(property1, property3)
         self.assertNotEqual(property2, property3)
         self.assertNotEqual(property1, 1)
+
+    def test_property_type_determination(self):
+        """
+        Tests that the is_<property_type> returns appropriate results
+        """
+        prop1 = Property(1, True, Property.PropertyType.int, 2, 3, 4, 5)
+        prop2 = Property(2, True, Property.PropertyType.string, 3, 4, 5, 6)
+        prop3 = Property(3, True, Property.PropertyType.intArray, 3, 4, 5, 6)
+
+        self.assertFalse(prop1.is_array())
+        self.assertFalse(prop1.is_string())
+        self.assertTrue(prop1.is_primitive())
+
+        self.assertFalse(prop2.is_array())
+        self.assertTrue(prop2.is_string())
+        self.assertFalse(prop2.is_primitive())
+
+        self.assertTrue(prop3.is_array())
+        self.assertFalse(prop3.is_string())
+        self.assertFalse(prop3.is_primitive())

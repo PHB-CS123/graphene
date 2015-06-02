@@ -358,10 +358,10 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         name_manager.update_name_at_index(name_index2, name2_u)
         self.assertEquals(name2_u, name_manager.read_name_at_index(name_index2))
 
-    def test_update_name_at_index_shorter_size(self):
+    def test_update_name_at_index_smaller_size(self):
         """
         Test that updating a name at a certain starting index works, with
-        shorter sized updates. Check that it deletes old items.
+        shorter-sized updates. Check that it deletes old items.
         """
         name_manager = GeneralNameManager(self.TEST_FILENAME,
                                           self.TEST_BLOCK_SIZE)

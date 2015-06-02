@@ -82,3 +82,14 @@ class TestArrayMethods(unittest.TestCase):
         self.assertFalse(array1.almost_equal(array2, 6))
         self.assertFalse(array2.almost_equal(array3, 3))
         self.assertFalse(array1.almost_equal(1, 6))
+
+    def test_is_string_array(self):
+        """
+        Test that is_string_array returns appropriate values based on array type
+        """
+        array1 = Array(1, True, Property.PropertyType.floatArray, 2, 3, 4, 5,
+                       [3.14159, 2.71828, 0.33333, 2.64575])
+        array2 = Array(1, True, Property.PropertyType.stringArray, 2, 3, 4, 5,
+                       [1, 2, 3])
+        self.assertFalse(array1.is_string_array())
+        self.assertTrue(array2.is_string_array())

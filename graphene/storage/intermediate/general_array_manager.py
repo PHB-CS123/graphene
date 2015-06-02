@@ -184,7 +184,7 @@ class GeneralArrayManager:
         # Get first array block
         cur_block = self.storeManager.get_item_at_index(index)
         # IDs available
-        old_length = cur_block.length
+        old_length = cur_block.blocks
         # Get type of array
         array_type = cur_block.type
         # Whether it's a string array
@@ -401,7 +401,6 @@ class GeneralArrayManager:
         # If no IDs are given, default to just creating ids for new names
         if not ids:
             return self.string_ids_for_strings(new_names)
-
         num_ids = len(ids)
         num_names = len(new_names)
         # Delete extraneous IDs
