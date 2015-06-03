@@ -46,7 +46,7 @@ class RelationIterator(Command):
         rel_schema, rel_type, rel_query = rel_data
         node_schema, node_type, node_query = node_data
         # Iterate over the relations of the given type (and relation query)
-        for relprop in self.rel_iter(storage_manager, rel_data):
+        for rel in self.rel_iter(storage_manager, rel_data):
             rel = relprop.rel
             left_nodeprop = storage_manager.get_node(rel.firstNodeId)
             left_node, left_props = left_nodeprop.node, left_nodeprop.properties
