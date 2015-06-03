@@ -30,7 +30,7 @@ class TestShowCommand(unittest.TestCase):
         # Create dummy output stream for testing
         out = StringIO.StringIO()
         cmd.execute(self.sm, output=out)
-        self.assertEquals(out.getvalue(), "No TYPES found.")
+        self.assertEquals(out.getvalue(), "No types found.\n")
         out.close()
 
     def test_one_type(self):
@@ -43,6 +43,33 @@ class TestShowCommand(unittest.TestCase):
         t = self.sm.create_node_type("T", (("a", "int"), ("b", "string")))
         cmd = ShowCommand(ShowCommand.ShowType.TYPES)
         self.assertEquals(cmd.show_type, ShowCommand.ShowType.TYPES)
+        # Dummy output stream
+        out = StringIO.StringIO()
+        cmd.execute(self.sm, output=out)
+        self.assertEquals(out.getvalue(), expected)
+        out.close()
+
+    def test_no_relations(self):
+        # Create command and ensure that it has the right type
+        cmd = ShowCommand(ShowCommand.ShowType.RELATIONS)
+        self.assertEquals(cmd.show_type, ShowCommand.ShowType.RELATIONS)
+
+        # Create dummy output stream for testing
+        out = StringIO.StringIO()
+        cmd.execute(self.sm, output=out)
+        self.assertEquals(out.getvalue(), "No relations found.\n")
+        out.close()
+
+    def test_one_relation(self):
+        # Pretty print expected output for testing later
+        exp_stream = StringIO.StringIO()
+        PrettyPrinter.print_table(["R"], ["RELATIONS"], exp_stream)
+        expected = exp_stream.getvalue()
+        exp_stream.close()
+
+        t = self.sm.create_relationship_type("R", (("a", "int"), ("b", "string")))
+        cmd = ShowCommand(ShowCommand.ShowType.RELATIONS)
+        self.assertEquals(cmd.show_type, ShowCommand.ShowType.RELATIONS)
         # Dummy output stream
         out = StringIO.StringIO()
         cmd.execute(self.sm, output=out)

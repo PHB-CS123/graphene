@@ -1,6 +1,6 @@
 import unittest
 
-from graphene.commands import DescTypeCommand
+from graphene.commands import DescCommand
 from graphene.storage import (StorageManager, GrapheneStore, Property)
 from graphene.utils import PrettyPrinter
 from graphene.server.server import GrapheneServer
@@ -24,7 +24,7 @@ class TestShowCommand(unittest.TestCase):
 
     def test_no_type(self):
         # Create command and ensure that it has the right type
-        cmd = DescTypeCommand("Foo")
+        cmd = DescCommand("Foo", DescCommand.DescType.TYPE)
         self.assertEquals(cmd.type_name, "Foo")
 
         # Create dummy output stream for testing
@@ -41,8 +41,35 @@ class TestShowCommand(unittest.TestCase):
         exp_stream.close()
 
         t = self.sm.create_node_type("T", (("a", "int"), ("b", "string")))
-        cmd = DescTypeCommand("T")
+        cmd = DescCommand("T", DescCommand.DescType.TYPE)
         self.assertEquals(cmd.type_name, "T")
+        # Dummy output stream
+        out = StringIO.StringIO()
+        cmd.execute(self.sm, output=out)
+        self.assertEquals(out.getvalue(), expected)
+        out.close()
+
+    def test_no_relation(self):
+        # Create command and ensure that it has the right type
+        cmd = DescCommand("Foo", DescCommand.DescType.RELATION)
+        self.assertEquals(cmd.type_name, "Foo")
+
+        # Create dummy output stream for testing
+        out = StringIO.StringIO()
+        cmd.execute(self.sm, output=out)
+        self.assertEquals(out.getvalue(), "Type Foo does not exist.")
+        out.close()
+
+    def test_one_type(self):
+        # Pretty print expected output for testing later
+        exp_stream = StringIO.StringIO()
+        PrettyPrinter.print_table((("a", "int"), ("b", "string")), ["NAME", "TYPE"], exp_stream)
+        expected = exp_stream.getvalue()
+        exp_stream.close()
+
+        t = self.sm.create_relationship_type("R", (("a", "int"), ("b", "string")))
+        cmd = DescCommand("R", DescCommand.DescType.RELATION)
+        self.assertEquals(cmd.type_name, "R")
         # Dummy output stream
         out = StringIO.StringIO()
         cmd.execute(self.sm, output=out)
