@@ -253,8 +253,19 @@ show_stmt returns [cmd]
 // DESC command
 desc_stmt returns [cmd]
   @init {$cmd = None}
-  : K_DESC (K_TYPE (t=I_TYPE {$t=$t.text}))
-  {$cmd = DescTypeCommand($t)}
+  : K_DESC ((t=desc_type {desc_t = DescCommand.DescType.TYPE})
+           | (t=desc_relation {desc_t = DescCommand.DescType.RELATION}))
+  {$cmd = DescCommand($t.ctx, desc_t)}
+  ;
+
+desc_type
+  : K_TYPE (t=I_TYPE {$t=$t.text})
+  {return $t}
+  ;
+
+desc_relation
+  : K_RELATION (t=(I_RELATION|I_TYPE) {$t.text.isupper()}? {$t=$t.text})
+  {return $t}
   ;
 
 // INSERT command
