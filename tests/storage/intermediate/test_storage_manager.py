@@ -355,7 +355,6 @@ class TestStorageManagerMethods(unittest.TestCase):
         self.assertEqual(r3.secondNextRelId, 0)
         self.assertEqual(r1.firstPrevRelId, 0)
 
-
         del self.sm.relprop[r3i]
         r1, rp1 = self.sm.relprop[r1i] # update relation 1
         n1, p1 = self.sm.nodeprop[n1.index]
@@ -384,3 +383,56 @@ class TestStorageManagerMethods(unittest.TestCase):
 
         self.assertEqual(n1.relId, 0)
         self.assertEqual(n2.relId, 0)
+
+    def test_update_nodes(self):
+        """
+        Test that updating a node's properties works properly
+        """
+        pass
+
+    def test_update_relations(self):
+        """
+        Test that updating a relation's properties works properly
+        """
+        # TODO
+        pass
+
+    def test_names_to_ids(self):
+        """
+        Test that getting IDs from node/relationship property names works
+        """
+        # Test node type item indexes are read
+        t = self.sm.create_node_type("T", (("a", "int"), ("c", "string"),
+                                           ("d", "int[]")))
+        t_type_idx = t.firstType
+        t_type_idxs = [t_type_idx]
+        while t_type_idx != 0:
+            t_type_idx = self.sm.nodeTypeTypeManager.\
+                get_item_at_index(t_type_idx).nextType
+            t_type_idxs.append(t_type_idx)
+        # Update dictionary
+        u_dict = {"a": 1, "c": 2, "d": 3}
+        # Update dictionary with names replaced by IDs
+        u_ids_dict = {1: 1, 2: 2, 3: 3}
+        self.assertEquals(self.sm.names_to_ids(u_dict, True), u_ids_dict)
+
+        # Test node type item indexes are read
+        schema = (("a", "string"), ("b", "int"), ("c", "string"))
+        t = self.sm.create_relationship_type("R", schema)
+        t_type_idx = t.firstType
+        t_type_idxs = [t_type_idx]
+        while t_type_idx != 0:
+            t_type_idx = self.sm.nodeTypeTypeManager.\
+                get_item_at_index(t_type_idx).nextType
+            t_type_idxs.append(t_type_idx)
+        # Update dictionary
+        u_dict = {"a": 1, "b": 2, "c": 3}
+        # Update dictionary with names replaced by IDs
+        u_ids_dict = {1: 1, 2: 2, 3: 3}
+        self.assertEquals(self.sm.names_to_ids(u_dict, False), u_ids_dict)
+
+        # Part of update dictionary
+        u_dict = {"a": 1, "c": 3}
+        # Part of update dictionary with names replaced by IDs
+        u_ids_dict = {1: 1, 3: 3}
+        self.assertEquals(self.sm.names_to_ids(u_dict, False), u_ids_dict)

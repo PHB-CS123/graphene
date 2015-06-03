@@ -547,12 +547,7 @@ class TestGeneralArrayManagerMethods(unittest.TestCase):
         array_manager.update_array_at_index(arr1_idx, arr1_u)
         self.assertEquals(arr1_u, array_manager.read_array_at_index(arr1_idx))
         # Check residue spots are deleted (1, 2, 3 filled, indexes 4, 5, 6 left)
-        old_spot1 = array_manager.storeManager.get_item_at_index(arr1_idx + 3)
-        self.assertTrue(old_spot1 is None or old_spot1 is EOF)
-        old_spot2 = array_manager.storeManager.get_item_at_index(arr1_idx + 4)
-        self.assertTrue(old_spot2 is None or old_spot2 is EOF)
-        old_spot3 = array_manager.storeManager.get_item_at_index(arr1_idx + 5)
-        self.assertTrue(old_spot3 is None or old_spot3 is EOF)
+        self.check_residue_deletion(array_manager, arr1_idx, [3, 4, 5])
 
         # Create a char array spanning 2 blocks
         array_size = 2 * (self.TEST_BLOCK_SIZE / 2)
@@ -569,8 +564,7 @@ class TestGeneralArrayManagerMethods(unittest.TestCase):
         array_manager.update_array_at_index(arr2_idx, arr2_u)
         self.assertEquals(arr2_u, array_manager.read_array_at_index(arr2_idx))
         # Check residue spot is deleted (1 index after the original index)
-        old_spot4 = array_manager.storeManager.get_item_at_index(arr2_idx + 1)
-        self.assertTrue(old_spot4 is None or old_spot4 is EOF)
+        self.check_residue_deletion(array_manager, arr2_idx, [1])
 
     def test_update_array_at_index_larger_size(self):
         """
@@ -691,7 +685,8 @@ class TestGeneralArrayManagerMethods(unittest.TestCase):
         arr1_u = [string_size * "B" for _ in range(0, arr_size)]
         array_manager.update_array_at_index(arr1_idx, arr1_u)
         self.assertEquals(arr1_u, array_manager.read_array_at_index(arr1_idx))
-        # TODO: check residue deletion both array and string
+        # Check residue blocks are deleted, assume strings are deleted
+        self.check_residue_deletion(array_manager, arr1_idx, [1, 2, 3, 4])
 
         # Create a string array spanning 3 blocks
         arr_size = 3 * (self.TEST_BLOCK_SIZE / 4) + 5
@@ -708,7 +703,8 @@ class TestGeneralArrayManagerMethods(unittest.TestCase):
         arr2_u = [string_size * "D" for _ in range(0, arr_size)]
         array_manager.update_array_at_index(arr2_idx, arr2_u)
         self.assertEquals(arr2_u, array_manager.read_array_at_index(arr2_idx))
-        # TODO: check residue deletion both array and string
+        # Check residue block is deleted, assume strings are deleted
+        self.check_residue_deletion(array_manager, arr2_idx, [2])
 
         # Create a string array spanning 3 blocks
         arr_size = 2 * (self.TEST_BLOCK_SIZE / 4) + 2
@@ -726,7 +722,8 @@ class TestGeneralArrayManagerMethods(unittest.TestCase):
         arr3_u = [string_size * "F" for _ in range(0, arr_size)]
         array_manager.update_array_at_index(arr3_idx, arr3_u)
         self.assertEquals(arr3_u, array_manager.read_array_at_index(arr3_idx))
-        # TODO: check residue deletion both array and string
+        # Check residue block is deleted, assume strings are deleted
+        self.check_residue_deletion(array_manager, arr3_idx, [2])
 
         # Update array with another spanning 1 block, decrease string size
         arr_size = self.TEST_BLOCK_SIZE / 4
@@ -734,7 +731,8 @@ class TestGeneralArrayManagerMethods(unittest.TestCase):
         arr3_u = [string_size * "G" for _ in range(0, arr_size)]
         array_manager.update_array_at_index(arr3_idx, arr3_u)
         self.assertEquals(arr3_u, array_manager.read_array_at_index(arr3_idx))
-        # TODO: check residue deletion both array and string
+        # Check residue block is deleted, assume strings are deleted
+        self.check_residue_deletion(array_manager, arr3_idx, [1])
 
     def test_update_string_array_larger_size(self):
         """
@@ -800,3 +798,12 @@ class TestGeneralArrayManagerMethods(unittest.TestCase):
         arr3_u = [string_size * "G" for _ in range(0, arr_size)]
         array_manager.update_array_at_index(arr3_idx, arr3_u)
         self.assertEquals(arr3_u, array_manager.read_array_at_index(arr3_idx))
+
+    def check_residue_deletion(self, array_manager, start, residue_indexes):
+        """
+        Check that the given residue spots from smaller updates are deleted.
+        Indexes checked will be at start + residue_indexes[i]
+        """
+        for i in residue_indexes:
+            old_item = array_manager.storeManager.get_item_at_index(start + i)
+            self.assertTrue(old_item is None or old_item is EOF)

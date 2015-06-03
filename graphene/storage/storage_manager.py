@@ -228,6 +228,7 @@ class StorageManager:
             type_type_manager = self.relTypeTypeManager
             type_type_name_manager = self.relTypeTypeNameManager
 
+        # Make sure the type does not already exists
         if type_name_manager.find_name(type_name) is not None:
             # The type name already exists!
             if node_flag:
@@ -237,11 +238,13 @@ class StorageManager:
                 raise TypeAlreadyExistsException(
                     "Relation %s already exists!" % type_name)
         name_index = type_name_manager.write_name(type_name)
+
         if len(schema) > 0:
             ids = type_type_manager.get_indexes(len(schema))
             # Create linked list of types for the created type
             for i, idx in enumerate(ids):
                 tt_name, tt_type = schema[i]
+                # Replace array syntax with Array following the array type
                 if tt_type.find("[]") > -1:
                     tt_type = tt_type.replace("[]", "Array")
                 tt_name_id = type_type_name_manager.write_name(tt_name)
