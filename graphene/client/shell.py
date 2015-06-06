@@ -61,4 +61,5 @@ class Shell(cmd.Cmd):
             if not self.server.doCommands(line):
                 return True
         except:
-            print self.format_traceback(sys.exc_type, sys.exc_value, sys.exc_traceback)
+            print self.format_traceback(sys.exc_type, sys.exc_value,
+                                        sys.exc_traceback)

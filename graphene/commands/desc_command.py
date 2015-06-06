@@ -1,10 +1,12 @@
 import sys
 from enum import Enum
+import logging
 
 from graphene.commands.command import Command
 from graphene.errors import TypeDoesNotExistException
 from graphene.utils import PrettyPrinter
 from graphene.storage import GeneralStore
+
 
 class DescCommand(Command):
     class DescType(Enum):
@@ -12,9 +14,11 @@ class DescCommand(Command):
         RELATION = 2
 
     def __init__(self, type_name, desc_type):
-        print type_name
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.type_name = type_name
         self.desc_type = desc_type
+
+        self.logger.debug("Describing type with name: %s" % type_name)
 
     def execute(self, storage_manager, output=sys.stdout):
         try:

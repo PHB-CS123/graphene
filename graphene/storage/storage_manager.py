@@ -1,12 +1,10 @@
-from graphene.storage import *
-from graphene.errors.storage_manager_errors import *
-
-from graphene.storage.base.property import Property
-
-from graphene.storage.intermediate import *
 from pylru import WriteBackCacheManager
-
 import logging
+
+from graphene.errors.storage_manager_errors import *
+from graphene.storage import *
+from graphene.storage.base.property import Property
+from graphene.storage.intermediate import *
 
 class StorageManager:
     # Maximum size of the cache (in items)
@@ -543,8 +541,7 @@ class StorageManager:
                     prop_kwargs["prop_block_id"] = prop_val
                 stored_prop = self.property_manager.create_item(**prop_kwargs)
                 properties.append(stored_prop)
-            print("Final properties: %s" % (rel_properties,))
-
+            self.logger.debug("Final properties: %s" % (rel_properties,))
 
         # TODO: Relationship's first prop_id is 0 if it has no properties?
         first_prop_idx = properties[0].index if rel_properties else 0
@@ -610,7 +607,7 @@ class StorageManager:
 
         self.relprop[new_rel.index] = (new_rel, properties)
         self.relprop.sync()
-        print("new rel: %s" % new_rel)
+        self.logger.debug("New Relationship: %s" % new_rel)
         return new_rel
 
     def get_relation(self, index):
