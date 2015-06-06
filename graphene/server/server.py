@@ -1,11 +1,14 @@
 from antlr4 import InputStream, CommonTokenStream
+import time
+import colorama
+
 from graphene.parser import (GQLLexer, GQLParser)
 from graphene.commands.exit_command import *
 from graphene.errors.parser_error import ParserError
 from graphene.errors.parser_error_listener import ParserErrorListener
 from graphene.storage.storage_manager import StorageManager
+from graphene.utils.pretty_printer import PrettyPrinter
 
-import time
 
 class GrapheneServer:
     """
@@ -14,6 +17,8 @@ class GrapheneServer:
     """
     def __init__(self):
         self.storage_manager = StorageManager()
+        # Initialize color escape sequences whether for Windows or Mac/Linux
+        colorama.init()
 
     def parseString(self, s):
         istream = InputStream.InputStream(s)
@@ -81,7 +86,7 @@ class GrapheneServer:
                 start_time = time.time()
                 cmd.execute(self.storage_manager)
                 end_time = time.time()
-                print("Command executed in %.3fs" % (end_time - start_time))
+                PrettyPrinter.print_execute_time(start_time, end_time)
             return True
         except ParserError as e:
             if eat_errors:
