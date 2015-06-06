@@ -54,3 +54,12 @@ class NodePropertyStore:
         if node == GeneralStore.EOF:
             raise IndexError("Key %d goes past the end of the store." % key)
         self.sm.delete_node(node)
+
+    def clear(self):
+        """
+        Called when the cache is cleared
+
+        :return: Nothing
+        :rtype: None
+        """
+        pass

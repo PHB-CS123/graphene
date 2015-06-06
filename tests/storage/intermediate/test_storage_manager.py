@@ -3,6 +3,7 @@ import unittest
 from graphene.errors.storage_manager_errors import *
 from graphene.storage import (StorageManager, GrapheneStore, Property,
                               Relationship, Node)
+from graphene.storage.intermediate.node_property import NodeProperty
 from graphene.storage.base.general_store import EOF
 
 
@@ -384,11 +385,36 @@ class TestStorageManagerMethods(unittest.TestCase):
         self.assertEqual(n1.relId, 0)
         self.assertEqual(n2.relId, 0)
 
-    def test_update_nodes(self):
+    def test_update_nodes_simple(self):
         """
-        Test that updating a node's properties works properly
+        Test that updating a node's properties works properly, in a 1 property
+        case
         """
         pass
+        # t = self.sm.create_node_type("T", (("a", "int"),))
+        # # Create 3 nodes of type T
+        # n1, p1 = self.sm.insert_node(t, ((Property.PropertyType.int, 2),))
+        # n2, p2 = self.sm.insert_node(t, ((Property.PropertyType.int, 3),))
+        # n3, p3 = self.sm.insert_node(t, ((Property.PropertyType.int, 5),))
+        #
+        # # Update nodes 1 and 3 with value 10
+        # update = {"a": 10}
+        # # Create nodeprops for update nodes
+        # nodeprop1 = NodeProperty(n1, p1, t, "T")
+        # nodeprop3 = NodeProperty(n3, p3, t, "T")
+        # nodeprops = [nodeprop1, nodeprop3]
+        # import pytest
+        # pytest.set_trace()
+        # self.sm.update_nodes(nodeprops, update)
+        # # Check that values are updated
+        # n1_f, p1_f = self.sm.nodeprop[n1.index]
+        # n2_f, p2_f = self.sm.nodeprop[n2.index]
+        # n3_f, p3_f = self.sm.nodeprop[n3.index]
+        #
+        # self.assertEquals(p1_f[0].propBlockId, 10)
+        # self.assertEquals(p3_f[0].propBlockId, 10)
+        # # Check that untouched values are the same
+        # self.assertEquals(p2_f[0].propBlockId, 3)
 
     def test_update_relations(self):
         """

@@ -391,9 +391,9 @@ class StorageManager:
         :param node_type: Type of node
         :type node_type: GeneralType
         :param node_properties: List of tuples containing (PropertyType, Value)
-        :type node_properties: list
-        :return: Tuple with
-        :rtype:
+        :type node_properties: tuple
+        :return: ID of new node and the IDs of the properties of the node
+        :rtype: tuple
         """
         properties = []
         if len(node_properties) > 0:
@@ -783,7 +783,7 @@ class StorageManager:
         """
         Updates the given nodes or relationship properties
         :param itemprops: nodeprops or relprops to update
-        :type itemprops: NodeProperty | RelationProperty
+        :type itemprops: list[NodeProperty] | list[RelationProperty]
         :param updates: Dict. containing property names and their update values
         :type updates: dict[str, Any]
         :param node_flag: Flag specifying whether we are getting data for
