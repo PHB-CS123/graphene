@@ -115,7 +115,7 @@ class PrettyPrinter:
         Pretty prints the given help string with the helpColor field
 
         :param help_str: Help string to print
-        :type help_str: str
+        :type help_str: str | FileIO[str]
         :return: Nothing
         :rtype: None
         """

@@ -1,0 +1,14 @@
+MATCH command
+    Used to query nodes or relations
+    - One node: MATCH (node_name:NodeType)
+    - Relation: MATCH(node_name:NodeType)-[rel_name:REL_TYPE]->(node_name:NodeType)
+    Can continue chaining relations with arrows.
+ 
+    Queries: MATCH node_chain WHERE property_name = property_value
+        NOTE: property_name can have an identifier corresponding to node_name.
+        e.g. `MATCH (t:T) WHERE t.a = 3;` or `MATCH (t:T) WHERE a = 3;`. Both work
+
+    Returns: MATCH node_chain RETURN property_name1, property_name2, ...
+        Projects schema.
+        Both queries and projections will notice if there are duplicate 
+        identifiers or ambiguous identifiers

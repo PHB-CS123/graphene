@@ -1,0 +1,17 @@
+DELETE command
+    Deletes a node/relation from the database (and any references
+    that may refer to it).
+
+    DELETE NODE:
+        Delete a node with a query.
+        
+        DELETE NODE TypeName(query)
+
+    DELETE RELATION:
+        Delete relation with a query, but can also require a node on left 
+        or right with its own query.
+
+        DELETE RELATION RELATION_NAME(query)
+        DELETE RELATION TypeName(query)-RELATION_NAME(query)
+        DELETE RELATION RELATION_NAME(query)->TypeName(query)
+        DELETE RELATION TypeName(query)-RELATION_NAME(query)->TypeName(query)
