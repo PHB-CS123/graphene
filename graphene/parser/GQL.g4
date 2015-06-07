@@ -237,9 +237,17 @@ update_relation returns [u]
     (',' (ui=update_value {$u[$ui.ctx.name] = $ui.ctx.value}))*
   ;
 
+// This empty_array stuff is super hacky but ANTLR4 is being difficult...
 update_value
-  : name=ident {$name.ctx = ".".join(filter(lambda v: v is not None, $name.ctx))} '='
-    value=literal {$value.ctx = $value.text}
+  : (name=ident {$name.ctx = ".".join(filter(lambda v: v is not None, $name.ctx))})
+   '='
+    ((value=literal)|(empty_array='[]'))
+{
+if $empty_array is not None:
+    $value.ctx = $empty_array.text
+else:
+    $value.ctx = $value.text
+}
   ;
 
 // SHOW command
