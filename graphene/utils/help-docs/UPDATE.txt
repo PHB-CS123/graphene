@@ -1,0 +1,5 @@
+UPDATE command
+    Updates a node/relation
+    Exactly the same syntax as DELETE except for how to set values
+    
+    UPDATE (NODE ...|RELATION ...) SET prop_name = prop_value, ...

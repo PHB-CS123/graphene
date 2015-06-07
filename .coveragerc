@@ -54,6 +54,9 @@ exclude_lines =
     # PrettyPrinter does not need testing
     class PrettyPrinter
 
+    # HelpDocs does not need testing
+    class HelpDocs
+
     # GPLogging does not need testing
     class GPLogging
 
