@@ -9,10 +9,14 @@ from graphene.errors import TypeMismatchException
 from graphene.traversal import Query
 from graphene.query.planner import QueryPlanner
 from graphene.storage.base.general_store import EOF
+from graphene.utils.pretty_printer import PrettyPrinter
 
 class TestDeleteRelationCommand(unittest.TestCase):
     def setUp(self):
         GrapheneStore.TESTING = True
+        # Set to no colors to avoid escape sequences in output
+        PrettyPrinter.TESTING = True
+
         graphene_store = GrapheneStore()
         graphene_store.remove_test_datafiles()
         self.server = GrapheneServer()

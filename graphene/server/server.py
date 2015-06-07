@@ -68,6 +68,8 @@ class GrapheneServer:
         :return: True if more commands will be accepted, False if an error occurred.
         :rtype: bool
         """
+        # Instance of pretty printer to use for all output
+        printer = PrettyPrinter()
 
         # Convert data to input stream
         istream = InputStream.InputStream(data)
@@ -86,11 +88,11 @@ class GrapheneServer:
                 start_time = time.time()
                 cmd.execute(self.storage_manager)
                 end_time = time.time()
-                PrettyPrinter.print_execute_time(start_time, end_time)
+                printer.print_execute_time(start_time, end_time)
             return True
         except ParserError as e:
             if eat_errors:
-                PrettyPrinter.print_error(e)
+                printer.print_error(e)
             else:
                 raise e
             return True

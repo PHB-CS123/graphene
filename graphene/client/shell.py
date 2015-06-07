@@ -29,14 +29,16 @@ class Shell(cmd.Cmd):
         :rtype: None
         """
         # TODO: implement for different types of commands
+        # Instance of pretty printer to use for all output
+        printer = PrettyPrinter()
         # Make the line whitespace and case insensitive
         line = line.upper().strip()
 
         if line == "MATCH":
-            PrettyPrinter.print_help("MATCH help: ")
+            printer.print_help("MATCH help: ")
         else:
-            PrettyPrinter.print_help("You can type the following help topics:\n"
-                                     "MATCH, INSERT, CREATE")
+            printer.print_help("You can type the following help topics:\n"
+                               "MATCH, INSERT, CREATE")
             self.logger.debug("Unhandled help request %s" % line)
 
     def do_EOF(self, line):
@@ -59,10 +61,13 @@ class Shell(cmd.Cmd):
         return s
 
     def default(self, line):
+        # Instance of pretty printer to use for all output
+        printer = PrettyPrinter()
+
         try:
             if not self.server.doCommands(line):
                 return True
         except:
             trace = self.format_traceback(sys.exc_type, sys.exc_value, sys.exc_traceback)
-            PrettyPrinter.print_error(trace)
+            printer.print_error(trace)
 

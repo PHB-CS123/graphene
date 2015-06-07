@@ -3,52 +3,62 @@ from colorama import Fore, Style
 
 
 class PrettyPrinter:
-    # --- Color presets --- #
-    # Color text green for the time it took to execute a command, make it dim
-    TIME_FORMAT = Fore.GREEN + Style.DIM
-    # Color of the table with output
-    TABLE_COLOR = Fore.YELLOW
-    # Color of the header of the table
-    HEADER_COLOR = Fore.RED
-    # Color of the elements in the table
-    ELEMENT_COLOR = Fore.BLUE
-    # Color errors red, and make them bright
-    ERROR_FORMAT = Fore.RED + Style.BRIGHT
-    # Color help green
-    HELP_COLOR = Fore.GREEN
-    # Color the info text white, make it bright
-    INFO_FORMAT = Fore.WHITE + Style.BRIGHT
-    # End of color, reset to normal terminal color
-    END = Fore.RESET + Style.RESET_ALL
+    # Set when testing to avoid getting output with color escape sequences
+    TESTING = False
 
-    # --- Table Elements --- #
-    PIPE = TABLE_COLOR + "|" + END
-    PIPE_START = TABLE_COLOR + "| " + END
-    PIPE_END = TABLE_COLOR + " |" + END
-    DASH = TABLE_COLOR + "-" + END
+    def __init__(self):
+        """
+        Initialize the colors used by the class, the instance handles all
+        general printing.
 
-    @classmethod
-    def print_list(cls, lst, header=None, output=sys.stdout):
+        :return: Instance of pretty printer to use for output
+        :rtype: PrettyPrinter
+        """
+        #TODO: change this to get themes from dict where NO_COLORS is a key
+        # --- Color presets --- #
+        # Color text green for the time to execute a command, make it dim
+        self.timeFormat = Fore.GREEN + Style.DIM if not self.TESTING else ""
+        # Color of the table with output
+        self.tableColor = Fore.YELLOW if not self.TESTING else ""
+        # Color of the header of the table
+        self.headerColor = Fore.RED if not self.TESTING else ""
+        # Color of the elements in the table
+        self.elementColor = Fore.BLUE if not self.TESTING else ""
+        # Color errors red, and make them bright
+        self.errorFormat = Fore.RED + Style.BRIGHT if not self.TESTING else ""
+        # Color help green
+        self.helpColor = Fore.GREEN if not self.TESTING else ""
+        # Color the info text white, make it bright
+        self.infoFormat = Fore.WHITE + Style.BRIGHT if not self.TESTING else ""
+        # End of color, reset to normal terminal color
+        self.endFormat = Fore.RESET + Style.RESET_ALL if not self.TESTING else ""
+             
+        # --- Table Elements --- #
+        self.pipeFormat = self.tableColor + "|" + self.endFormat
+        self.pipeStartFormat = self.tableColor + "| " + self.endFormat
+        self.pipeEndFormat = self.tableColor + " |" + self.endFormat
+        self.dashFormat = self.tableColor + "-" + self.endFormat
+
+    def print_list(self, lst, header=None, output=sys.stdout):
         max_len = max(map(len, lst))
 
         str_list = []
         # Format header
         if header is not None:
             max_len = max(max_len, len(header))
-            str_list.append((max_len + 4) * cls.DASH)
-            str_list.append(cls.PIPE_START + cls.format_header(header.upper()) +
-                            (max_len - len(header)) * " " + cls.PIPE_END)
-        str_list.append((max_len + 4) * cls.DASH)
+            str_list.append((max_len + 4) * self.dashFormat)
+            str_list.append(self.pipeStartFormat + self.format_header(header.upper()) +
+                            (max_len - len(header)) * " " + self.pipeEndFormat)
+        str_list.append((max_len + 4) * self.dashFormat)
         for o in lst:
-            new_o = cls.format_element(o)
-            str_list.append(cls.PIPE_START + new_o +
-                            (max_len - len(o)) * " " + cls.PIPE_END)
-        str_list.append((max_len + 4) * cls.DASH)
+            new_o = self.format_element(o)
+            str_list.append(self.pipeStartFormat + new_o +
+                            (max_len - len(o)) * " " + self.pipeEndFormat)
+        str_list.append((max_len + 4) * self.dashFormat)
 
         output.write("\n".join(str_list) + "\n")
 
-    @classmethod
-    def print_table(cls, table, header=None, output=sys.stdout):
+    def print_table(self, table, header=None, output=sys.stdout):
         data = zip(*table)
         maxes = map(lambda l: max(map(lambda v: len(str(v)), l)), data)
         width = sum(m + 2 for m in maxes) + 2 + (len(maxes) - 1)
@@ -56,26 +66,26 @@ class PrettyPrinter:
         if header is not None:
             maxes = [max(m, len(str(header[i] or ""))) for i, m in enumerate(maxes)]
             width = sum(m + 2 for m in maxes) + 2 + (len(maxes) - 1)
-            output.write(width * cls.DASH + "\n")
+            output.write(width * self.dashFormat + "\n")
             # Apply color to header
-            new_header = map(lambda h: cls.format_header(h), header)
+            new_header = map(lambda h: self.format_header(h), header)
             # Output headers
-            join_headers = cls.PIPE.join(" %s%s " % (new_header[i], (maxes[i] - len(str(v))) * " ")
-                                         for i, v in enumerate(header))
-            output.write((cls.PIPE + "%s" + cls.PIPE + "\n") % join_headers)
-        output.write(width * cls.DASH + "\n")
+            join_headers = self.pipeFormat.join(" %s%s " % (new_header[i], (maxes[i] - len(str(v))) * " ")
+                                                for i, v in enumerate(header))
+            output.write((self.pipeFormat + "%s" + self.pipeFormat + "\n") % join_headers)
+        output.write(width * self.dashFormat + "\n")
         for row in table:
             # Apply color to rows
-            new_row = map(lambda e: cls.format_element(e), row)
-            join_rows = cls.PIPE.join(" %s%s " % (new_row[i], (maxes[i] - len(str(v))) * " ")
-                                      for i, v in enumerate(row))
-            output.write((cls.PIPE + "%s" + cls.PIPE + "\n") % join_rows)
-        output.write(width * cls.DASH + "\n")
+            new_row = map(lambda e: self.format_element(e), row)
+            join_rows = self.pipeFormat.join(" %s%s " % (new_row[i], (maxes[i] - len(str(v))) * " ")
+                                             for i, v in enumerate(row))
+            output.write((self.pipeFormat + "%s" + self.pipeFormat + "\n")
+                         % join_rows)
+        output.write(width * self.dashFormat + "\n")
 
-    @classmethod
-    def print_info(cls, info, output=sys.stdout):
+    def print_info(self, info, output=sys.stdout):
         """
-        Pretty prints the given info text with the INFO_FORMAT field
+        Pretty prints the given info text with the infoFormat field
 
         :param info: Information to print
         :type info: str
@@ -84,12 +94,11 @@ class PrettyPrinter:
         :return: Nothing
         :rtype: None
         """
-        output.write(cls.INFO_FORMAT + info + cls.END)
+        output.write(self.infoFormat + info + self.endFormat)
 
-    @classmethod
-    def print_execute_time(cls, start_time, end_time, output=sys.stdout):
+    def print_execute_time(self, start_time, end_time, output=sys.stdout):
         """
-        Pretty prints the execution time with the TIME_COLOR field
+        Pretty prints the execution time with the timeFormat field
 
         :param start_time: Time when execution started
         :type start_time: float
@@ -98,54 +107,50 @@ class PrettyPrinter:
         :return: Nothing
         :rtype: None
         """
-        output.write((cls.TIME_FORMAT + "Command executed in %.3fs" + cls.END)
-                     % (end_time - start_time) + "\n")
+        output.write((self.timeFormat + "Command executed in %.3fs"
+                      + self.endFormat) % (end_time - start_time) + "\n")
 
-    @classmethod
-    def print_help(cls, help, output=sys.stdout):
+    def print_help(self, help_str, output=sys.stdout):
         """
-        Pretty prints the given help string with the HELP_FORMAT field
+        Pretty prints the given help string with the helpColor field
 
-        :param help: Help string to print
-        :type help: str
+        :param help_str: Help string to print
+        :type help_str: str
         :return: Nothing
         :rtype: None
         """
-        output.write(cls.HELP_COLOR + help + cls.END + "\n")
+        output.write(self.helpColor + help_str + self.endFormat + "\n")
 
-    @classmethod
-    def print_error(cls, error, output=sys.stdout):
+    def print_error(self, error, output=sys.stdout):
         """
-        Pretty prints the given error with the ERROR_FORMAT field
+        Pretty prints the given error with the errorFormat field
 
         :param error: Prints the given error that responds to the str method
         :type error: Exception
         :return: Nothing
         :rtype: None
         """
-        output.write(cls.ERROR_FORMAT + str(error) + cls.END + "\n")
-
-    @classmethod
-    def format_header(cls, header):
+        output.write(self.errorFormat + str(error) + self.endFormat + "\n")
+    
+    def format_header(self, header):
         """
-        Formats the given header according to the HEADER_COLOR field, and makes
-        the headers uppercase.
+        Formats the given header according to the headerColor field, and
+        makes the headers uppercase.
 
         :param header: Header to format
         :type header: str
         :return: Formatted string
         :rtype: str
         """
-        return cls.HEADER_COLOR + header.upper() + cls.END
+        return self.headerColor + header.upper() + self.endFormat
 
-    @classmethod
-    def format_element(cls, element):
+    def format_element(self, element):
         """
-        Formats the given element according to the ELEMENT_COLOR field
+        Formats the given element according to the elementColor field
 
         :param element: Row to format
         :type element: Any
         :return: String with format for given element
         :rtype: str
         """
-        return cls.ELEMENT_COLOR + str(element) + cls.END
+        return self.elementColor + str(element) + self.endFormat
