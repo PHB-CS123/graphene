@@ -1,4 +1,5 @@
 from graphene.utils.pretty_printer import PrettyPrinter
+from graphene.utils.help_docs import HelpDocs
 
 import cmd
 import readline
@@ -12,6 +13,8 @@ class Shell(cmd.Cmd):
         cmd.Cmd.__init__(self)
         self.server = server
         self.logger = logging.getLogger(self.__class__.__name__)
+        # Where help documentation is obtained from
+        self.helpDocs = HelpDocs()
 
     def preloop(self):
         self.intro = "Graphene 0.1"
@@ -28,18 +31,22 @@ class Shell(cmd.Cmd):
         :return: Nothing
         :rtype: None
         """
-        # TODO: implement for different types of commands
         # Instance of pretty printer to use for all output
         printer = PrettyPrinter()
         # Make the line whitespace and case insensitive
         line = line.upper().strip()
+        # Get possible help topics
+        help_topics = self.helpDocs.topics
 
-        if line == "MATCH":
-            printer.print_help("MATCH help: ")
-        else:
-            printer.print_help("You can type the following help topics:\n"
-                               "MATCH, INSERT, CREATE")
-            self.logger.debug("Unhandled help request %s" % line)
+        if line in help_topics:
+            self.helpDocs.print_help_topic(line)
+            return
+        # User entered invalid help topic
+        elif len(line) != 0:
+            printer.print_error("ERROR: Unrecognized help topic.")
+        # Print possible help topics
+        printer.print_help("You ask about the following help topics:\n%s"
+                           % "- " + " \n- ".join(help_topics))
 
     def do_EOF(self, line):
         return True

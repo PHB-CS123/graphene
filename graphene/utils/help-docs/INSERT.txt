@@ -1,0 +1,14 @@
+INSERT command
+    Inserts a node/relation into the database
+    INSERT NODE
+        Can insert multiple nodes of any type.
+        
+        INSERT NODE TypeName(prop1, prop2), OtherTypeName(prop1, prop2, prop3), ...
+    
+    INSERT RELATION
+        Adding properties to relation is like with nodes, but use queries to 
+        determine which nodes to attach to. 
+        Queries work exactly like MATCH queries, except you can't use type 
+        name aliases
+
+        INSERT RELATION TypeName(query)-[RELATION_NAME(prop1, prop2)]->TypeName(query)

@@ -1,0 +1,3 @@
+DESC command
+    Describes schema of type/relation
+    DESC (TYPE TypeName|RELATION RELATION_NAME)

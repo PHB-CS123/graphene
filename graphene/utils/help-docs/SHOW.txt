@@ -1,0 +1,3 @@
+SHOW command
+    Lists types/relations by name
+    SHOW (TYPES|RELATIONS)

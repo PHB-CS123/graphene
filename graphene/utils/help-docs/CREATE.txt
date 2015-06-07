@@ -1,0 +1,10 @@
+CREATE command
+    Creates schemas for nodes/relations
+    - CREATE TYPE for node types
+    - CREATE RELATION for relation type
+    
+    CREATE (TYPE TypeName|RELATION RELATION_NAME) (prop_name: prop_type, ...)
+ 
+    Relations can have empty schemas, so `CREATE RELATION R ();` is legal
+    Types cannot have empty schemas
+    Available types: string, int, double, bool; also array versions of each
