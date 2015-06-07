@@ -16,6 +16,8 @@ class PrettyPrinter:
     ERROR_FORMAT = Fore.RED + Style.BRIGHT
     # Color help green
     HELP_COLOR = Fore.GREEN
+    # Color the info text white, make it bright
+    INFO_FORMAT = Fore.WHITE + Style.BRIGHT
     # End of color, reset to normal terminal color
     END = Fore.RESET + Style.RESET_ALL
 
@@ -38,7 +40,9 @@ class PrettyPrinter:
                             (max_len - len(header)) * " " + cls.PIPE_END)
         str_list.append((max_len + 4) * cls.DASH)
         for o in lst:
-            str_list.append(cls.PIPE_START + o + (max_len - len(o)) * " " + cls.PIPE_END)
+            new_o = cls.format_element(o)
+            str_list.append(cls.PIPE_START + new_o +
+                            (max_len - len(o)) * " " + cls.PIPE_END)
         str_list.append((max_len + 4) * cls.DASH)
 
         output.write("\n".join(str_list) + "\n")
@@ -67,6 +71,20 @@ class PrettyPrinter:
                                       for i, v in enumerate(row))
             output.write((cls.PIPE + "%s" + cls.PIPE + "\n") % join_rows)
         output.write(width * cls.DASH + "\n")
+
+    @classmethod
+    def print_info(cls, info, output=sys.stdout):
+        """
+        Pretty prints the given info text with the INFO_FORMAT field
+
+        :param info: Information to print
+        :type info: str
+        :param output: Output stream
+        :type output: FileIO[str]
+        :return: Nothing
+        :rtype: None
+        """
+        output.write(cls.INFO_FORMAT + info + cls.END)
 
     @classmethod
     def print_execute_time(cls, start_time, end_time, output=sys.stdout):

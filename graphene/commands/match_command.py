@@ -31,7 +31,7 @@ class MatchCommand(Command):
 
         # If there's nothing found, there were no nodes
         if len(results) == 0:
-            output.write("No nodes found.\n")
+            PrettyPrinter.print_info("No nodes found.\n", output)
             return []
 
         PrettyPrinter.print_table(results, schema, output)
