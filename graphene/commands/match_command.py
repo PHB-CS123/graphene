@@ -25,14 +25,17 @@ class MatchCommand(Command):
         :param output: The file stream to pipe output into
         :return: List of results
         """
+        # Instance of pretty printer to use for all output
+        printer = PrettyPrinter()
+
         # Create a planner and execute given a node chain and query chain
         planner = QueryPlanner(storage_manager)
         schema, results = planner.execute(self.nc, self.qc, self.rc)
 
         # If there's nothing found, there were no nodes
         if len(results) == 0:
-            output.write("No nodes found.\n")
+            printer.print_info("No nodes found.\n", output)
             return []
 
-        PrettyPrinter.print_table(results, schema, output)
+        printer.print_table(results, schema, output)
         return results

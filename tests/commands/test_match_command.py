@@ -10,6 +10,9 @@ class TestMatchCommand(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         GrapheneStore.TESTING = True
+        # Set to no colors to avoid escape sequences in output
+        PrettyPrinter.TESTING = True
+
         graphene_store = GrapheneStore()
         graphene_store.remove_test_datafiles()
         cls.server = GrapheneServer()
