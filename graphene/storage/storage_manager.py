@@ -519,7 +519,7 @@ class StorageManager:
                     prop_kwargs["prop_block_id"] = prop_val
                 stored_prop = self.property_manager.create_item(**prop_kwargs)
                 properties.append(stored_prop)
-            print("Final properties: %s" % (rel_properties,))
+            self.logger.debug("Final properties: %s" % (rel_properties,))
 
 
         # TODO: Relationship's first prop_id is 0 if it has no properties?
@@ -586,7 +586,7 @@ class StorageManager:
 
         self.relprop[new_rel.index] = (new_rel, properties)
         self.relprop.sync()
-        print("new rel: %s" % new_rel)
+        self.logger.debug("New Relationship: %s" % new_rel)
         return new_rel
 
     def get_relation(self, index):

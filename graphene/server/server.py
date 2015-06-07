@@ -90,7 +90,7 @@ class GrapheneServer:
             return True
         except ParserError as e:
             if eat_errors:
-                print(e)
+                PrettyPrinter.print_error(e)
             else:
                 raise e
             return True

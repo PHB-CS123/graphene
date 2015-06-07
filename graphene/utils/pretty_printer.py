@@ -1,21 +1,25 @@
 import sys
-from colorama import Fore
+from colorama import Fore, Style
 
 
 class PrettyPrinter:
     # --- Color presets --- #
-    # Color of the text for the time it took to execute a command
-    TIME_COLOR = Fore.GREEN
+    # Color text green for the time it took to execute a command, make it dim
+    TIME_FORMAT = Fore.GREEN + Style.DIM
     # Color of the table with output
     TABLE_COLOR = Fore.YELLOW
     # Color of the header of the table
     HEADER_COLOR = Fore.RED
     # Color of the elements in the table
     ELEMENT_COLOR = Fore.BLUE
+    # Color errors red, and make them bright
+    ERROR_FORMAT = Fore.RED + Style.BRIGHT
+    # Color help green
+    HELP_COLOR = Fore.GREEN
     # End of color, reset to normal terminal color
-    END = Fore.RESET
+    END = Fore.RESET + Style.RESET_ALL
 
-    # Table Elements
+    # --- Table Elements --- #
     PIPE = TABLE_COLOR + "|" + END
     PIPE_START = TABLE_COLOR + "| " + END
     PIPE_END = TABLE_COLOR + " |" + END
@@ -65,9 +69,9 @@ class PrettyPrinter:
         output.write(width * cls.DASH + "\n")
 
     @classmethod
-    def print_execute_time(cls, start_time, end_time):
+    def print_execute_time(cls, start_time, end_time, output=sys.stdout):
         """
-        Pretty prints the execution time
+        Pretty prints the execution time with the TIME_COLOR field
 
         :param start_time: Time when execution started
         :type start_time: float
@@ -76,8 +80,32 @@ class PrettyPrinter:
         :return: Nothing
         :rtype: None
         """
-        print((Fore.GREEN+"Command executed in %.3fs"+Fore.RESET)
-              % (end_time - start_time))
+        output.write((cls.TIME_FORMAT + "Command executed in %.3fs" + cls.END)
+                     % (end_time - start_time) + "\n")
+
+    @classmethod
+    def print_help(cls, help, output=sys.stdout):
+        """
+        Pretty prints the given help string with the HELP_FORMAT field
+
+        :param help: Help string to print
+        :type help: str
+        :return: Nothing
+        :rtype: None
+        """
+        output.write(cls.HELP_COLOR + help + cls.END + "\n")
+
+    @classmethod
+    def print_error(cls, error, output=sys.stdout):
+        """
+        Pretty prints the given error with the ERROR_FORMAT field
+
+        :param error: Prints the given error that responds to the str method
+        :type error: Exception
+        :return: Nothing
+        :rtype: None
+        """
+        output.write(cls.ERROR_FORMAT + str(error) + cls.END + "\n")
 
     @classmethod
     def format_header(cls, header):
@@ -103,4 +131,3 @@ class PrettyPrinter:
         :rtype: str
         """
         return cls.ELEMENT_COLOR + str(element) + cls.END
-
