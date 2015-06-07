@@ -20,6 +20,9 @@ class ShowCommand(Command):
         :type storage_manager: StorageManager
         :return:
         """
+        # Instance of pretty printer to use for all output
+        printer = PrettyPrinter()
+
         # Dictionaries to determine type and name managers for various types.
         type_managers = {
             self.ShowType.TYPES: storage_manager.nodeTypeManager,
@@ -48,6 +51,7 @@ class ShowCommand(Command):
 
         # Print the resulting name list.
         if not name_list:
-            output.write("No %s found.\n" % self.show_type.name.lower())
-            return
-        PrettyPrinter.print_list(name_list, self.show_type.name, output=output)
+            printer.print_info(("No %s found.\n" %
+                                self.show_type.name.lower()), output)
+        else:
+            printer.print_list(name_list, self.show_type.name, output=output)

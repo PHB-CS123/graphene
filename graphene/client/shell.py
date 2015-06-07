@@ -1,3 +1,5 @@
+from graphene.utils.pretty_printer import PrettyPrinter
+
 import cmd
 import readline
 import traceback
@@ -27,14 +29,16 @@ class Shell(cmd.Cmd):
         :rtype: None
         """
         # TODO: implement for different types of commands
+        # Instance of pretty printer to use for all output
+        printer = PrettyPrinter()
         # Make the line whitespace and case insensitive
         line = line.upper().strip()
 
         if line == "MATCH":
-            print("MATCH help: ")
+            printer.print_help("MATCH help: ")
         else:
-            print("You can type the following help topics: \n"
-                  "MATCH, INSERT, CREATE")
+            printer.print_help("You can type the following help topics:\n"
+                               "MATCH, INSERT, CREATE")
             self.logger.debug("Unhandled help request %s" % line)
 
     def do_EOF(self, line):
@@ -57,8 +61,13 @@ class Shell(cmd.Cmd):
         return s
 
     def default(self, line):
+        # Instance of pretty printer to use for all output
+        printer = PrettyPrinter()
+
         try:
             if not self.server.doCommands(line):
                 return True
         except:
-            print self.format_traceback(sys.exc_type, sys.exc_value, sys.exc_traceback)
+            trace = self.format_traceback(sys.exc_type, sys.exc_value, sys.exc_traceback)
+            printer.print_error(trace)
+

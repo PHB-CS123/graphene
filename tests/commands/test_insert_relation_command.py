@@ -5,10 +5,14 @@ from graphene.storage import (StorageManager, GrapheneStore, Property, Relations
 from graphene.server.server import GrapheneServer
 from graphene.utils.conversion import TypeConversion
 from graphene.errors import TypeMismatchException
+from graphene.utils.pretty_printer import PrettyPrinter
 
 class TestInsertRelationCommand(unittest.TestCase):
     def setUp(self):
         GrapheneStore.TESTING = True
+        # Set to no colors to avoid escape sequences in output
+        PrettyPrinter.TESTING = True
+
         graphene_store = GrapheneStore()
         graphene_store.remove_test_datafiles()
         self.server = GrapheneServer()

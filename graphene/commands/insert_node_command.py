@@ -43,7 +43,8 @@ class InsertNodeCommand(Command):
                         raise TypeMismatchException(err)
                     # Convert value and add to list
                     conv_value = TypeConversion.convert_to_value(prop, given_type)
-                    print( conv_value, given_type)
+                    self.logger.debug("\t\t%s, %s" %(str(conv_value),
+                                                     str(given_type)))
                 properties.append((exp_tt, conv_value))
             final_types.append(node_type)
             final_props.append(properties)

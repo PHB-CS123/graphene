@@ -1,14 +1,17 @@
 import unittest
+import StringIO
 
 from graphene.commands import DescCommand
 from graphene.storage import (StorageManager, GrapheneStore, Property)
 from graphene.utils import PrettyPrinter
 from graphene.server.server import GrapheneServer
-import StringIO
 
 class TestShowCommand(unittest.TestCase):
     def setUp(self):
         GrapheneStore.TESTING = True
+        # Set to no colors to avoid escape sequences in output
+        PrettyPrinter.TESTING = True
+
         graphene_store = GrapheneStore()
         graphene_store.remove_test_datafiles()
         self.server = GrapheneServer()
@@ -30,13 +33,14 @@ class TestShowCommand(unittest.TestCase):
         # Create dummy output stream for testing
         out = StringIO.StringIO()
         cmd.execute(self.sm, output=out)
-        self.assertEquals(out.getvalue(), "Type Foo does not exist.")
+        self.assertEquals(out.getvalue(), "Type Foo does not exist.\n")
         out.close()
 
     def test_one_type(self):
+        printer = PrettyPrinter()
         # Pretty print expected output for testing later
         exp_stream = StringIO.StringIO()
-        PrettyPrinter.print_table((("a", "int"), ("b", "string")), ["NAME", "TYPE"], exp_stream)
+        printer.print_table((("a", "int"), ("b", "string")), ["NAME", "TYPE"], exp_stream)
         expected = exp_stream.getvalue()
         exp_stream.close()
 
@@ -57,13 +61,14 @@ class TestShowCommand(unittest.TestCase):
         # Create dummy output stream for testing
         out = StringIO.StringIO()
         cmd.execute(self.sm, output=out)
-        self.assertEquals(out.getvalue(), "Type Foo does not exist.")
+        self.assertEquals(out.getvalue(), "Type Foo does not exist.\n")
         out.close()
 
     def test_one_type(self):
+        printer = PrettyPrinter()
         # Pretty print expected output for testing later
         exp_stream = StringIO.StringIO()
-        PrettyPrinter.print_table((("a", "int"), ("b", "string")), ["NAME", "TYPE"], exp_stream)
+        printer.print_table((("a", "int"), ("b", "string")), ["NAME", "TYPE"], exp_stream)
         expected = exp_stream.getvalue()
         exp_stream.close()
 

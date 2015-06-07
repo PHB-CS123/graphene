@@ -186,7 +186,8 @@ class QueryPlanner:
         # Gather schema information from node chain. Collects all property names
         schema = self.get_schema(node_chain, fullset=True)
 
-        # Check query against schema to ensure no ambiguous or nonexistent properties are being queried
+        # Check query against schema to ensure no ambiguous or nonexistent
+        # properties are being queried
         schema_names = [n for n, tt in schema]
         self.check_query(schema, query_chain)
 

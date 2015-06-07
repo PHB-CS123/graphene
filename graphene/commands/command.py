@@ -14,4 +14,4 @@ class Command(object):
         return "[Command]"
 
     def execute(self, storage_manager):
-        print "executing..."
+        pass

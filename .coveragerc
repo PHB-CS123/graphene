@@ -22,6 +22,10 @@ exclude_lines =
     # Do not test continue statements
     continue
 
+    # Do not test logging statements
+    logger
+    self.logger
+
     ######### Storage #########
     # Don't complain if we don't hit IOErrors since these might be defensive
     except IOError

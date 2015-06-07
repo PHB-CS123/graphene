@@ -9,6 +9,9 @@ import StringIO
 class TestShowCommand(unittest.TestCase):
     def setUp(self):
         GrapheneStore.TESTING = True
+        # Set to no colors to avoid escape sequences in output
+        PrettyPrinter.TESTING = True
+
         graphene_store = GrapheneStore()
         graphene_store.remove_test_datafiles()
         self.server = GrapheneServer()
@@ -34,9 +37,10 @@ class TestShowCommand(unittest.TestCase):
         out.close()
 
     def test_one_type(self):
+        printer = PrettyPrinter()
         # Pretty print expected output for testing later
         exp_stream = StringIO.StringIO()
-        PrettyPrinter.print_table(["T"], ["TYPES"], exp_stream)
+        printer.print_table(["T"], ["TYPES"], exp_stream)
         expected = exp_stream.getvalue()
         exp_stream.close()
 
@@ -61,9 +65,10 @@ class TestShowCommand(unittest.TestCase):
         out.close()
 
     def test_one_relation(self):
+        printer = PrettyPrinter()
         # Pretty print expected output for testing later
         exp_stream = StringIO.StringIO()
-        PrettyPrinter.print_table(["R"], ["RELATIONS"], exp_stream)
+        printer.print_table(["R"], ["RELATIONS"], exp_stream)
         expected = exp_stream.getvalue()
         exp_stream.close()
 

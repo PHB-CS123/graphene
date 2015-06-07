@@ -6,12 +6,14 @@ from graphene.expressions import *
 from graphene.traversal import *
 from graphene.utils.conversion import TypeConversion
 from graphene.errors import TypeMismatchException, BadPropertyException
+import logging
 
 import itertools
 
 class InsertRelationCommand(Command):
     def __init__(self, ctx):
         self.rel, self.query1, self.query2 = ctx
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def parse_properties(self, prop_list, schema, storage_manager):
         """
@@ -34,9 +36,8 @@ class InsertRelationCommand(Command):
             raise BadPropertyException("Expected %d propert%s, but got %d." % \
                 (schema_len, "y" if schema_len == 1 else "ies", num_props))
         for prop, schema_tt in zip(prop_list, schema):
-            tt, prop_name, exp_tt = schema_tt
+            tt, prop_name, expected_type = schema_tt
             given_type = TypeConversion.get_type_type_of_string(prop)
-            expected_type = exp_tt
             if given_type != expected_type:
                 raise TypeMismatchException("Got value of type %s, but"
                             " expected value of type %s for property '%s'." %
@@ -64,8 +65,8 @@ class InsertRelationCommand(Command):
         type_data1, type_schema_data1 = storage_manager.get_node_data(type1)
         type_schema1 = [(tt_name, tt_type) for _, tt_name, tt_type in type_schema_data1]
 
-        # Determine type and schema information for type 2 (the right side of the
-        # relation)
+        # Determine type and schema information for type 2
+        # (the right side of the relation)
         type2, queries2 = self.query2
         type_data2, type_schema_data2 = storage_manager.get_node_data(type2)
         type_schema2 = [(tt_name, tt_type) for _, tt_name, tt_type in type_schema_data2]
@@ -87,8 +88,8 @@ class InsertRelationCommand(Command):
             if np1 == np2:
                 continue
 
-            print("Inserting relation %s between %s and %s" % \
-                (rel_name, np1.node, np2.node))
+            self.logger.debug("Inserting relation %s between %s and %s"
+                              % (rel_name, np1.node, np2.node))
             rel = storage_manager.insert_relation(rel_type, rel_props,
                 np1.node, np2.node)
             inserted_relations.append(rel)
