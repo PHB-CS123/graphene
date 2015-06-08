@@ -97,15 +97,15 @@ class GeneralStoreManager:
             return
         # Get all file IDs and sort them in reverse order
         ids.sort(reverse=True)
-        # Write them back in this reverse order to prevent future
-        # fragmentation (lower IDs will be popped from the end)
-        self.idStore.write_all_ids(ids)
 
         # Now find out how many IDs need truncation
         last_file_index = self.store.get_last_file_index()
         trunc_amt = self.truncate_amount(ids, last_file_index)
         # Finally truncate this many items
         self.store.truncate_file(trunc_amt)
+        # Write the untruncated ones back in this reverse order to prevent
+        # future fragmentation (lower IDs will be popped from the end)
+        self.idStore.write_all_ids(ids[trunc_amt:])
 
     def get_item_at_index(self, index):
         """

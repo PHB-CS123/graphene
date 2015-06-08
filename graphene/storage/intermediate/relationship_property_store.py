@@ -7,11 +7,10 @@ class RelationshipPropertyStore:
         Set up the relationship-property store, which associates
         relationships with their properties.
 
-        :type prop_manager: GeneralStoreManager
-        :type relationship_manager: GeneralStoreManager
-        :param relationship_manager: store manager for relationships
-        :param prop_manager: store manager for properties
-        :return:
+        :param storage_manager: Storage manager to use to get data
+        :type storage_manager: StorageManager
+        :return: Store for both relations ad their properties
+        :rtype: RelationshipPropertyStore
         """
         self.sm = storage_manager
         self.relationship_manager = self.sm.relationship_manager
@@ -46,3 +45,12 @@ class RelationshipPropertyStore:
         if rel == GeneralStore.EOF:
             raise IndexError("Key %d goes past the end of the store." % key)
         self.sm.delete_relation(rel)
+
+    def clear(self):
+        """
+        Called when the cache is cleared
+
+        :return: Nothing
+        :rtype: None
+        """
+        pass

@@ -413,7 +413,6 @@ class TestGeneralArrayManagerMethods(unittest.TestCase):
         """
         array_manager = GeneralArrayManager(self.TEST_BLOCK_SIZE,
                                             self.TEST_STRING_BLOCK_SIZE)
-
         # Create an arbitrary int array
         array_size = self.TEST_BLOCK_SIZE / 4
         rand_size = randint(1, 3) * array_size + randint(0, array_size - 1)
@@ -437,7 +436,6 @@ class TestGeneralArrayManagerMethods(unittest.TestCase):
         """
         array_manager = GeneralArrayManager(self.TEST_BLOCK_SIZE,
                                             self.TEST_STRING_BLOCK_SIZE)
-
         # Create an arbitrary int array
         array_size = self.TEST_BLOCK_SIZE / 4
         rand_size = randint(1, 3) * array_size + randint(0, array_size - 1)
@@ -491,3 +489,335 @@ class TestGeneralArrayManagerMethods(unittest.TestCase):
         self.assertTrue(array2 is None or array2 is EOF)
         array1 = array_manager.read_array_at_index(array_idx1)
         self.assertTrue(array1 is None or array1 is EOF)
+
+    def test_update_array_at_index_same_size(self):
+        """
+        Test that updating an array at a certain starting index works with
+        same size updates.
+        """
+        array_manager = GeneralArrayManager(self.TEST_BLOCK_SIZE,
+                                            self.TEST_STRING_BLOCK_SIZE)
+        # Create an int array spanning 1 block
+        array_size = self.TEST_BLOCK_SIZE / 4
+        arr1 = [randint(-2**31, 2**31 - 1) for _ in range(0, array_size)]
+        # Write it to the array manager
+        arr1_idx = array_manager.write_array(arr1,
+                                             Property.PropertyType.intArray)
+        # Check that the array is as expected
+        self.assertEquals(arr1, array_manager.read_array_at_index(arr1_idx))
+
+        # Update the array with another having the same size
+        arr1_u = [randint(-2**31, 2**31 - 1) for _ in range(0, array_size)]
+        array_manager.update_array_at_index(arr1_idx, arr1_u)
+        self.assertEquals(arr1_u, array_manager.read_array_at_index(arr1_idx))
+
+        # Create an int array spanning 4 blocks: 4 * (block_size / int_size)
+        array_size = self.TEST_BLOCK_SIZE / 4
+        arr2 = [randint(-2**31, 2**31 - 1) for _ in range(0, array_size)]
+        # Write it to the array manager
+        arr2_idx = array_manager.write_array(arr2,
+                                             Property.PropertyType.intArray)
+        # Check that the array is as expected
+        self.assertEquals(arr2, array_manager.read_array_at_index(arr2_idx))
+
+        # Update the array with another having the same size
+        arr2_u = [randint(-2**31, 2**31 - 1) for _ in range(0, array_size)]
+        array_manager.update_array_at_index(arr2_idx, arr2_u)
+        self.assertEquals(arr2_u, array_manager.read_array_at_index(arr2_idx))
+
+    def test_update_array_at_index_smaller_size(self):
+        """
+        Test that updating an array at a certain starting index works with
+        smaller-size updates.
+        """
+        array_manager = GeneralArrayManager(self.TEST_BLOCK_SIZE,
+                                            self.TEST_STRING_BLOCK_SIZE)
+        # Create a char array spanning 6 blocks: 6 * (block_size / char_size)
+        array_size = 6 * (self.TEST_BLOCK_SIZE / 2)
+        arr1 = [unichr(randint(0, 2**16 - 1)) for _ in range(0, array_size)]
+        # Write it to the array manager
+        arr1_idx = array_manager.write_array(arr1,
+                                             Property.PropertyType.charArray)
+        # Check that the array is as expected
+        self.assertEquals(arr1, array_manager.read_array_at_index(arr1_idx))
+
+        # Update the array with another spanning 3 blocks
+        array_size = 3 * (self.TEST_BLOCK_SIZE / 2)
+        arr1_u = [unichr(randint(0, 2**16 - 1)) for _ in range(0, array_size)]
+        array_manager.update_array_at_index(arr1_idx, arr1_u)
+        self.assertEquals(arr1_u, array_manager.read_array_at_index(arr1_idx))
+        # Check residue spots are deleted (1, 2, 3 filled, indexes 4, 5, 6 left)
+        self.check_residue_deletion(array_manager, arr1_idx, [3, 4, 5])
+
+        # Create a char array spanning 2 blocks
+        array_size = 2 * (self.TEST_BLOCK_SIZE / 2)
+        arr2 = [unichr(randint(0, 2**16 - 1)) for _ in range(0, array_size)]
+        # Write it to the array manager
+        arr2_idx = array_manager.write_array(arr2,
+                                             Property.PropertyType.charArray)
+        # Check that the array is as expected
+        self.assertEquals(arr2, array_manager.read_array_at_index(arr2_idx))
+
+        # Update the array with another spanning 1 block
+        array_size = self.TEST_BLOCK_SIZE / 2
+        arr2_u = [unichr(randint(0, 2**16 - 1)) for _ in range(0, array_size)]
+        array_manager.update_array_at_index(arr2_idx, arr2_u)
+        self.assertEquals(arr2_u, array_manager.read_array_at_index(arr2_idx))
+        # Check residue spot is deleted (1 index after the original index)
+        self.check_residue_deletion(array_manager, arr2_idx, [1])
+
+        # Create a char array spanning 2 blocks
+        array_size = 2 * (self.TEST_BLOCK_SIZE / 2)
+        arr3 = [unichr(randint(0, 2**16 - 1)) for _ in range(0, array_size)]
+        # Write it to the array manager
+        arr3_idx = array_manager.write_array(arr3,
+                                             Property.PropertyType.charArray)
+        # Check that the array is as expected
+        self.assertEquals(arr3, array_manager.read_array_at_index(arr3_idx))
+
+        # Update the array with another spanning no blocks
+        arr3_u = []
+        array_manager.update_array_at_index(arr3_idx, arr3_u)
+        self.assertEquals(arr3_u, array_manager.read_array_at_index(arr3_idx))
+        # Check residue spot is deleted (1 index after the original index)
+        self.check_residue_deletion(array_manager, arr3_idx, [1, 2])
+
+    def test_update_array_at_index_larger_size(self):
+        """
+        Test that updating an array at a certain starting index works with
+        larger-size updates.
+        """
+        array_manager = GeneralArrayManager(self.TEST_BLOCK_SIZE,
+                                            self.TEST_STRING_BLOCK_SIZE)
+        # Create a double array spanning 1 block: 1 * (block_size / double_size)
+        array_size = self.TEST_BLOCK_SIZE / 8
+        arr1 = [uniform(-10, 10) for _ in range(0, array_size)]
+        # Write it to the array manager
+        arr1_idx = array_manager.write_array(arr1,
+                                             Property.PropertyType.doubleArray)
+        # Check that the array is as expected
+        self.assertEquals(arr1, array_manager.read_array_at_index(arr1_idx))
+
+        # Update the array with another spanning 5 blocks
+        array_size = 5 * (self.TEST_BLOCK_SIZE / 8)
+        arr1_u = [uniform(-10, 10) for _ in range(0, array_size)]
+        array_manager.update_array_at_index(arr1_idx, arr1_u)
+        self.assertEquals(arr1_u, array_manager.read_array_at_index(arr1_idx))
+
+        # Create a double array spanning 4 blocks
+        array_size = 4 * (self.TEST_BLOCK_SIZE / 8)
+        arr2 = [uniform(-10, 10) for _ in range(0, array_size)]
+        # Write it to the array manager
+        arr2_idx = array_manager.write_array(arr2,
+                                             Property.PropertyType.doubleArray)
+        # Check that the array is as expected
+        self.assertEquals(arr2, array_manager.read_array_at_index(arr2_idx))
+
+        # Update the array with another spanning 7 blocks
+        array_size = 7 * (self.TEST_BLOCK_SIZE / 8)
+        arr2_u = [uniform(-10, 10) for _ in range(0, array_size)]
+        array_manager.update_array_at_index(arr2_idx, arr2_u)
+        self.assertEquals(arr2_u, array_manager.read_array_at_index(arr2_idx))
+
+    def test_update_string_array_same_size(self):
+        """
+        Test that updating a string array at a certain starting index works
+        with same-size updates.
+        """
+        array_manager = GeneralArrayManager(self.TEST_BLOCK_SIZE,
+                                            self.TEST_STRING_BLOCK_SIZE)
+        # Create a string array spanning 1 block: 1 * (block_size / string_size)
+        arr_size = self.TEST_BLOCK_SIZE / 4 - 4
+        # With strings that span 3 blocks
+        string_size = 3 * self.TEST_STRING_BLOCK_SIZE
+        arr1 = [string_size * "A" for _ in range(0, arr_size)]
+        arr1_idx = array_manager.write_array(arr1,
+                                             Property.PropertyType.stringArray)
+        # Check that the array is as expected
+        self.assertEquals(arr1, array_manager.read_array_at_index(arr1_idx))
+
+        # Update the array with another having the same size
+        arr1_u = [string_size * "B" for _ in range(0, arr_size)]
+        array_manager.update_array_at_index(arr1_idx, arr1_u)
+        self.assertEquals(arr1_u, array_manager.read_array_at_index(arr1_idx))
+
+        # Create a string array spanning 3 blocks
+        arr_size = 2 * (self.TEST_BLOCK_SIZE / 4) + 2
+        # With strings that span 2 blocks
+        string_size = 2 * self.TEST_STRING_BLOCK_SIZE
+        arr2 = [string_size * "C" for _ in range(0, arr_size)]
+        arr2_idx = array_manager.write_array(arr2,
+                                             Property.PropertyType.stringArray)
+        # Check that the array is as expected
+        self.assertEquals(arr2, array_manager.read_array_at_index(arr2_idx))
+
+        # Update the array with another having the same size
+        arr2_u = [string_size * "D" for _ in range(0, arr_size)]
+        array_manager.update_array_at_index(arr2_idx, arr2_u)
+        self.assertEquals(arr2_u, array_manager.read_array_at_index(arr2_idx))
+
+        # Create a string array spanning 1 block
+        arr_size = self.TEST_BLOCK_SIZE / 4
+        # With strings that span 2 blocks
+        string_size = 2 * self.TEST_STRING_BLOCK_SIZE
+        arr3 = [string_size * "E" for _ in range(0, arr_size)]
+        arr3_idx = array_manager.write_array(arr3,
+                                             Property.PropertyType.stringArray)
+        # Check that the array is as expected
+        self.assertEquals(arr3, array_manager.read_array_at_index(arr3_idx))
+
+        # Update array with another having the same size, increase string size
+        string_size = 4 * self.TEST_STRING_BLOCK_SIZE
+        arr3_u = [string_size * "F" for _ in range(0, arr_size)]
+        array_manager.update_array_at_index(arr3_idx, arr3_u)
+        self.assertEquals(arr3_u, array_manager.read_array_at_index(arr3_idx))
+
+        # Update array with another having the same size, decrease string size
+        string_size = self.TEST_STRING_BLOCK_SIZE
+        arr3_u = [string_size * "G" for _ in range(0, arr_size)]
+        array_manager.update_array_at_index(arr3_idx, arr3_u)
+        self.assertEquals(arr3_u, array_manager.read_array_at_index(arr3_idx))
+
+    def test_update_string_array_smaller_size(self):
+        """
+        Test that updating a string array at a certain starting index works
+        with smaller-size updates.
+        """
+        array_manager = GeneralArrayManager(self.TEST_BLOCK_SIZE,
+                                            self.TEST_STRING_BLOCK_SIZE)
+        # Create a string array spanning 5 blocks: 5 * (block_size / str_size)
+        arr_size = 5 * (self.TEST_BLOCK_SIZE / 4) - 3
+        # With strings that span 3 blocks
+        string_size = 3 * self.TEST_STRING_BLOCK_SIZE
+        arr1 = [string_size * "A" for _ in range(0, arr_size)]
+        arr1_idx = array_manager.write_array(arr1,
+                                             Property.PropertyType.stringArray)
+        # Check that the array is as expected
+        self.assertEquals(arr1, array_manager.read_array_at_index(arr1_idx))
+        # Update the array with another spanning 1 block
+        # Tests case (1) of update_names_at_indexes since our only block will
+        # need 1 less string ID than the first block before the update provides
+        arr_size = self.TEST_BLOCK_SIZE / 4 - 1
+        arr1_u = [string_size * "B" for _ in range(0, arr_size)]
+        array_manager.update_array_at_index(arr1_idx, arr1_u)
+        self.assertEquals(arr1_u, array_manager.read_array_at_index(arr1_idx))
+        # Check residue blocks are deleted, assume strings are deleted
+        self.check_residue_deletion(array_manager, arr1_idx, [1, 2, 3, 4])
+
+        # Create a string array spanning 3 blocks
+        arr_size = 3 * (self.TEST_BLOCK_SIZE / 4) + 5
+        # With strings that span 2 blocks
+        string_size = 2 * self.TEST_STRING_BLOCK_SIZE
+        arr2 = [string_size * "C" for _ in range(0, arr_size)]
+        arr2_idx = array_manager.write_array(arr2,
+                                             Property.PropertyType.stringArray)
+        # Check that the array is as expected
+        self.assertEquals(arr2, array_manager.read_array_at_index(arr2_idx))
+
+        # Update the array with an empty array
+        arr2_u = []
+        array_manager.update_array_at_index(arr2_idx, arr2_u)
+        self.assertEquals(arr2_u, array_manager.read_array_at_index(arr2_idx))
+        # Check residue block is deleted, assume strings are deleted
+        self.check_residue_deletion(array_manager, arr2_idx, [2])
+
+        # Create a string array spanning 3 blocks
+        arr_size = 2 * (self.TEST_BLOCK_SIZE / 4) + 2
+        # With strings that span 2 blocks
+        string_size = 2 * self.TEST_STRING_BLOCK_SIZE
+        arr3 = [string_size * "E" for _ in range(0, arr_size)]
+        arr3_idx = array_manager.write_array(arr3,
+                                             Property.PropertyType.stringArray)
+        # Check that the array is as expected
+        self.assertEquals(arr3, array_manager.read_array_at_index(arr3_idx))
+
+        # Update array with another spanning 2 blocks, increase string size
+        arr_size = self.TEST_BLOCK_SIZE / 4 + 1
+        string_size = 4 * self.TEST_STRING_BLOCK_SIZE
+        arr3_u = [string_size * "F" for _ in range(0, arr_size)]
+        array_manager.update_array_at_index(arr3_idx, arr3_u)
+        self.assertEquals(arr3_u, array_manager.read_array_at_index(arr3_idx))
+        # Check residue block is deleted, assume strings are deleted
+        self.check_residue_deletion(array_manager, arr3_idx, [2])
+
+        # Update array with another spanning 1 block, decrease string size
+        arr_size = self.TEST_BLOCK_SIZE / 4
+        arr3_u = ["" for _ in range(0, arr_size)]
+        array_manager.update_array_at_index(arr3_idx, arr3_u)
+        self.assertEquals(arr3_u, array_manager.read_array_at_index(arr3_idx))
+        # Check residue block is deleted, assume strings are deleted
+        self.check_residue_deletion(array_manager, arr3_idx, [1])
+
+    def test_update_string_array_larger_size(self):
+        """
+        Test that updating a string array at a certain starting index works
+        with larger-size updates.
+        """
+        array_manager = GeneralArrayManager(self.TEST_BLOCK_SIZE,
+                                            self.TEST_STRING_BLOCK_SIZE)
+        # Create a string array spanning 1 block: 1 * (block_size / string_size)
+        arr_size = self.TEST_BLOCK_SIZE / 4 - 3
+        # With strings that span 3 blocks
+        string_size = 3 * self.TEST_STRING_BLOCK_SIZE
+        arr1 = [string_size * "A" for _ in range(0, arr_size)]
+        arr1_idx = array_manager.write_array(arr1,
+                                             Property.PropertyType.stringArray)
+        # Check that the array is as expected
+        self.assertEquals(arr1, array_manager.read_array_at_index(arr1_idx))
+
+        # Update the array with another spanning 5 blocks
+        # Tests case (2) of update_names_at_indexes since our last block will
+        # need 3 more string IDs than the last block before the update provides
+        arr_size = 5 * (self.TEST_BLOCK_SIZE / 4)
+        arr1_u = [string_size * "B" for _ in range(0, arr_size)]
+        array_manager.update_array_at_index(arr1_idx, arr1_u)
+        self.assertEquals(arr1_u, array_manager.read_array_at_index(arr1_idx))
+
+        # Create a string array spanning 3 blocks
+        arr_size = 3 * (self.TEST_BLOCK_SIZE / 4)
+        # With strings that span 2 blocks
+        string_size = 2 * self.TEST_STRING_BLOCK_SIZE
+        arr2 = [string_size * "C" for _ in range(0, arr_size)]
+        arr2_idx = array_manager.write_array(arr2,
+                                             Property.PropertyType.stringArray)
+        # Check that the array is as expected
+        self.assertEquals(arr2, array_manager.read_array_at_index(arr2_idx))
+
+        # Update the array with another spanning 6 blocks
+        arr_size = 6 * (self.TEST_BLOCK_SIZE / 4)
+        arr2_u = [string_size * "D" for _ in range(0, arr_size)]
+        array_manager.update_array_at_index(arr2_idx, arr2_u)
+        self.assertEquals(arr2_u, array_manager.read_array_at_index(arr2_idx))
+
+        # Create a string array spanning 1 block
+        arr_size = self.TEST_BLOCK_SIZE / 4
+        # With strings that span 2 blocks
+        string_size = 2 * self.TEST_STRING_BLOCK_SIZE
+        arr3 = [string_size * "E" for _ in range(0, arr_size)]
+        arr3_idx = array_manager.write_array(arr3,
+                                             Property.PropertyType.stringArray)
+        # Check that the array is as expected
+        self.assertEquals(arr3, array_manager.read_array_at_index(arr3_idx))
+
+        # Update array with another spanning 3 blocks, increase string size
+        arr_size = 3 * (self.TEST_BLOCK_SIZE / 4)
+        string_size = 4 * self.TEST_STRING_BLOCK_SIZE
+        arr3_u = [string_size * "F" for _ in range(0, arr_size)]
+        array_manager.update_array_at_index(arr3_idx, arr3_u)
+        self.assertEquals(arr3_u, array_manager.read_array_at_index(arr3_idx))
+
+        # Update array with another spanning 4 blocks, decrease string size
+        arr_size = 4 * (self.TEST_BLOCK_SIZE / 4)
+        string_size = self.TEST_STRING_BLOCK_SIZE
+        arr3_u = [string_size * "G" for _ in range(0, arr_size)]
+        array_manager.update_array_at_index(arr3_idx, arr3_u)
+        self.assertEquals(arr3_u, array_manager.read_array_at_index(arr3_idx))
+
+    def check_residue_deletion(self, array_manager, start, residue_indexes):
+        """
+        Check that the given residue spots from smaller updates are deleted.
+        Indexes checked will be at start + residue_indexes[i]
+        """
+        for i in residue_indexes:
+            old_item = array_manager.storeManager.get_item_at_index(start + i)
+            self.assertTrue(old_item is None or old_item is EOF)

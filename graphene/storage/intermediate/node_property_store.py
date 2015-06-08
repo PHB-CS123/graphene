@@ -8,19 +8,24 @@ class NodePropertyStore:
         Set up the node-property store, which associates
         nodes with their properties.
 
-        :param node_manager: Store manager for nodes
-        :type node_manager: GeneralStoreManager
-        :param prop_manager: Store manager for properties
-        :type prop_manager: GeneralStoreManager
-        :param prop_string_manager: Store manager for strings
-        :type prop_string_manager: GeneralNameManager
-        :return:
+        :param storage_manager: Store manager containing needed stores
+        :type storage_manager: StoreManager
+        :return: Store for handling nodes and properties
+        :rtype: NodePropertyStore
         """
         self.sm = storage_manager
         self.node_manager = self.sm.node_manager
         self.prop_manager = self.sm.property_manager
 
     def __getitem__(self, key):
+        """
+        Get the node and an array of the properties for the node
+
+        :param key: Index of the node
+        :type key: int
+        :return: Tuple with node and property array
+        :rtype: tuple
+        """
         cur_node = self.node_manager.get_item_at_index(key)
         if cur_node is None or cur_node == GeneralStore.EOF:
             return cur_node
@@ -49,3 +54,12 @@ class NodePropertyStore:
         if node == GeneralStore.EOF:
             raise IndexError("Key %d goes past the end of the store." % key)
         self.sm.delete_node(node)
+
+    def clear(self):
+        """
+        Called when the cache is cleared
+
+        :return: Nothing
+        :rtype: None
+        """
+        pass

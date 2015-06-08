@@ -105,6 +105,8 @@ class TestGeneralStoreManagerMethods(unittest.TestCase):
         store_manager.delete_item(item3)
         store_manager.delete_item(item4)
         self.assertEquals(one_item_size, store_manager.store.get_file_size())
+        # Make sure the ID store contains no IDs, they have been truncated
+        self.assertIsNone(store_manager.idStore.get_all_ids())
 
     def test_get_indexes(self):
         """

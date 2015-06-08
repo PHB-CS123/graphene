@@ -1,5 +1,5 @@
 from graphene.commands.command import Command
-from graphene.expressions import MatchNode
+from graphene.expressions.match_node import MatchNode
 from graphene.query.planner import QueryPlanner
 
 class DeleteNodeCommand(Command):
@@ -14,6 +14,6 @@ class DeleteNodeCommand(Command):
         planner = QueryPlanner(storage_manager)
         # Iterate over nodes using the planner's helper method for convenience
         iter_tree = planner.get_iter_tree([MatchNode(None, self.node_type)],
-            self.qc)
+                                          self.qc)
         for nodeprop in iter_tree:
             del storage_manager.nodeprop[nodeprop.node.index]

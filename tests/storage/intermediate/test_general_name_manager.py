@@ -212,6 +212,42 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         self.assertEquals(name_index2, name_manager.find_name(name2))
         self.assertEquals(name_index3, name_manager.find_name(name3))
 
+    def test_find_names(self):
+        """
+        Tests that the starting index of various names can be found correctly
+        """
+        name_manager = GeneralNameManager(self.TEST_FILENAME,
+                                          self.TEST_BLOCK_SIZE)
+
+        # Create a name with a random length
+        name1 = "a" * self.random_length()
+        # Write the name to the name store
+        name_index1 = name_manager.write_name(name1)
+        # Create another name with a random length
+        name2 = "b" * self.random_length()
+        # Write the name to the name store
+        name_index2 = name_manager.write_name(name2)
+        # Create a third name with a random length
+        name3 = "c" * self.random_length()
+        # Write the name to the name store
+        name_index3 = name_manager.write_name(name3)
+        # Create a fourth name with a random length
+        name4 = "d" * self.random_length()
+        # Write the name to the name store
+        name_index4 = name_manager.write_name(name4)
+
+        # Check that none is returned for empty array
+        no_names = name_manager.find_names([])
+        self.assertIsNone(no_names)
+        # Check that the found starting indexes are as expected
+        name_indexes23 = name_manager.find_names([name2, name3])
+        self.assertEquals([name_index2, name_index3], name_indexes23)
+        # Check that the found starting indexes are as expected when in
+        # non-increasing order
+        name_indexes213 = name_manager.find_names([name2, name1, name3])
+        self.assertEquals([name_index2, name_index1, name_index3],
+                          name_indexes213)
+
     def test_delete_name_at_index(self):
         """
         Tests that deleting an array at a specific index works
@@ -290,6 +326,107 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         self.assertTrue(name1_file is None or name1_file is EOF)
         name2_file = name_manager.read_name_at_index(name_index2)
         self.assertTrue(name2_file is None or name2_file is EOF)
+
+    def test_update_name_at_index_same_size(self):
+        """
+        Test that updating a name at a certain starting index works with
+        same size updates
+        """
+        name_manager = GeneralNameManager(self.TEST_FILENAME,
+                                          self.TEST_BLOCK_SIZE)
+        # Create a name that spans a single block
+        name1 = "a" * self.TEST_BLOCK_SIZE
+        # Write the name to the name store
+        name_index1 = name_manager.write_name(name1)
+        # Check that the name is as expected
+        self.assertEquals(name1, name_manager.read_name_at_index(name_index1))
+
+        # Update the name spanning a single block
+        name1_u = "b" * (self.TEST_BLOCK_SIZE - 1)
+        name_manager.update_name_at_index(name_index1, name1_u)
+        self.assertEquals(name1_u, name_manager.read_name_at_index(name_index1))
+
+        # Create a name that spans two blocks
+        name2 = "b" * (2 * self.TEST_BLOCK_SIZE)
+        # Write the name to the name store
+        name_index2 = name_manager.write_name(name2)
+        # Check that the name is as expected
+        self.assertEquals(name2, name_manager.read_name_at_index(name_index2))
+
+        # Update it with a name spanning two blocks
+        name2_u = "c" * (2 * self.TEST_BLOCK_SIZE - 1)
+        name_manager.update_name_at_index(name_index2, name2_u)
+        self.assertEquals(name2_u, name_manager.read_name_at_index(name_index2))
+
+    def test_update_name_at_index_smaller_size(self):
+        """
+        Test that updating a name at a certain starting index works, with
+        shorter-sized updates. Check that it deletes old items.
+        """
+        name_manager = GeneralNameManager(self.TEST_FILENAME,
+                                          self.TEST_BLOCK_SIZE)
+        # Create a name that spans a three blocks
+        name1 = "d" * (3 * self.TEST_BLOCK_SIZE)
+        # Write the name to the name store
+        name_index1 = name_manager.write_name(name1)
+        # Check that the name is as expected
+        self.assertEquals(name1, name_manager.read_name_at_index(name_index1))
+
+        # Update it with a name spanning a single block
+        name1_u = "c" * (self.TEST_BLOCK_SIZE - 1)
+        name_manager.update_name_at_index(name_index1, name1_u)
+        self.assertEquals(name1_u, name_manager.read_name_at_index(name_index1))
+        # Make sure the residue spots are deleted
+        old_spot1 = name_manager.storeManager.get_item_at_index(name_index1 + 1)
+        self.assertTrue(old_spot1 is None or old_spot1 is EOF)
+        old_spot2 = name_manager.storeManager.get_item_at_index(name_index1 + 2)
+        self.assertTrue(old_spot2 is None or old_spot2 is EOF)
+
+        # Create a name that spans 4 blocks
+        name2 = "e" * (4 * self.TEST_BLOCK_SIZE)
+        # Write the name to the name store
+        name_index2 = name_manager.write_name(name2)
+        # Check that the name is as expected
+        self.assertEquals(name2, name_manager.read_name_at_index(name_index2))
+
+        # Update it with a name spanning no blocks
+        name2_u = "" 
+        name_manager.update_name_at_index(name_index2, name2_u)
+        self.assertEquals(name2_u, name_manager.read_name_at_index(name_index2))
+        # Make sure the residue spots are deleted
+        old_spot3 = name_manager.storeManager.get_item_at_index(name_index2 + 3)
+        self.assertTrue(old_spot3 is None or old_spot3 is EOF)
+
+    def test_update_name_at_index_longer_size(self):
+        """
+        Test that updating a name at a certain starting index works, with
+        longer sized updates.
+        """
+        name_manager = GeneralNameManager(self.TEST_FILENAME,
+                                          self.TEST_BLOCK_SIZE)
+        # Create a name that spans a three blocks
+        name1 = "g" * (3 * self.TEST_BLOCK_SIZE)
+        # Write the name to the name store
+        name_index1 = name_manager.write_name(name1)
+        # Check that the name is as expected
+        self.assertEquals(name1, name_manager.read_name_at_index(name_index1))
+
+        # Update it with a name spanning 4 blocks
+        name1_u = "h" * (4 * self.TEST_BLOCK_SIZE)
+        name_manager.update_name_at_index(name_index1, name1_u)
+        self.assertEquals(name1_u, name_manager.read_name_at_index(name_index1))
+
+        # Create a name that spans 1 block
+        name2 = "i" * self.TEST_BLOCK_SIZE
+        # Write the name to the name store
+        name_index2 = name_manager.write_name(name2)
+        # Check that the name is as expected
+        self.assertEquals(name2, name_manager.read_name_at_index(name_index2))
+
+        # Update it with a name spanning 6 blocks
+        name2_u = "j" * (6 * self.TEST_BLOCK_SIZE)
+        name_manager.update_name_at_index(name_index2, name2_u)
+        self.assertEquals(name2_u, name_manager.read_name_at_index(name_index2))
 
     @classmethod
     def random_length(cls):
