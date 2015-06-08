@@ -317,9 +317,10 @@ prop_list returns [props]
 
 prop_value : v=literal {return $v.text} ;
 
-insert_relation
-  : K_RELATION (n1=node_query) (r=relation_with_props) (n2=node_query)
-  {return ($r.ctx, $n1.ctx, $n2.ctx)}
+insert_relation returns [relprops]
+  : K_RELATION ((n1=node_query) (r=relation_with_props) (n2=node_query) {$relprops = [($r.ctx, $n1.ctx, $n2.ctx)]})
+    (',' ((n1i=node_query) (ri=relation_with_props) (n2i=node_query) {$relprops.append(($ri.ctx, $n1i.ctx, $n2i.ctx))}))*
+  {return $relprops}
   ;
 
 // Literals
