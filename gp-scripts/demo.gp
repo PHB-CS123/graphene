@@ -18,11 +18,11 @@ MATCH (p1:Person)-[k:KNOWS]->(p2:Person) WHERE p1.id < 100 AND p1.age < p2.age R
 MATCH (p1:Person)-[k:KNOWS]->(p2:Person) WHERE p1.id < 100 AND p1.age < p2.age RETURN name; // error
 MATCH (p1:Person)-[KNOWS]->(Person)-[KNOWS]->(p2:Person);
 
-MATCH (p1:Person)-[k:KNOWS]->(p2:Person) WHERE p1.id = 11;
-UPDATE RELATION Person(id = 11)-KNOWS SET num_years = 42;
-MATCH (p1:Person)-[k:KNOWS]->(p2:Person) WHERE p1.id = 11;
-DELETE RELATION Person(id = 11)-KNOWS;
-MATCH (p1:Person)-[k:KNOWS]->(p2:Person) WHERE p1.id = 11;
+MATCH (p1:Person)-[k:KNOWS]->(p2:Person) WHERE p1.id = 12;
+UPDATE RELATION Person(id = 12)-KNOWS SET num_years = 42;
+MATCH (p1:Person)-[k:KNOWS]->(p2:Person) WHERE p1.id = 12;
+DELETE RELATION Person(id = 12)-KNOWS;
+MATCH (p1:Person)-[k:KNOWS]->(p2:Person) WHERE p1.id = 12;
 
 MATCH (p1:Person)-[k:KNOWS]->(p2:Person) WHERE p1.id = 22;
 DELETE NODE Person(id = 22);
