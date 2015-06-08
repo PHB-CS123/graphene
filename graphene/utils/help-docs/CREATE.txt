@@ -3,8 +3,17 @@ CREATE command
     - CREATE TYPE for node types
     - CREATE RELATION for relation type
     
-    CREATE (TYPE TypeName|RELATION RELATION_NAME) (prop_name: prop_type, ...)
+    CREATE (TYPE TypeName|RELATION RELATION_NAME) (prop_name : prop_type, ...)
  
-    Relations can have empty schemas, so `CREATE RELATION R ();` is legal
+    Relations can have empty schemas, so "CREATE RELATION R ( );" is legal
     Types cannot have empty schemas
-    Available types: string, int, double, bool; also array versions of each
+    Available types: 
+    Primitives: int, long, bool, short, char, float, double, string
+    Arrays: int[], long[], bool[], short[], char[], float[], double[], string[]
+
+    Examples:
+    CREATE TYPE Person (name : string, age : int);
+    CREATE TYPE Directory (name : string, phone_number : int[]);
+
+    CREATE RELATION R (a : int);
+    CREATE RELATION S (a : int, b : bool, c : string);

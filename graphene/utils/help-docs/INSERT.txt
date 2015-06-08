@@ -3,7 +3,7 @@ INSERT command
     INSERT NODE
         Can insert multiple nodes of any type.
         
-        INSERT NODE TypeName(prop1, prop2), OtherTypeName(prop1, prop2, prop3), ...
+        INSERT NODE TypeName(prop1 , prop2), OtherTypeName(prop1 , prop2 , prop3), ...
     
     INSERT RELATION
         Adding properties to relation is like with nodes, but use queries to 
@@ -11,4 +11,11 @@ INSERT command
         Queries work exactly like MATCH queries, except you can't use type 
         name aliases
 
-        INSERT RELATION TypeName(query)-[RELATION_NAME(prop1, prop2)]->TypeName(query)
+        INSERT RELATION TypeName( query ) - [RELATION_NAME( prop1, ...)] -> TypeName( query )
+
+    Examples:
+    INSERT NODE Person ("cody"   , 21);
+    INSERT NODE Person ("david"  , 21);
+    INSERT NODE Person ("eugene" , 21);
+
+    INSERT RELATION Person(name = "cody") - [R( 5 )] -> Person(name = "david");

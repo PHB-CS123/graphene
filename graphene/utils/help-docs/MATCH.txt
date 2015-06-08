@@ -12,3 +12,9 @@ MATCH command
         Projects schema.
         Both queries and projections will notice if there are duplicate 
         identifiers or ambiguous identifiers
+
+    Examples:
+    MATCH (Person )
+    MATCH (p1 : Person)
+    MATCH (p1 : Person) RETURN p1
+    MATCH (p1 : Person) - [R] -> (p2 : Person)

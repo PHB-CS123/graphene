@@ -1,2 +1,6 @@
-EXIT/QUIT command
+EXIT / QUIT command
     Exits server
+
+    Examples:
+    exit
+    quit

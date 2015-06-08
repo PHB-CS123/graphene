@@ -355,7 +355,6 @@ class TestStorageManagerMethods(unittest.TestCase):
         self.assertEqual(r3.secondNextRelId, 0)
         self.assertEqual(r1.firstPrevRelId, 0)
 
-
         del self.sm.relprop[r3i]
         r1, rp1 = self.sm.relprop[r1i] # update relation 1
         n1, p1 = self.sm.nodeprop[n1.index]

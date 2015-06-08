@@ -8,5 +8,5 @@ INSERT NODE Person ("eugene", 21);
 // CREATE RELATION T;
 // INSERT RELATION Person(name="cody")-[R(5)]->Person(name="david");
 // MATCH (p1:Person)-[R]->(p2:Person)
-// DELETE TYPE Person
-// DELETE TYPE T
+// DROP TYPE Person
+// DROP TYPE T
