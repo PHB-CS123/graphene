@@ -750,6 +750,16 @@ class StorageManager:
         # Delete node itself
         self.node_manager.delete_item(node)
 
+        # Because delete_relation is unaware of whether it's being deleted
+        # because a node was deleted, if this node has only ONE relation
+        # attached to it, it will be modified during the update_relation_links
+        # process. However, the cache thinks the node has been deleted before
+        # the write-through process is done, so the node never actually gets
+        # removed from the cache
+        #
+        # TODO: Handle this more gracefully
+        del self.nodeprop[node.index]
+
 # --- Update Interface Methods --- #
     def update_nodes(self, nodeprops, updates):
         """
