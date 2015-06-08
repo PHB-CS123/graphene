@@ -28,9 +28,10 @@ class TypeConversion:
             if len(s) == 2:
                 # empty array, so undefined
                 return Property.PropertyType.undefined
+            # Get rid of superfluous whitespace
+            values = map(lambda s: s.strip(), s[1:-1].split(","))
             # Convert everything in this array to a type
-            all_types = map(TypeConversion.get_type_type_of_string,
-                s[1:-1].split(","))
+            all_types = map(TypeConversion.get_type_type_of_string, values)
             # If everything is of the same type, return array version of that
             # type. Otherwise undefined
             if all_types.count(all_types[0]) == len(all_types):
