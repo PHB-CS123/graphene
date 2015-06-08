@@ -6,7 +6,7 @@ MATCH command
  
     Queries: MATCH node_chain WHERE property_name = property_value
         NOTE: property_name can have an identifier corresponding to node_name.
-        e.g. "MATCH (t:T) WHERE t.a = 3;` or `MATCH (t : T) WHERE a = 3;". Both work
+        e.g. "MATCH (t : T) WHERE t.a = 3;" or "MATCH (t : T) WHERE a = 3;". Both work
 
     Returns: MATCH node_chain RETURN property_name1, property_name2, ...
         Projects schema.
@@ -18,3 +18,5 @@ MATCH command
     MATCH (p1 : Person)
     MATCH (p1 : Person) RETURN p1
     MATCH (p1 : Person) - [R] -> (p2 : Person)
+    MATCH (p1 : Person) - [k:KNOWS] -> (p2:Person) 
+        WHERE p1.age = 10 AND p2.age > 50;
