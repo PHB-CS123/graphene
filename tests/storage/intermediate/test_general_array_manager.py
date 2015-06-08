@@ -566,6 +566,22 @@ class TestGeneralArrayManagerMethods(unittest.TestCase):
         # Check residue spot is deleted (1 index after the original index)
         self.check_residue_deletion(array_manager, arr2_idx, [1])
 
+        # Create a char array spanning 2 blocks
+        array_size = 2 * (self.TEST_BLOCK_SIZE / 2)
+        arr3 = [unichr(randint(0, 2**16 - 1)) for _ in range(0, array_size)]
+        # Write it to the array manager
+        arr3_idx = array_manager.write_array(arr3,
+                                             Property.PropertyType.charArray)
+        # Check that the array is as expected
+        self.assertEquals(arr3, array_manager.read_array_at_index(arr3_idx))
+
+        # Update the array with another spanning no blocks
+        arr3_u = []
+        array_manager.update_array_at_index(arr3_idx, arr3_u)
+        self.assertEquals(arr3_u, array_manager.read_array_at_index(arr3_idx))
+        # Check residue spot is deleted (1 index after the original index)
+        self.check_residue_deletion(array_manager, arr3_idx, [1, 2])
+
     def test_update_array_at_index_larger_size(self):
         """
         Test that updating an array at a certain starting index works with
@@ -698,9 +714,8 @@ class TestGeneralArrayManagerMethods(unittest.TestCase):
         # Check that the array is as expected
         self.assertEquals(arr2, array_manager.read_array_at_index(arr2_idx))
 
-        # Update the array with another spanning 2 blocks
-        arr_size = self.TEST_BLOCK_SIZE / 4 + 1
-        arr2_u = [string_size * "D" for _ in range(0, arr_size)]
+        # Update the array with an empty array
+        arr2_u = []
         array_manager.update_array_at_index(arr2_idx, arr2_u)
         self.assertEquals(arr2_u, array_manager.read_array_at_index(arr2_idx))
         # Check residue block is deleted, assume strings are deleted
@@ -727,8 +742,7 @@ class TestGeneralArrayManagerMethods(unittest.TestCase):
 
         # Update array with another spanning 1 block, decrease string size
         arr_size = self.TEST_BLOCK_SIZE / 4
-        string_size = self.TEST_STRING_BLOCK_SIZE
-        arr3_u = [string_size * "G" for _ in range(0, arr_size)]
+        arr3_u = ["" for _ in range(0, arr_size)]
         array_manager.update_array_at_index(arr3_idx, arr3_u)
         self.assertEquals(arr3_u, array_manager.read_array_at_index(arr3_idx))
         # Check residue block is deleted, assume strings are deleted

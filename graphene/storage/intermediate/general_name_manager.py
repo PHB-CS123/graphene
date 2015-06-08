@@ -275,6 +275,9 @@ class GeneralNameManager:
         :return: List of split sub-strings in order given
         :rtype: list
         """
+        # Empty name, return an array with the empty string to store
+        if not name:
+            return [""]
         return [name[i:i + self.blockSize]
                 for i in range(0, len(name), self.blockSize)]
 

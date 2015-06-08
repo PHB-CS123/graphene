@@ -389,8 +389,8 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         # Check that the name is as expected
         self.assertEquals(name2, name_manager.read_name_at_index(name_index2))
 
-        # Update it with a name spanning 3 blocks
-        name2_u = "f" * (3 * self.TEST_BLOCK_SIZE)
+        # Update it with a name spanning no blocks
+        name2_u = "" 
         name_manager.update_name_at_index(name_index2, name2_u)
         self.assertEquals(name2_u, name_manager.read_name_at_index(name_index2))
         # Make sure the residue spots are deleted

@@ -600,7 +600,7 @@ class TestStorageManagerMethods(unittest.TestCase):
             i4, p4 = self.sm.relprop[r4i]
 
         # Update items 2, 3, 4 with new values, set the update keys accordingly
-        updates = {0: 2, 1: 5*"i", 3: 102*"j"}
+        updates = {0: 2, 1: "", 3: 102*"j"}
         # Create itemprops for update items
         itemprop2 = itemprop(i2, p2, t, type_name)
         itemprop3 = itemprop(i3, p3, t, type_name)
@@ -686,7 +686,7 @@ class TestStorageManagerMethods(unittest.TestCase):
             i4, p4 = self.sm.relprop[r4i]
 
         # Update items 2 and 4 with new values, set the update keys accordingly
-        updates = {0: 82 * [2431], 1: 5 * "i", 2: 43 * ["j"]}
+        updates = {0: [], 1: 5 * "i", 2: 43 * ["j"]}
         # Create itemprops for update items
         itemprop2 = itemprop(i2, p2, t, type_name)
         itemprop4 = itemprop(i4, p4, t, type_name)
@@ -773,7 +773,7 @@ class TestStorageManagerMethods(unittest.TestCase):
             i4, p4 = self.sm.relprop[r4i]
 
         # Update items 2 and 3 with new values, set the update keys accordingly
-        updates = {0: 82 * [2431], 1: 50 * [12 * "i"], 3: 43 * [68 * "j"]}
+        updates = {0: 82 * [2431], 1: [], 3: 43 * [68 * "j"]}
         # Create itemprops for update items
         itemprop2 = itemprop(i2, p2, t, type_name)
         itemprop3 = itemprop(i3, p3, t, type_name)

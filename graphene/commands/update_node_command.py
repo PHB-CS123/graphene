@@ -1,10 +1,12 @@
+import logging
+
 from graphene.commands.command import Command
 from graphene.expressions.match_node import MatchNode
 from graphene.query.planner import QueryPlanner
 from graphene.utils.conversion import TypeConversion
-from graphene.errors import BadPropertyException, TypeMismatchException, NonexistentPropertyException
+from graphene.errors import TypeMismatchException, NonexistentPropertyException
 from graphene.storage import Property
-import logging
+
 
 class UpdateNodeCommand(Command):
     """
@@ -48,9 +50,9 @@ class UpdateNodeCommand(Command):
                 # Empty array, so we just have to check that the expected
                 # type is some time of array
                 if prop_type.value < Property.PropertyType.intArray.value:
-                    raise TypeMismatchException("Got empty array, but "
-                                "expected value of type %s for property '%s'."
-                                                % (prop_type, u_name))
+                    err = "Got empty array, but expected value of type %s " \
+                          "for property '%s'." % (prop_type, u_name)
+                    raise TypeMismatchException(err)
                 conv_value = []
             else:
                 u_type = TypeConversion.get_type_type_of_string(u_value)
