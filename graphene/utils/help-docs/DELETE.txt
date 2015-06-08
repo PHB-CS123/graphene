@@ -25,6 +25,3 @@ DELETE command
     DELETE NODE R(a = 2)
     
     DELETE RELATION Person(id = 90) - KNOWS;
-
-    DELETE TYPE Person;
-    DELETE TYPE T;

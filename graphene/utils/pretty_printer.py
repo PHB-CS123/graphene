@@ -104,8 +104,12 @@ class SyntaxHighlighting:
             # Keyword found
             if loc != -1:
                 # If a word in the blacklist follows, it's not a keyword
-                if loc + k_len < len(word) and \
-                        word[loc + k_len] in self.BLACKLIST:
+                # e.g SHOW_ALL shouldn't be highlighted
+                # If a word in the blacklist is before, it's not a keyword
+                # e.g. PRINT_RELATION shouldn't be highlighted
+                if (loc + k_len < len(word) and
+                        word[loc + k_len] in self.BLACKLIST) or \
+                        (loc != 0 and word[loc - 1] in self.BLACKLIST):
                     continue
                 # Where to end syntax
                 end_s = loc + k_len
