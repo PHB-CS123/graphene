@@ -7,6 +7,7 @@ from graphene.errors import TypeDoesNotExistException
 from graphene.utils import PrettyPrinter
 from graphene.storage import GeneralStore
 
+
 class DescCommand(Command):
     class DescType(Enum):
         TYPE = 1

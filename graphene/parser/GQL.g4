@@ -18,7 +18,7 @@ stmt
     | c=create_stmt | c=drop_stmt
     | c=exit_stmt
     | c=show_stmt | c=desc_stmt
-    | c=insert_stmt | c=delete_stmt
+    | c=insert_stmt | c=delete_stmt | c=update_stmt
     )
   ;
 
@@ -202,6 +202,54 @@ delete_relation
     ('->' (nr=node_query))?
   ;
 
+// UPDATE command
+update_stmt returns [cmd]
+  @init {$cmd = None}
+  : K_UPDATE ( un=update_node
+             | ur=update_relation
+             )
+{
+if $un.ctx is not None:
+    $cmd = UpdateNodeCommand($un.ctx)
+if $ur.ctx is not None:
+    $cmd = UpdateRelationCommand($ur.ctx.t, $ur.ctx.q, $ur.ctx.nl, $ur.ctx.nr, $ur.ctx.u)
+}
+  ;
+
+update_node returns [u]
+  @init {$u = dict()}
+  : K_NODE (t=I_TYPE {$t=$t.text})
+    '(' (q=query_chain)? ')'
+    K_SET
+    (u1=update_value {$u[$u1.ctx.name] = $u1.ctx.value})
+    (',' (ui=update_value {$u[$ui.ctx.name] = $ui.ctx.value}))*
+  ;
+
+update_relation returns [u]
+  @init {$u = dict()}
+  : K_RELATION
+    ((nl=node_query) '-')?
+    (t=(I_RELATION|I_TYPE) {$t.text.isupper()}? {$t=$t.text})
+    ('(' (q=query_chain)? ')')?
+    ('->' (nr=node_query))?
+    K_SET
+    (u1=update_value {$u[$u1.ctx.name] = $u1.ctx.value})
+    (',' (ui=update_value {$u[$ui.ctx.name] = $ui.ctx.value}))*
+  ;
+
+// This empty_array stuff is super hacky but ANTLR4 is being difficult...
+update_value
+  : (name=ident {$name.ctx = ".".join(filter(lambda v: v is not None, $name.ctx))})
+   '='
+    ((value=literal)|(empty_array='[]'))
+{
+if $empty_array is not None:
+    $value.ctx = $empty_array.text
+else:
+    $value.ctx = $value.text
+}
+  ;
+
 // SHOW command
 show_stmt returns [cmd]
   @init {$cmd = None}
@@ -269,9 +317,10 @@ prop_list returns [props]
 
 prop_value : v=literal {return $v.text} ;
 
-insert_relation
-  : K_RELATION (n1=node_query) (r=relation_with_props) (n2=node_query)
-  {return ($r.ctx, $n1.ctx, $n2.ctx)}
+insert_relation returns [relprops]
+  : K_RELATION ((n1=node_query) (r=relation_with_props) (n2=node_query) {$relprops = [($r.ctx, $n1.ctx, $n2.ctx)]})
+    (',' ((n1i=node_query) (ri=relation_with_props) (n2i=node_query) {$relprops.append(($ri.ctx, $n1i.ctx, $n2i.ctx))}))*
+  {return $relprops}
   ;
 
 // Literals
@@ -301,6 +350,8 @@ K_QUIT : Q U I T ;
 K_SHOW : S H O W ;
 K_DESC : D E S C ;
 K_INSERT : I N S E R T ;
+K_UPDATE : U P D A T E ;
+K_SET : S E T ;
 
 K_TYPE : T Y P E ;
 K_RELATION : R E L A T I O N ;

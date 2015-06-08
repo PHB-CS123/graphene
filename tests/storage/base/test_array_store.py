@@ -98,7 +98,7 @@ class TestArrayStoreMethods(unittest.TestCase):
 
         # Create an array and add it to the ArrayStore file
         array = Array(1, True, Property.PropertyType.intArray,
-                      0, 3, 0, [2131243121, 824142142, 546543423])
+                      0, 3, 1, 0, [2131243121, 824142142, 546543423])
         array_store.write_item(array)
 
         # Read the array from the ArrayStore file
@@ -109,7 +109,7 @@ class TestArrayStoreMethods(unittest.TestCase):
 
         # Create a signed and add it to the ArrayStore file
         array = Array(1, True, Property.PropertyType.intArray,
-                      0, 3, 0, [-2131243121, -824142142, -546543423])
+                      0, 3, 1, 0, [-2131243121, -824142142, -546543423])
         array_store.write_item(array)
 
         # Read the array from the ArrayStore file
@@ -127,7 +127,7 @@ class TestArrayStoreMethods(unittest.TestCase):
 
         # Create an array and add it to the ArrayStore file
         array = Array(1, True, Property.PropertyType.longArray,
-                      0, 2, 0, [1717986918400, 1717986918401])
+                      0, 2, 1, 0, [1717986918400, 1717986918401])
         array_store.write_item(array)
 
         # Read the array from the ArrayStore file
@@ -138,7 +138,7 @@ class TestArrayStoreMethods(unittest.TestCase):
 
         # Create a signed array and add it to the ArrayStore file
         array = Array(1, True, Property.PropertyType.longArray,
-                      0, 2, 0, [-1717986918400, -1717986918401])
+                      0, 2, 1, 0, [-1717986918400, -1717986918401])
         array_store.write_item(array)
 
         # Read the array from the ArrayStore file
@@ -156,7 +156,7 @@ class TestArrayStoreMethods(unittest.TestCase):
 
         # Create an array and add it to the ArrayStore file
         array = Array(1, True, Property.PropertyType.boolArray,
-                      0, 5, 0, [True, False, False, True, True])
+                      0, 5, 1, 0, [True, False, False, True, True])
         array_store.write_item(array)
 
         # Read the array from the ArrayStore file
@@ -174,7 +174,7 @@ class TestArrayStoreMethods(unittest.TestCase):
 
         # Create an array and add it to the ArrayStore file
         array = Array(1, True, Property.PropertyType.shortArray,
-                      0, 6, 0, [2, 8, 127, 32767, 0, 32764])
+                      0, 6, 1, 0, [2, 8, 127, 32767, 0, 32764])
         array_store.write_item(array)
 
         # Read the array from the ArrayStore file
@@ -185,7 +185,7 @@ class TestArrayStoreMethods(unittest.TestCase):
 
         # Create a signed array and add it to the ArrayStore file
         array = Array(1, True, Property.PropertyType.shortArray,
-                      0, 6, 0, [-2, -8, -127, -32767, 0, -32764])
+                      0, 6, 1, 0, [-2, -8, -127, -32767, 0, -32764])
         array_store.write_item(array)
 
         # Read the array from the ArrayStore file
@@ -203,7 +203,7 @@ class TestArrayStoreMethods(unittest.TestCase):
 
         # Create an array and add it to the ArrayStore file
         array = Array(1, True, Property.PropertyType.charArray,
-                      0, 8, 0, ["a", "b", "c", "d", "e", "f", "g", "h"])
+                      0, 8, 1, 0, ["a", "b", "c", "d", "e", "f", "g", "h"])
         array_store.write_item(array)
 
         # Read the array from the ArrayStore file
@@ -215,7 +215,7 @@ class TestArrayStoreMethods(unittest.TestCase):
         # Test unicode
         # Create a unicode array and add it to the ArrayStore file
         array = Array(1, True, Property.PropertyType.charArray,
-                      0, 3, 0, [unichr(57344), unichr(57343), unichr(57342)])
+                      0, 3, 1, 0, [unichr(57344), unichr(57343), unichr(57342)])
         array_store.write_item(array)
 
         # Read the array from the ArrayStore file
@@ -232,8 +232,8 @@ class TestArrayStoreMethods(unittest.TestCase):
         array_store = ArrayStore()
 
         # Create an array and add it to the ArrayStore file
-        array = Array(1, True, Property.PropertyType.floatArray,
-                      0, 4, 0, [3.14159, 2.71828, 0.333333, 2.64575131106])
+        array = Array(1, True, Property.PropertyType.floatArray, 0, 4, 1, 0,
+                      [3.14159, 2.71828, 0.333333, 2.64575131106])
         array_store.write_item(array)
 
         # Read the array from the ArrayStore file
@@ -243,8 +243,8 @@ class TestArrayStoreMethods(unittest.TestCase):
         self.assertTrue(array.almost_equal(array_file, 5))
 
         # Create a signed array and add it to the ArrayStore file
-        array = Array(1, True, Property.PropertyType.floatArray,
-                      0, 4, 0, [-3.14159, -2.71828, -0.333333, -2.64575131106])
+        array = Array(1, True, Property.PropertyType.floatArray, 0, 4, 1, 0,
+                      [-3.14159, -2.71828, -0.333333, -2.64575131106])
         array_store.write_item(array)
 
         # Read the array from the ArrayStore file
@@ -261,8 +261,8 @@ class TestArrayStoreMethods(unittest.TestCase):
         array_store = ArrayStore()
 
         # Create an array and add it to the ArrayStore file
-        array = Array(1, True, Property.PropertyType.doubleArray,
-                      0, 3, 0, [5e-324, 4e-325, 3e-326])
+        array = Array(1, True, Property.PropertyType.doubleArray, 0, 3, 1, 0,
+                      [5e-324, 4e-325, 3e-326])
         array_store.write_item(array)
 
         # Read the array from the ArrayStore file
@@ -272,8 +272,8 @@ class TestArrayStoreMethods(unittest.TestCase):
         self.assertEquals(array, array_file)
 
         # Create a signed array and add it to the ArrayStore file
-        array = Array(1, True, Property.PropertyType.doubleArray,
-                      0, 3, 0, [5e-324, 4e-325, 3e-326])
+        array = Array(1, True, Property.PropertyType.doubleArray, 0, 3, 1, 0,
+                      [5e-324, 4e-325, 3e-326])
         array_store.write_item(array)
 
         # Read the array from the ArrayStore file
@@ -289,15 +289,15 @@ class TestArrayStoreMethods(unittest.TestCase):
         array_store = ArrayStore()
 
         # Create one array and write it to the ArrayStore
-        array1 = Array(1, True, Property.PropertyType.doubleArray,
-                       0, 3, 0, [5e-324, 4e-325, 3e-326])
+        array1 = Array(1, True, Property.PropertyType.doubleArray, 0, 3, 1, 0,
+                       [5e-324, 4e-325, 3e-326])
         array_store.write_item(array1)
 
         # Create 2 arrays and add them to the ArrayStore
-        array2 = Array(2, True, Property.PropertyType.charArray,
-                       0, 8, 0, ["a", "b", "c", "d", "e", "f", "g", "h"])
-        array3 = Array(3, True, Property.PropertyType.charArray,
-                       0, 3, 0, [unichr(57344), unichr(57343), unichr(57342)])
+        array2 = Array(2, True, Property.PropertyType.charArray, 0, 8, 1, 0,
+                       ["a", "b", "c", "d", "e", "f", "g", "h"])
+        array3 = Array(3, True, Property.PropertyType.charArray, 0, 3, 1, 0,
+                       [unichr(57344), unichr(57343), unichr(57342)])
         array_store.write_item(array2)
         array_store.write_item(array3)
 
@@ -318,12 +318,12 @@ class TestArrayStoreMethods(unittest.TestCase):
         array_store = ArrayStore()
 
         # Create 3 arrays
-        array1 = Array(1, True, Property.PropertyType.doubleArray,
-                       0, 3, 0, [5e-324, 4e-325, 3e-326])
-        array2 = Array(2, True, Property.PropertyType.charArray,
-                       0, 8, 0, ["a", "b", "c", "d", "e", "f", "g", "h"])
-        array3 = Array(3, True, Property.PropertyType.charArray,
-                       0, 3, 0, [unichr(57344), unichr(57343), unichr(57342)])
+        array1 = Array(1, True, Property.PropertyType.doubleArray, 0, 3, 1, 0,
+                       [5e-324, 4e-325, 3e-326])
+        array2 = Array(2, True, Property.PropertyType.charArray, 0, 8, 1, 0,
+                       ["a", "b", "c", "d", "e", "f", "g", "h"])
+        array3 = Array(3, True, Property.PropertyType.charArray, 0, 3, 1, 0,
+                       [unichr(57344), unichr(57343), unichr(57342)])
 
         # Write them to the array store
         array_store.write_item(array1)
@@ -341,8 +341,8 @@ class TestArrayStoreMethods(unittest.TestCase):
         self.assertEquals(array3, array3_file)
 
         # Create a new array2 and overwrite the old array2
-        new_array2 = Array(2, True, Property.PropertyType.shortArray,
-                           0, 6, 0, [2, 8, 127, 32767, 0, 32764])
+        new_array2 = Array(2, True, Property.PropertyType.shortArray, 0, 6, 1,
+                           0, [2, 8, 127, 32767, 0, 32764])
         array_store.write_item(new_array2)
 
         # Verify that the data is still as expected
@@ -363,11 +363,11 @@ class TestArrayStoreMethods(unittest.TestCase):
 
         # Create 3 arrays
         array1 = Array(1, True, Property.PropertyType.doubleArray,
-                       0, 3, 0, [5e-324, 4e-325, 3e-326])
+                       0, 3, 1, 0, [5e-324, 4e-325, 3e-326])
         array2 = Array(2, True, Property.PropertyType.charArray,
-                       0, 8, 0, ["a", "b", "c", "d", "e", "f", "g", "h"])
-        array3 = Array(3, True, Property.PropertyType.charArray,
-                       0, 3, 0, [unichr(57344), unichr(57343), unichr(57342)])
+                       0, 8, 1, 0, ["a", "b", "c", "d", "e", "f", "g", "h"])
+        array3 = Array(3, True, Property.PropertyType.charArray, 0, 3, 1, 0,
+                       [unichr(57344), unichr(57343), unichr(57342)])
 
         # Write them to the array_store
         array_store.write_item(array1)

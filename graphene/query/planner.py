@@ -200,7 +200,7 @@ class QueryPlanner:
         # kind of thing (i.e. RI returns (props, rightNode), NI returns a
         # NodeProperty instance)
         if len(node_chain) == 1:
-            # NodeIterator returns slightly different structure than RelationshipIterator
+            # Node iterator returns slightly diff. struct. than Rel. iterator
             for nodeprop in iter_tree:
                 results.append(nodeprop.properties)
         else:

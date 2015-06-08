@@ -10,7 +10,7 @@ class Name:
         :type in_use: bool
         :param previous_block: Index of previous block of data
         :type previous_block: int
-        :param length: Length of the name
+        :param length: Number of blocks for the whole name
         :type length: int
         :param next_block: Index of next block of data
         :type next_block: int
