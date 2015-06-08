@@ -22,15 +22,15 @@ def rel_data_generator(nodes, amount=50):
   the type:       RELATION KNOWS (num_years: int);
   """
   combos = tuple(itertools.permutations(nodes, 2))
-  for left, right in random.sample(combos, len(nodes) / 2):
+  for left, right in random.sample(combos, amount):
     left_id = left.split('(')[1].split(',')[0]
     right_id = right.split('(')[1].split(',')[0]
     years_known = random.randrange(1, 10, 1)
     yield "Person(id=%s)-[KNOWS(%d)]->Person(id=%s)" % (left_id, years_known, right_id)
 
 if __name__ == '__main__':
-  nodes = tuple(node_data_generator(100))
+  nodes = tuple(node_data_generator(1000))
   print "CREATE TYPE Person (id: int, name: string, age: int);"
   print "INSERT NODE " + ", ".join(nodes) + ";"
   print "CREATE RELATION KNOWS (num_years: int);"
-  print "INSERT RELATION " + ", ".join(rel_data_generator(nodes)) + ";"
+  print "INSERT RELATION " + ", ".join(rel_data_generator(nodes, 300)) + ";"
