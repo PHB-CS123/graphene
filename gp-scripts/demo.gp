@@ -8,8 +8,8 @@ SHOW RELATIONS;
 MATCH (p:Person);
 MATCH (p:Person) WHERE id < 15;
 MATCH (p:Person) WHERE id < 15 RETURN name;
-MATCH (p:Person) WHERE id < 15 OR id > 490;
-MATCH (p:Person) WHERE id < 15 AND id > 490;
+MATCH (p:Person) WHERE id < 15 OR id > 990;
+MATCH (p:Person) WHERE id < 15 AND id > 990;
 MATCH (p1:Person)-[k:KNOWS]->(p2:Person);
 MATCH (p1:Person)-[KNOWS]->(p1:Person); // error
 MATCH (p1:Person)-[k:KNOWS]->(p2:Person) WHERE p1.id < 100;
