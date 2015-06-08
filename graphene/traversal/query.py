@@ -182,7 +182,7 @@ class Query:
                     # TODO: These should be a SyntaxError from the parser, sorta
                     raise ValueError('error: opening bracket is missing')
             else:
-                qc[-1].append(q)
+                qc[-1].append(q.upper()) # operators are assumed to be uppercase
         if len(qc) > 1:
             # TODO: These should be a SyntaxError from the parser, sorta
             raise ValueError('error: closing bracket is missing')
