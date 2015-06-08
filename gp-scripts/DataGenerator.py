@@ -29,8 +29,8 @@ def rel_data_generator(nodes, amount=50):
     yield "Person(id=%s)-[KNOWS(%d)]->Person(id=%s)" % (left_id, years_known, right_id)
 
 if __name__ == '__main__':
-  nodes = tuple(node_data_generator(1000))
+  nodes = tuple(node_data_generator(500))
   print "CREATE TYPE Person (id: int, name: string, age: int);"
   print "INSERT NODE " + ", ".join(nodes) + ";"
   print "CREATE RELATION KNOWS (num_years: int);"
-  print "INSERT RELATION " + ", ".join(rel_data_generator(nodes, 300)) + ";"
+  print "INSERT RELATION " + ", ".join(rel_data_generator(nodes, 100)) + ";"
