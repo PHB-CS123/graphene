@@ -60,4 +60,4 @@ class UpdateRelationCommand(RelationIterator):
             # Create a key with the index and converted value
             update_dict[index_dict[u_name]] = conv_value
         # Update relation properties yielded by generator
-        storage_manager.update_relations(rel_iter, self.update)
+        storage_manager.update_relations(rel_iter, update_dict)

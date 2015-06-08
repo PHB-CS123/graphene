@@ -315,7 +315,15 @@ prop_list returns [props]
   {return $props}
   ;
 
-prop_value : v=literal {return $v.text} ;
+prop_value
+  : ((value=literal)|(empty_array='[]'))
+{
+if $empty_array is not None:
+    return $empty_array.text
+else:
+    return $value.text
+}
+;
 
 insert_relation returns [relprops]
   : K_RELATION ((n1=node_query) (r=relation_with_props) (n2=node_query) {$relprops = [($r.ctx, $n1.ctx, $n2.ctx)]})
