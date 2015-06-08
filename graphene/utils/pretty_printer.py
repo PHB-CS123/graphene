@@ -1,5 +1,142 @@
 import sys
+import logging
 from colorama import Fore, Style
+
+class SyntaxHighlighting:
+    # TODO: get keywords from .g4 file in the future
+    KEYWORDS_FILENAME = "graphene/utils/keywords.txt"
+    COMMENT_IDENTIFIER = "#"
+    # TODO: eliminate "o", added to prevent into from highlighting "int"
+    BLACKLIST = ["_", "o"]
+    # TODO: eliminate duplicate symbols ");" , ");\"" "),"
+    # TODO: figure out how to highlight "\"" and "["
+    SYMBOLS = ["->", ");", "),", ");", "(", ")", ":", "|", ";", "=", ",",
+               "-"]
+    # Property types available, NOTE: arrays are put first so they are detected
+    # when doing syntax highlighting before primitives.
+    TYPES = ["int[]", "long[]", "bool[]", "short[]", "char[]", "float[]",
+             "double[]", "string[]", "int", "long", "bool", "short", "char",
+             "float", "double", "string"]
+
+    def __init__(self, keyword_color, symbol_color, type_color):
+        self.logger = self.logger = logging.getLogger(self.__class__.__name__)
+        self.keywords = self.get_keywords()
+        # --- Syntax Colors --- #
+        self.keywordColor = keyword_color
+        self.symbolColor = symbol_color
+        self.typeColor = type_color
+
+    def get_keywords(self):
+        """
+        Get the keywords from the keywords file
+
+        :return: List of keywords
+        :rtype: list[str]
+        """
+        try:
+            syntax_file = open(self.KEYWORDS_FILENAME, "r")
+        except IOError:
+            self.logger.warn("Unable to open syntax file: %s"
+                             % self.KEYWORDS_FILENAME)
+            return None
+
+        keywords = []
+        for line in syntax_file:
+            # Strip whitespace
+            line = line.strip()
+            # Comment, skip
+            if line.startswith(self.COMMENT_IDENTIFIER):
+                continue
+            # Split by commas, remove whitespace, filter any empty strings
+            keywords.extend(map(lambda x: x.strip(), line.split(",")))
+            keywords = filter(lambda x: x != "", keywords)
+
+        return sorted(keywords)
+
+    def highlight(self, line, existing_color=""):
+        """
+        Apply syntax highlighting to the given line, if the line has an
+        existing color, pass it
+
+        :param line: Line to apply highlighting to
+        :type line: str
+        :param existing_color: Color the line currently has
+        :type existing_color: str
+        :return: New line with syntax highlighting
+        :rtype: str
+        """
+        new_line = ""
+        for i, word in enumerate(line.split(" ")):
+            #TODO: highlight multiple symbols on the same word i.e. (a:
+            # Symbols must be highlighted before anything because [ and ]
+            # are possible symbols, but also escape sequences for colors
+            word = self.highlight_id(word, self.SYMBOLS,
+                                     self.symbolColor, existing_color)
+            word = self.highlight_id(word, self.keywords,
+                                     self.keywordColor, existing_color)
+            word = self.highlight_id(word, self.TYPES,
+                                     self.typeColor, existing_color)
+            # Add formatted word to new string
+            new_line += word
+            # Add space back
+            new_line += " "
+        return new_line
+
+    def highlight_id(self, word, identifiers, color, e_color=""):
+        """
+        Apply syntax highlighting to identifiers
+
+        :param word: Word to apply highlighting to
+        :type word: str
+        :param identifiers: Items to highlight
+        :type identifiers: list[str]
+        :param e_color: Existing color to return to after highlighting
+        :type e_color: str
+        :return: Highlighted keyword, or regular if it doesn't need highlighting
+        :rtype: str
+        """
+        new_word = None
+        # Check if current word contains keyword
+        for keyword in identifiers:
+            # Keyword length
+            k_len = len(keyword)
+            loc = word.find(keyword)
+            # Keyword found
+            if loc != -1:
+                # If a word in the blacklist follows, it's not a keyword
+                # e.g SHOW_ALL shouldn't be highlighted
+                # If a word in the blacklist is before, it's not a keyword
+                # e.g. PRINT_RELATION shouldn't be highlighted
+                if (loc + k_len < len(word) and
+                        word[loc + k_len] in self.BLACKLIST) or \
+                        (loc != 0 and word[loc - 1] in self.BLACKLIST):
+                    continue
+                # Where to end syntax
+                end_s = loc + k_len
+                new_word = self.color_item(word, color, loc, end_s, e_color)
+                # Word highlighted, stop searching for keywords
+                break
+        # Return highlighted word or original if no highlighting was applied
+        return new_word or word
+
+    def color_item(self, item, color, start, stop, e_color):
+        """
+        Color the given item
+
+        :param item: Item to color
+        :type item: str
+        :param color: Color to apply
+        :type color: str
+        :param start: Start coloring
+        :type start: int
+        :param stop: End coloring
+        :type stop: int
+        :param e_color: Existing color to return to after the highlighting
+        :type e_color: str
+        :return: Colored item
+        :rtype: str
+        """
+        return item[:start] + color + item[start:stop] + e_color + item[stop:]
 
 
 class PrettyPrinter:
@@ -30,14 +167,26 @@ class PrettyPrinter:
         self.helpColor = Fore.GREEN if not self.TESTING else ""
         # Color the info text white, make it bright
         self.infoFormat = Fore.WHITE + Style.BRIGHT if not self.TESTING else ""
+
+        # Format for keyword highlighting
+        self.keywordFormat = Fore.RED if not self.TESTING else ""
+        # Format for symbol highlighting
+        self.symbolFormat = Fore.WHITE if not self.TESTING else ""
+        # Format for type highlighting
+        self.typeFormat = Fore.CYAN if not self.TESTING else ""
+
         # End of color, reset to normal terminal color
         self.endFormat = Fore.RESET + Style.RESET_ALL if not self.TESTING else ""
-             
+
         # --- Table Elements --- #
         self.pipeFormat = self.tableColor + "|" + self.endFormat
         self.pipeStartFormat = self.tableColor + "| " + self.endFormat
         self.pipeEndFormat = self.tableColor + " |" + self.endFormat
         self.dashFormat = self.tableColor + "-" + self.endFormat
+
+        # Syntax highlighting
+        self.syntaxH = SyntaxHighlighting(self.keywordFormat, self.symbolFormat,
+                                          self.typeFormat)
 
     def print_list(self, lst, header=None, output=sys.stdout):
         max_len = max(map(len, lst))
@@ -119,6 +268,9 @@ class PrettyPrinter:
         :return: Nothing
         :rtype: None
         """
+        # If a syntax color is set, highlight syntax
+        if self.keywordFormat or self.symbolFormat or self.typeFormat:
+            help_str = self.syntaxH.highlight(help_str, self.helpColor)
         output.write(self.helpColor + help_str + self.endFormat + "\n")
 
     def print_error(self, error, output=sys.stdout):

@@ -1,3 +1,7 @@
 DESC command
     Describes schema of type/relation
     DESC (TYPE TypeName|RELATION RELATION_NAME)
+
+    Examples:
+    DESC TYPE Person;
+    DESC RELATION R;
