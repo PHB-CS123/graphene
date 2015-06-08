@@ -88,7 +88,7 @@ class InsertRelationCommand(Command):
                 if np1 == np2:
                     continue
 
-                self.logger.debug("Insertsing relation %s between %s and %s"
+                self.logger.debug("Inserting relation %s between %s and %s"
                                   % (rel_name, np1.node, np2.node))
                 rel = storage_manager.insert_relation(rel_type, rel_props,
                     np1.node, np2.node)
