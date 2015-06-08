@@ -12,7 +12,7 @@ import itertools
 
 class InsertRelationCommand(Command):
     def __init__(self, ctx):
-        self.rel, self.query1, self.query2 = ctx
+        self.relprops = ctx
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def parse_properties(self, prop_list, schema, storage_manager):
@@ -54,44 +54,44 @@ class InsertRelationCommand(Command):
         :param storage_manager: storage manager for this instance
         :return: List of inserted relations
         """
-        # Gather information about the relation: name, type, schema and properties
-        rel_name = self.rel[0]
-        rel_type, rel_schema = storage_manager.get_relationship_data(rel_name)
-        rel_props = self.parse_properties(self.rel[1] or [], rel_schema, storage_manager)
-
-        # Determine type and schema information for type 1 (the left side of the
-        # relation)
-        type1, queries1 = self.query1
-        type_data1, type_schema_data1 = storage_manager.get_node_data(type1)
-        type_schema1 = [(tt_name, tt_type) for _, tt_name, tt_type in type_schema_data1]
-
-        # Determine type and schema information for type 2
-        # (the right side of the relation)
-        type2, queries2 = self.query2
-        type_data2, type_schema_data2 = storage_manager.get_node_data(type2)
-        type_schema2 = [(tt_name, tt_type) for _, tt_name, tt_type in type_schema_data2]
-
-        # Parse queries for the left and right nodes
-        qc1 = Query.parse_chain(storage_manager, queries1, type_schema1)
-        qc2 = Query.parse_chain(storage_manager, queries2, type_schema2)
-
-        # Create iterators for the left and right nodes
-        iter1 = NodeIterator(storage_manager, MatchNode(None, type1), type_schema1, queries=qc1)
-        iter2 = NodeIterator(storage_manager, MatchNode(None, type2), type_schema2, queries=qc2)
-
         inserted_relations = []
+        for rel, query1, query2 in self.relprops:
+            # Gather information about the relation: name, type, schema and properties
+            rel_name = rel[0]
+            rel_type, rel_schema = storage_manager.get_relationship_data(rel_name)
+            rel_props = self.parse_properties(rel[1] or [], rel_schema, storage_manager)
 
-        # Iterate over a product of the left node-set and right node-set. For
-        # each, we will create a relation. We don't care if a node appears on
-        # both sides; that's fine.
-        for np1, np2 in itertools.product(iter1, iter2):
-            if np1 == np2:
-                continue
+            # Determine type and schema information for type 1 (the left side of the
+            # relation)
+            type1, queries1 = query1
+            type_data1, type_schema_data1 = storage_manager.get_node_data(type1)
+            type_schema1 = [(tt_name, tt_type) for _, tt_name, tt_type in type_schema_data1]
 
-            self.logger.debug("Inserting relation %s between %s and %s"
-                              % (rel_name, np1.node, np2.node))
-            rel = storage_manager.insert_relation(rel_type, rel_props,
-                np1.node, np2.node)
-            inserted_relations.append(rel)
+            # Determine type and schema information for type 2
+            # (the right side of the relation)
+            type2, queries2 = query2
+            type_data2, type_schema_data2 = storage_manager.get_node_data(type2)
+            type_schema2 = [(tt_name, tt_type) for _, tt_name, tt_type in type_schema_data2]
+
+            # Parse queries for the left and right nodes
+            qc1 = Query.parse_chain(storage_manager, queries1, type_schema1)
+            qc2 = Query.parse_chain(storage_manager, queries2, type_schema2)
+
+            # Create iterators for the left and right nodes
+            iter1 = NodeIterator(storage_manager, MatchNode(None, type1), type_schema1, queries=qc1)
+            iter2 = NodeIterator(storage_manager, MatchNode(None, type2), type_schema2, queries=qc2)
+
+            # Iterate over a product of the left node-set and right node-set. For
+            # each, we will create a relation. We don't care if a node appears on
+            # both sides; that's fine.
+            for np1, np2 in itertools.product(iter1, iter2):
+                if np1 == np2:
+                    continue
+
+                self.logger.debug("Insertsing relation %s between %s and %s"
+                                  % (rel_name, np1.node, np2.node))
+                rel = storage_manager.insert_relation(rel_type, rel_props,
+                    np1.node, np2.node)
+                inserted_relations.append(rel)
 
         return inserted_relations
