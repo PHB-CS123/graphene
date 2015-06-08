@@ -1,4 +1,4 @@
-from graphene.utils.pretty_printer import PrettyPrinter
+from graphene.utils.pretty_printer import *
 from graphene.utils.help_docs import HelpDocs
 from graphene.errors import query_errors, storage_manager_errors
 
@@ -50,7 +50,7 @@ class Shell(cmd.Cmd):
         elif len(line) != 0:
             printer.print_error("ERROR: Unrecognized help topic.")
         # Print possible help topics
-        printer.print_help("You ask about the following help topics:\n%s"
+        printer.print_help("You ask about the following help topics: \n%s"
                            % "- " + " \n- ".join(help_topics))
 
     def do_EOF(self, line):

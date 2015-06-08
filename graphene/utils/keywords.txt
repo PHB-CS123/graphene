@@ -1,0 +1,3 @@
+# Input keywords as comma separated values. Line comments start with "#"
+AND,  QUIT,  RETURN,  SHOW,  TYPE,  CREATE,  DROP,  RELATIONS,  INSERT,  
+EXIT,  NODE,  RELATION,  DESC,  WHERE,  OR,  MATCH,  DELETE, UPDATE, SET

@@ -1,3 +1,6 @@
 DROP command
     Removes schemas and any nodes/relations/properties referring to them
     DROP (TYPE TypeName|RELATION RELATION_NAME)
+
+    DROP TYPE Person;
+    DROP RELATION T;
