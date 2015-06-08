@@ -800,10 +800,14 @@ class StorageManager:
         cache.sync()
 
         for itemprop in itemprops:
+            if node_flag:
+                _, properties = cache[itemprop.node.index]
+            else:
+                _, properties = cache[itemprop.rel.index]
             # For every update to the properties of the current item
             for index, new_val in updates.iteritems():
                 # Property to update
-                prop = itemprop.properties[index]
+                prop = properties[index]
                 # Old value (index of name or array, won't be changed)
                 old_val = prop.propBlockId
                 # -- Update property value -- #

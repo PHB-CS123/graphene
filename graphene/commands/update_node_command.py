@@ -70,4 +70,4 @@ class UpdateNodeCommand(Command):
         iter_tree = planner.get_iter_tree([MatchNode(None, self.node_type)],
                                           self.qc)
 
-        storage_manager.update_node(iter_tree, update_dict)
+        storage_manager.update_nodes(iter_tree, update_dict)
