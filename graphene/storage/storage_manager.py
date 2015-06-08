@@ -666,12 +666,6 @@ class StorageManager:
         Deletes a relation and anything referencing it. Also makes sure to
         update linked lists that may have passed through this relation.
         """
-        # Delete the properties the relation references
-        cur_prop_id = rel.propId
-        while cur_prop_id != 0:
-            prop = self.property_manager.get_item_at_index(cur_prop_id)
-            cur_prop_id = prop.nextPropId
-            self.delete_property(prop)
 
         # Update the links between relations to ensure that the lists are
         # attached properly
@@ -679,6 +673,13 @@ class StorageManager:
             rel.firstNextRelId)
         self.update_relation_links(rel.secondNodeId, rel.secondPrevRelId,
             rel.secondNextRelId)
+
+        # Delete the properties the relation references
+        cur_prop_id = rel.propId
+        while cur_prop_id != 0:
+            prop = self.property_manager.get_item_at_index(cur_prop_id)
+            cur_prop_id = prop.nextPropId
+            self.delete_property(prop)
 
         # Delete relation itself
         self.relationship_manager.delete_item(rel)
@@ -703,12 +704,6 @@ class StorageManager:
         """
         Deletes a node and everything that contains it as a reference.
         """
-        # Delete all properties referred to by this node
-        cur_prop_id = node.propId
-        while cur_prop_id != 0:
-            prop = self.property_manager.get_item_at_index(cur_prop_id)
-            cur_prop_id = prop.nextPropId
-            self.delete_property(prop)
 
         # Delete all relations that are attached to this node (since they can't
         # be attached to nothing)
@@ -724,6 +719,13 @@ class StorageManager:
             # deletion of relation through storage manager too)
             del self.relprop[rel.index]
             self.relprop.sync()
+
+        # Delete all properties referred to by this node
+        cur_prop_id = node.propId
+        while cur_prop_id != 0:
+            prop = self.property_manager.get_item_at_index(cur_prop_id)
+            cur_prop_id = prop.nextPropId
+            self.delete_property(prop)
 
         # Delete node itself
         self.node_manager.delete_item(node)
