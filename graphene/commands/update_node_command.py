@@ -18,6 +18,15 @@ class UpdateNodeCommand(Command):
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def execute(self, storage_manager):
+        """
+        Checks that the given update values are valid, and converts the given
+        values into properties that can be stored. Then performs update.
+
+        :param storage_manager: Manager to perform update from
+        :type storage_manager: StorageManager
+        :return: Nothing
+        :rtype: None
+        """
         # Check Schema Types
         node_type, schema = storage_manager.get_node_data(self.node_type)
         # The first part of a tuple in the schema list is the type-type itself
@@ -29,35 +38,34 @@ class UpdateNodeCommand(Command):
         index_dict = dict((s[1], i) for i, s in enumerate(schema))
         # This list will contain all the new values for properties with the
         # given indices.
-        update_list = []
+        update_dict = {}
         for u_name, u_value in self.update.items():
             if u_name not in schema_dict:
                 msg = "Property name `%s` does not exist." % u_name
                 raise NonexistentPropertyException(msg)
             prop_type = schema_dict[u_name]
             if u_value == "[]":
-                # empty array, so we just have to check that the expected
+                # Empty array, so we just have to check that the expected
                 # type is some time of array
                 if prop_type.value < Property.PropertyType.intArray.value:
-                    raise TypeMismatchException("Got empty array, but " \
-                            "expected value of type %s for property '%s'." \
-                            % (prop_type, u_name))
+                    raise TypeMismatchException("Got empty array, but "
+                                "expected value of type %s for property '%s'."
+                                                % (prop_type, u_name))
                 conv_value = []
             else:
                 u_type = TypeConversion.get_type_type_of_string(u_value)
                 if u_type != prop_type:
-                    err = "Got value of type %s, but expected value of type "\
-                            "%s for property '%s'." % (u_type, prop_type,
-                                u_name)
+                    err = "Got value of type %s, but expected value of type " \
+                          "%s for property '%s'." % (u_type, prop_type, u_name)
                     raise TypeMismatchException(err)
                 # Convert value and add to list
                 conv_value = TypeConversion.convert_to_value(u_value, prop_type)
-            # Add to list of stuff to update
-            update_list.append((index_dict[u_name], conv_value))
+            # Create a key with the index and converted value
+            update_dict[index_dict[u_name]] = conv_value
 
         planner = QueryPlanner(storage_manager)
         # Iterate over nodes using the planner's helper method for convenience
         iter_tree = planner.get_iter_tree([MatchNode(None, self.node_type)],
                                           self.qc)
 
-        storage_manager.update_node(iter_tree, update_list)
+        storage_manager.update_node(iter_tree, update_dict)

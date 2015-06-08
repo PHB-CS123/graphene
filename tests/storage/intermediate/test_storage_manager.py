@@ -4,6 +4,7 @@ from graphene.errors.storage_manager_errors import *
 from graphene.storage import (StorageManager, GrapheneStore, Property,
                               Relationship, Node)
 from graphene.storage.intermediate.node_property import NodeProperty
+from graphene.storage.intermediate.relation_property import RelationProperty
 from graphene.storage.base.general_store import EOF
 
 
@@ -385,80 +386,499 @@ class TestStorageManagerMethods(unittest.TestCase):
         self.assertEqual(n1.relId, 0)
         self.assertEqual(n2.relId, 0)
 
-    def test_update_nodes_simple(self):
+    def test_update_items_simple(self, node_flag=True):
         """
-        Test that updating a node's properties works properly, in a 1 property
-        case
-        """
-        pass
-        # t = self.sm.create_node_type("T", (("a", "int"),))
-        # # Create 3 nodes of type T
-        # n1, p1 = self.sm.insert_node(t, ((Property.PropertyType.int, 2),))
-        # n2, p2 = self.sm.insert_node(t, ((Property.PropertyType.int, 3),))
-        # n3, p3 = self.sm.insert_node(t, ((Property.PropertyType.int, 5),))
-        #
-        # # Update nodes 1 and 3 with value 10
-        # update = {"a": 10}
-        # # Create nodeprops for update nodes
-        # nodeprop1 = NodeProperty(n1, p1, t, "T")
-        # nodeprop3 = NodeProperty(n3, p3, t, "T")
-        # nodeprops = [nodeprop1, nodeprop3]
-        # import pytest
-        # pytest.set_trace()
-        # self.sm.update_nodes(nodeprops, update)
-        # # Check that values are updated
-        # n1_f, p1_f = self.sm.nodeprop[n1.index]
-        # n2_f, p2_f = self.sm.nodeprop[n2.index]
-        # n3_f, p3_f = self.sm.nodeprop[n3.index]
-        #
-        # self.assertEquals(p1_f[0].propBlockId, 10)
-        # self.assertEquals(p3_f[0].propBlockId, 10)
-        # # Check that untouched values are the same
-        # self.assertEquals(p2_f[0].propBlockId, 3)
+        Test that updating an item's properties works properly, in a 1 property
+        case. [General Test]
 
-    def test_update_relations(self):
+        :param node_flag: Set to false to test update for relations
+        :type node_flag: bool
+        :return: Nothing
+        :rtype: None
         """
-        Test that updating a relation's properties works properly
-        """
-        # TODO
-        pass
+        if node_flag:
+            update = self.sm.update_nodes
+            itemprop = NodeProperty
+            itemprop_store = self.sm.nodeprop
+        else:
+            update = self.sm.update_relations
+            itemprop = RelationProperty
+            itemprop_store = self.sm.relprop
 
-    def test_names_to_ids(self):
-        """
-        Test that getting IDs from node/relationship property names works
-        """
-        # Test node type item indexes are read
-        t = self.sm.create_node_type("T", (("a", "int"), ("c", "string"),
-                                           ("d", "int[]")))
-        t_type_idx = t.firstType
-        t_type_idxs = [t_type_idx]
-        while t_type_idx != 0:
-            t_type_idx = self.sm.nodeTypeTypeManager.\
-                get_item_at_index(t_type_idx).nextType
-            t_type_idxs.append(t_type_idx)
-        # Update dictionary
-        u_dict = {"a": 1, "c": 2, "d": 3}
-        # Update dictionary with names replaced by IDs
-        u_ids_dict = {1: 1, 2: 2, 3: 3}
-        self.assertEquals(self.sm.names_to_ids(u_dict, True), u_ids_dict)
+        # Create type T with schema tuple for properties
+        type_name = "T"
+        schema_tup = (("a", "int"),)
+        t = self.sm.create_node_type(type_name, schema_tup)
+        # Create 3 nodes of type T
+        prop_tup1 = ((Property.PropertyType.int, 2),)
+        prop_tup2 = ((Property.PropertyType.int, 3),)
+        prop_tup3 = ((Property.PropertyType.int, 5),)
+        i1, p1 = self.sm.insert_node(t, prop_tup1)
+        i2, p2 = self.sm.insert_node(t, prop_tup2)
+        i3, p3 = self.sm.insert_node(t, prop_tup3)
 
-        # Test node type item indexes are read
-        schema = (("a", "string"), ("b", "int"), ("c", "string"))
-        t = self.sm.create_relationship_type("R", schema)
-        t_type_idx = t.firstType
-        t_type_idxs = [t_type_idx]
-        while t_type_idx != 0:
-            t_type_idx = self.sm.nodeTypeTypeManager.\
-                get_item_at_index(t_type_idx).nextType
-            t_type_idxs.append(t_type_idx)
-        # Update dictionary
-        u_dict = {"a": 1, "b": 2, "c": 3}
-        # Update dictionary with names replaced by IDs
-        u_ids_dict = {1: 1, 2: 2, 3: 3}
-        self.assertEquals(self.sm.names_to_ids(u_dict, False), u_ids_dict)
+        # If testing relations, make the properties for relations
+        if not node_flag:
+            type_name = "R"
+            t = self.sm.create_relationship_type(type_name, schema_tup)
+            # Save nodes since items will be overwritten for generality
+            n1, n2, n3 = (i1, i2, i3)
+            r1i = self.sm.insert_relation(t, prop_tup1, n1, n2).index
+            r2i = self.sm.insert_relation(t, prop_tup2, n2, n3).index
+            r3i = self.sm.insert_relation(t, prop_tup3, n3, n1).index
+            # Overwrite items
+            i1, p1 = self.sm.relprop[r1i]
+            i2, p2 = self.sm.relprop[r2i]
+            i3, p3 = self.sm.relprop[r3i]
 
-        # Part of update dictionary
-        u_dict = {"a": 1, "c": 3}
-        # Part of update dictionary with names replaced by IDs
-        u_ids_dict = {1: 1, 3: 3}
-        self.assertEquals(self.sm.names_to_ids(u_dict, False), u_ids_dict)
+        # Update items 1 and 3 with value 10, since "a" is the first property,
+        # set the update key accordingly
+        updates = {0: 10}
+        # Create itemprops for update items
+        itemprop1 = itemprop(i1, p1, t, type_name)
+        itemprop3 = itemprop(i3, p3, t, type_name)
+        itemprops = [itemprop1, itemprop3]
+
+        update(itemprops, updates)
+        # Check that values are updated
+        i1_f, p1_f = itemprop_store[i1.index]
+        i2_f, p2_f = itemprop_store[i2.index]
+        i3_f, p3_f = itemprop_store[i3.index]
+
+        self.assertTrue(self.valid_update(self.sm, p1_f, updates))
+        self.assertTrue(self.valid_update(self.sm, p3_f, updates))
+        # Check that untouched values are the same
+        self.assertTrue(self.equal_properties(p2, p2_f))
+
+    def test_update_items_complex(self, node_flag=True):
+        """
+        Test that updating an item's properties works properly, in a 4 property
+        case. [General Test]
+
+        :param node_flag: Set to false to test update for relations
+        :type node_flag: bool
+        :return: Nothing
+        :rtype: None
+        """
+        if node_flag:
+            update = self.sm.update_nodes
+            itemprop = NodeProperty
+            itemprop_store = self.sm.nodeprop
+        else:
+            update = self.sm.update_relations
+            itemprop = RelationProperty
+            itemprop_store = self.sm.relprop
+
+        # Create type T with schema tuple for properties
+        schema_tup = (("a", "int"), ("b", "float"),
+                      ("c", "char"), ("d", "double"))
+        type_name = "T"
+        t = self.sm.create_node_type(type_name, schema_tup)
+
+        # Create 4 nodes of type T
+        prop_tup1 = ((Property.PropertyType.int, 2),
+                     (Property.PropertyType.float, 3.4),
+                     (Property.PropertyType.char, "a"),
+                     (Property.PropertyType.double, 5e-9))
+        prop_tup2 = ((Property.PropertyType.int, 5),
+                     (Property.PropertyType.float, 123.4),
+                     (Property.PropertyType.char, "b"),
+                     (Property.PropertyType.double, 5e-8))
+        prop_tup3 = ((Property.PropertyType.int, 254321),
+                     (Property.PropertyType.float, 9.4),
+                     (Property.PropertyType.char, "c"),
+                     (Property.PropertyType.double, 5e-4))
+        prop_tup4 = ((Property.PropertyType.int, 32),
+                     (Property.PropertyType.float, 9.4),
+                     (Property.PropertyType.char, "c"),
+                     (Property.PropertyType.double, 5e-4))
+        i1, p1 = self.sm.insert_node(t, prop_tup1)
+        i2, p2 = self.sm.insert_node(t, prop_tup2)
+        i3, p3 = self.sm.insert_node(t, prop_tup3)
+        i4, p4 = self.sm.insert_node(t, prop_tup4)
+
+        # If testing relations, make the properties for relations
+        if not node_flag:
+            type_name = "R"
+            t = self.sm.create_relationship_type(type_name, schema_tup)
+            # Save nodes since items will be overwritten for generality
+            n1, n2, n3, n4 = (i1, i2, i3, i4)
+            r1i = self.sm.insert_relation(t, prop_tup1, n1, n2).index
+            r2i = self.sm.insert_relation(t, prop_tup2, n2, n3).index
+            r3i = self.sm.insert_relation(t, prop_tup3, n3, n1).index
+            r4i = self.sm.insert_relation(t, prop_tup4, n4, n1).index
+            # Overwrite items
+            i1, p1 = self.sm.relprop[r1i]
+            i2, p2 = self.sm.relprop[r2i]
+            i3, p3 = self.sm.relprop[r3i]
+            i4, p4 = self.sm.relprop[r4i]
+
+        # Update items 1 and 3 with new values, set the update keys accordingly
+        updates = {1: 2.1, 2: "f", 3: 4e-200}
+        # Create itemprops for update items
+        itemprop1 = itemprop(i1, p1, t, type_name)
+        itemprop3 = itemprop(i3, p3, t, type_name)
+        itemprops = [itemprop1, itemprop3]
+        # Perform update
+        update(itemprops, updates)
+
+        # Check that values are updated
+        i1_f, p1_f = itemprop_store[i1.index]
+        i2_f, p2_f = itemprop_store[i2.index]
+        i3_f, p3_f = itemprop_store[i3.index]
+        i4_f, p4_f = itemprop_store[i4.index]
+
+        self.assertTrue(self.valid_update(self.sm, p1_f, updates))
+        self.assertTrue(self.valid_update(self.sm, p3_f, updates))
+        # Check that untouched values are the same
+        self.assertTrue(self.equal_properties(p2, p2_f))
+        self.assertTrue(self.equal_properties(p4, p4_f))
+
+    def test_update_items_string(self, node_flag=True):
+        """
+        Test that updating a node's properties works properly, when
+        updating strings. [General Test]
+
+        :param node_flag: Set to false to test update for relations
+        :type node_flag: bool
+        :return: Nothing
+        :rtype: None
+        """
+        if node_flag:
+            update = self.sm.update_nodes
+            itemprop = NodeProperty
+            itemprop_store = self.sm.nodeprop
+        else:
+            update = self.sm.update_relations
+            itemprop = RelationProperty
+            itemprop_store = self.sm.relprop
+
+        # Create type T with schema tuple for properties
+        schema_tup = (("a", "int"), ("b", "string"),
+                      ("c", "char"), ("d", "string"))
+        type_name = "T"
+        t = self.sm.create_node_type(type_name, schema_tup)
+
+        # Property tuples
+        prop_tup1 = ((Property.PropertyType.int, 2),
+                     (Property.PropertyType.string, 99*"a"),
+                     (Property.PropertyType.char, "w"),
+                     (Property.PropertyType.string, "b"))
+        prop_tup2 = ((Property.PropertyType.int, 1020),
+                     (Property.PropertyType.string, 6*"c"),
+                     (Property.PropertyType.char, "x"),
+                     (Property.PropertyType.string, 92*"d"))
+        prop_tup3 = ((Property.PropertyType.int, 21),
+                     (Property.PropertyType.string, 9*"e"),
+                     (Property.PropertyType.char, "y"),
+                     (Property.PropertyType.string, 122*"f"))
+        prop_tup4 = ((Property.PropertyType.int, 2432),
+                     (Property.PropertyType.string, 2*"g"),
+                     (Property.PropertyType.char, "z"),
+                     (Property.PropertyType.string, 40*"h"))
+
+        # Create 4 nodes of type T
+        i1, p1 = self.sm.insert_node(t, prop_tup1)
+        i2, p2 = self.sm.insert_node(t, prop_tup2)
+        i3, p3 = self.sm.insert_node(t, prop_tup3)
+        i4, p4 = self.sm.insert_node(t, prop_tup4)
+
+        # If testing relations, make the properties for relations
+        if not node_flag:
+            type_name = "R"
+            t = self.sm.create_relationship_type(type_name, schema_tup)
+            # Save nodes since items will be overwritten for generality
+            n1, n2, n3, n4 = (i1, i2, i3, i4)
+            r1i = self.sm.insert_relation(t, prop_tup1, n1, n2).index
+            r2i = self.sm.insert_relation(t, prop_tup2, n2, n3).index
+            r3i = self.sm.insert_relation(t, prop_tup3, n3, n1).index
+            r4i = self.sm.insert_relation(t, prop_tup4, n4, n1).index
+            # Overwrite items
+            i1, p1 = self.sm.relprop[r1i]
+            i2, p2 = self.sm.relprop[r2i]
+            i3, p3 = self.sm.relprop[r3i]
+            i4, p4 = self.sm.relprop[r4i]
+
+        # Update items 2, 3, 4 with new values, set the update keys accordingly
+        updates = {0: 2, 1: 5*"i", 3: 102*"j"}
+        # Create itemprops for update items
+        itemprop2 = itemprop(i2, p2, t, type_name)
+        itemprop3 = itemprop(i3, p3, t, type_name)
+        itemprop4 = itemprop(i4, p4, t, type_name)
+        itemprops = [itemprop3, itemprop4, itemprop2]
+
+        update(itemprops, updates)
+        # Check that values are updated
+        i1_f, p1_f = itemprop_store[i1.index]
+        i2_f, p2_f = itemprop_store[i2.index]
+        i3_f, p3_f = itemprop_store[i3.index]
+        i4_f, p4_f = itemprop_store[i4.index]
+
+        self.assertTrue(self.valid_update(self.sm, p2_f, updates))
+        self.assertTrue(self.valid_update(self.sm, p3_f, updates))
+        self.assertTrue(self.valid_update(self.sm, p4_f, updates))
+        # Check that untouched values are the same
+        self.assertTrue(self.equal_properties(p1, p1_f))
+
+    def test_update_items_array(self, node_flag=True):
+        """
+        Test that updating a node's properties works properly, when updating
+        arrays. String arrays tested separately. [General Test]
+
+        :param node_flag: Set to false to test update for relations
+        :type node_flag: bool
+        :return: Nothing
+        :rtype: None
+        """
+        if node_flag:
+            update = self.sm.update_nodes
+            itemprop = NodeProperty
+            itemprop_store = self.sm.nodeprop
+        else:
+            update = self.sm.update_relations
+            itemprop = RelationProperty
+            itemprop_store = self.sm.relprop
+
+        # Create type T with schema tuple for properties
+        type_name = "T"
+        schema_tup = (("a", "int[]"), ("b", "string"),
+                    ("c", "char[]"), ("d", "string"))
+        t = self.sm.create_node_type(type_name, schema_tup)
+
+        # Property tuples
+        prop_tup1 = ((Property.PropertyType.intArray, 80 * [243]),
+                     (Property.PropertyType.string, 99*"a"),
+                     (Property.PropertyType.charArray, 43 * ["w"]),
+                     (Property.PropertyType.string, "b"))
+        prop_tup2 = ((Property.PropertyType.intArray, 56 * [1020]),
+                     (Property.PropertyType.string, 6*"c"),
+                     (Property.PropertyType.charArray, ["x"]),
+                     (Property.PropertyType.string, 92*"d"))
+        prop_tup3 = ((Property.PropertyType.intArray, [21]),
+                     (Property.PropertyType.string, 9*"e"),
+                     (Property.PropertyType.charArray, 80 * ["y"]),
+                     (Property.PropertyType.string, 122*"f"))
+        prop_tup4 = ((Property.PropertyType.intArray, 102 * [2432]),
+                     (Property.PropertyType.string, 2*"g"),
+                     (Property.PropertyType.charArray, 32 * ["z"]),
+                     (Property.PropertyType.string, 40*"h"))
+
+        # Create 4 nodes of type T
+        i1, p1 = self.sm.insert_node(t, prop_tup1)
+        i2, p2 = self.sm.insert_node(t, prop_tup2)
+        i3, p3 = self.sm.insert_node(t, prop_tup3)
+        i4, p4 = self.sm.insert_node(t, prop_tup4)
+
+        # If testing relations, make the properties for relations
+        if not node_flag:
+            type_name = "R"
+            t = self.sm.create_relationship_type(type_name, schema_tup)
+            # Save nodes since items will be overwritten for generality
+            n1, n2, n3, n4 = (i1, i2, i3, i4)
+            r1i = self.sm.insert_relation(t, prop_tup1, n1, n2).index
+            r2i = self.sm.insert_relation(t, prop_tup2, n2, n3).index
+            r3i = self.sm.insert_relation(t, prop_tup3, n3, n1).index
+            r4i = self.sm.insert_relation(t, prop_tup4, n4, n1).index
+            # Overwrite items
+            i1, p1 = self.sm.relprop[r1i]
+            i2, p2 = self.sm.relprop[r2i]
+            i3, p3 = self.sm.relprop[r3i]
+            i4, p4 = self.sm.relprop[r4i]
+
+        # Update items 2 and 4 with new values, set the update keys accordingly
+        updates = {0: 82 * [2431], 1: 5 * "i", 2: 43 * ["j"]}
+        # Create itemprops for update items
+        itemprop2 = itemprop(i2, p2, t, type_name)
+        itemprop4 = itemprop(i4, p4, t, type_name)
+        itemprops = [itemprop4, itemprop2]
+
+        update(itemprops, updates)
+
+        # Check that values are updated
+        i1_f, p1_f = itemprop_store[i1.index]
+        i2_f, p2_f = itemprop_store[i2.index]
+        i3_f, p3_f = itemprop_store[i3.index]
+        i4_f, p4_f = itemprop_store[i4.index]
+
+        self.assertTrue(self.valid_update(self.sm, p2_f, updates))
+        self.assertTrue(self.valid_update(self.sm, p4_f, updates))
+        # Check that untouched values are the same
+        self.assertTrue(self.equal_properties(p1, p1_f))
+        self.assertTrue(self.equal_properties(p3, p3_f))
+
+    def test_update_items_string_array(self, node_flag=True):
+        """
+        Test that updating a node's properties works properly, when updating
+        string arrays. [General Test]
+
+        :param node_flag: Set to false to test update for relations
+        :type node_flag: bool
+        :return: Nothing
+        :rtype: None
+        """
+
+        if node_flag:
+            update = self.sm.update_nodes
+            itemprop = NodeProperty
+            itemprop_store = self.sm.nodeprop
+        else:
+            update = self.sm.update_relations
+            itemprop = RelationProperty
+            itemprop_store = self.sm.relprop
+
+        # Create type T with schema tuple for properties
+        type_name = "T"
+        schema_tup = (("a", "int[]"), ("b", "string[]"),
+                      ("c", "char[]"), ("d", "string[]"))
+        t = self.sm.create_node_type(type_name, schema_tup)
+
+        # Property tuples
+        prop_tup1 = ((Property.PropertyType.intArray, 80 * [243]),
+                     (Property.PropertyType.stringArray, 9*[42 * "a"]),
+                     (Property.PropertyType.charArray, 43 * ["w"]),
+                     (Property.PropertyType.stringArray, 62 * ["b"]),)
+        prop_tup2 = ((Property.PropertyType.intArray, 56 * [1020]),
+                     (Property.PropertyType.stringArray, [42 * "c"]),
+                     (Property.PropertyType.charArray, ["x"]),
+                     (Property.PropertyType.stringArray, 92 * ["d"]),)
+        prop_tup3 = ((Property.PropertyType.intArray, [21]),
+                     (Property.PropertyType.stringArray, 9 * [8 * "e"]),
+                     (Property.PropertyType.charArray, 80 * ["y"]),
+                     (Property.PropertyType.stringArray, 122 * [98 * "f"]),)
+        prop_tup4 = ((Property.PropertyType.intArray, 102 * [2432]),
+                     (Property.PropertyType.stringArray, 82 * [42 * "g"]),
+                     (Property.PropertyType.charArray, 32 * ["z"]),
+                     (Property.PropertyType.stringArray, 40 * [32 * "h"]),)
+
+        # Create 4 nodes of type T
+        i1, p1 = self.sm.insert_node(t, prop_tup1)
+        i2, p2 = self.sm.insert_node(t, prop_tup2)
+        i3, p3 = self.sm.insert_node(t, prop_tup3)
+        i4, p4 = self.sm.insert_node(t, prop_tup4)
+
+        # If testing relations, make the properties for relations
+        if not node_flag:
+            type_name = "R"
+            t = self.sm.create_relationship_type(type_name, schema_tup)
+            # Save nodes since items will be overwritten for generality
+            n1, n2, n3, n4 = (i1, i2, i3, i4)
+            r1i = self.sm.insert_relation(t, prop_tup1, n1, n2).index
+            r2i = self.sm.insert_relation(t, prop_tup2, n2, n3).index
+            r3i = self.sm.insert_relation(t, prop_tup3, n3, n1).index
+            r4i = self.sm.insert_relation(t, prop_tup4, n4, n1).index
+            # Overwrite items
+            i1, p1 = self.sm.relprop[r1i]
+            i2, p2 = self.sm.relprop[r2i]
+            i3, p3 = self.sm.relprop[r3i]
+            i4, p4 = self.sm.relprop[r4i]
+
+        # Update items 2 and 3 with new values, set the update keys accordingly
+        updates = {0: 82 * [2431], 1: 50 * [12 * "i"], 3: 43 * [68 * "j"]}
+        # Create itemprops for update items
+        itemprop2 = itemprop(i2, p2, t, type_name)
+        itemprop3 = itemprop(i3, p3, t, type_name)
+        itemprops = [itemprop3, itemprop2]
+
+        # Perform update
+        update(itemprops, updates)
+
+        # Check that values are updated
+        n1_f, p1_f = itemprop_store[i1.index]
+        n2_f, p2_f = itemprop_store[i2.index]
+        n3_f, p3_f = itemprop_store[i3.index]
+        n4_f, p4_f = itemprop_store[i4.index]
+
+        self.assertTrue(self.valid_update(self.sm, p2_f, updates))
+        self.assertTrue(self.valid_update(self.sm, p3_f, updates))
+        # Check that untouched values are the same
+        self.assertTrue(self.equal_properties(p1, p1_f))
+        self.assertTrue(self.equal_properties(p4, p4_f))
+
+    def test_update_relations_simple(self):
+        """
+        Test updating relation properties in a simple case with primitives
+        """
+        self.test_update_items_simple(False)
+
+    def test_update_relations_complex(self):
+        """
+        Test updating relation properties in a complex case with primitives
+        """
+        self.test_update_items_complex(False)
+
+    def test_update_relations_string(self):
+        """
+        Test updating relation properties in a case with strings
+        """
+        self.test_update_items_string(False)
+
+    def test_update_relations_array(self):
+        """
+        Test updating relation properties in a case with arrays
+        """
+        self.test_update_items_array(False)
+
+    def test_update_relations_string_array(self):
+        """
+        Test updating relation properties in a case with string arrays
+        """
+        self.test_update_items_string_array(False)
+
+    def valid_update(self, storage_manager, properties, updates):
+        """
+        Test that the given properties have the corresponding update values
+        changed.
+
+        :param storage_manager: Storage manager to use to check strings & arrays
+        :type storage_manager: StorageManager
+        :param properties: List of properties to check
+        :type properties: list[Properties]
+        :param updates: Dictionary with indexes of properties and new values
+        :type updates: dict[int: Any]
+        :return: Whether the properties have the given update values changed
+        :rtype: bool
+        """
+        string_manager = storage_manager.prop_string_manager
+        array_manager = storage_manager.array_manager
+
+        for index, new_val in updates.iteritems():
+            prop = properties[index]
+            cur_val = prop.propBlockId
+            if prop.is_string():
+                if string_manager.read_name_at_index(cur_val) != new_val:
+                    return False
+            elif prop.is_array():
+                if array_manager.read_array_at_index(cur_val) != new_val:
+                    return False
+            # Primitive, just check values
+            elif cur_val != new_val:
+                return False
+        return True
+
+    def equal_properties(self, props1, props2):
+        """
+        Check that the two given list of properties are equal.
+
+        :param props1: First property list
+        :type props1: list[Property]
+        :param props2: Second property list
+        :type props2: list[Property]
+        :return: Whether the two lists have equal property values
+        :rtype: bool
+        """
+        for index, prop1 in enumerate(props1):
+            prop2 = props2[index]
+            val1 = prop1.propBlockId
+            val2 = prop2.propBlockId
+
+            if prop1.is_string():
+                if not prop2.is_string():
+                    return False
+            elif prop1.is_array():
+                if not prop2.is_array():
+                    return False
+            # Both arrays and primitives must have the same value, if arrays or
+            # strings have the same ID value, then they are obviously the same
+            if val1 != val2:
+                return False
+        return True

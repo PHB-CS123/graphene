@@ -796,54 +796,29 @@ class StorageManager:
 
         # Sync cache before updates
         cache.sync()
-        # Get property IDs from property names
-        updates = self.names_to_ids(updates, node_flag)
 
         for itemprop in itemprops:
-            # For every property of an item
-            for prop in itemprop.properties:
-                # Get property index
-                prop_idx = prop.index
+            # For every update to the properties of the current item
+            for index, new_val in updates.iteritems():
                 # Property to update
-                if prop_idx in updates:
-                    # Old value (index of name or array, won't be changed)
-                    old_val = prop.propBlockId
-                    new_val = updates[prop_idx]
-                    # -- Update property value -- #
-                    # String, so update name
-                    if prop.is_string():
-                        self.prop_string_manager.\
-                            update_name_at_index(old_val, new_val)
-                    # Array, so use array manager
-                    elif prop.is_array():
-                        self.array_manager.\
-                            update_array_at_index(old_val, new_val)
-                    # Otherwise primitive
-                    else:
-                        prop.propBlockId = new_val
-                        self.property_manager.write_item(prop)
+                prop = itemprop.properties[index]
+                # Old value (index of name or array, won't be changed)
+                old_val = prop.propBlockId
+                # -- Update property value -- #
+                # String, so update name
+                if prop.is_string():
+                    self.prop_string_manager.\
+                        update_name_at_index(old_val, new_val)
+                # Array, so use array manager
+                elif prop.is_array():
+                    self.array_manager.\
+                        update_array_at_index(old_val, new_val)
+                # Otherwise primitive
+                else:
+                    prop.propBlockId = new_val
+                    self.property_manager.write_item(prop)
         # Done with updates, clear cache
         cache.clear()
-
-    def names_to_ids(self, updates, node_flag):
-        """
-
-        :param updates: Dict. containing property names and their update values
-        :type updates: dict
-        :param node_flag: Flag specifying whether we are getting data for
-                          a node type (True) or a relationship type (False)
-        :type node_flag: bool
-        :return: Dict. with property names mapped to their ID values
-        :rtype: dict
-        """
-        if node_flag:
-            type_type_manager = self.nodeTypeTypeNameManager
-        else:
-            type_type_manager = self.relTypeTypeNameManager
-        # Get corresponding ids for dictionary keys
-        corr_ids = type_type_manager.find_names(updates.keys())
-        # Map the found ids to their corresponding names
-        return dict(zip(corr_ids, updates.itervalues()))
 
 # --- Tools --- #
     def cache_diagnostic(self):
