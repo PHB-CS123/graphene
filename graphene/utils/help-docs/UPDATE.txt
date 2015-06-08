@@ -5,3 +5,6 @@ UPDATE command
     UPDATE (NODE ...|RELATION ...) SET prop_name = prop_value, ...
 
     Example:
+    UPDATE NODE NameList( ) SET list = ["none"]
+    UPDATE NODE NameList(name = "david") SET list = ["none"]
+    UPDATE RELATION Person(age = 10) - KNOWS -> Person(age > 50) SET num_years = 20;

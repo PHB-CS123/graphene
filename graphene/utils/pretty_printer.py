@@ -10,8 +10,8 @@ class SyntaxHighlighting:
     BLACKLIST = ["_", "o"]
     # TODO: eliminate duplicate symbols ");" , ");\"" "),"
     # TODO: figure out how to highlight "\"" and "["
-    SYMBOLS = ["->", ");", "),", ");", "(", ")", ":", "|", ";", "=", ",",
-               "-"]
+    SYMBOLS = ["->", "<=", ">=", ");", "),", ");", "(", ")", ":", "|", ";",
+               "=", ",", "-", "<", ">"]
     # Property types available, NOTE: arrays are put first so they are detected
     # when doing syntax highlighting before primitives.
     TYPES = ["int[]", "long[]", "bool[]", "short[]", "char[]", "float[]",
