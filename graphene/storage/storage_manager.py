@@ -10,7 +10,7 @@ import logging
 
 class StorageManager:
     # Maximum size of the cache (in items)
-    MAX_CACHE_SIZE = 100
+    MAX_CACHE_SIZE = 10000
 
     # Filename for the node type store
     NODE_TYPE_STORE_FILENAME = "graphenestore.nodetypestore.db"
