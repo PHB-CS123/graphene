@@ -728,13 +728,16 @@ class StorageManager:
         # Delete all relations that are attached to this node (since they can't
         # be attached to nothing)
         cur_rel_id = node.relId
+        isOnlyRel = False
         while cur_rel_id != 0:
             rel = self.relationship_manager.get_item_at_index(cur_rel_id)
             # Determine which list to pass through
             if rel.firstNodeId == node.index:
                 cur_rel_id = rel.firstNextRelId
+                isOnlyRel = rel.firstPrevRelId == 0
             else:
                 cur_rel_id = rel.secondNextRelId
+                isOnlyRel = rel.secondPrevRelId == 0
             # Delete the cache instance of the relation (will trigger proper
             # deletion of relation through storage manager too)
             del self.relprop[rel.index]
@@ -758,7 +761,8 @@ class StorageManager:
         # removed from the cache
         #
         # TODO: Handle this more gracefully
-        del self.nodeprop[node.index]
+        if isOnlyRel:
+            del self.nodeprop[node.index]
 
 # --- Update Interface Methods --- #
     def update_nodes(self, nodeprops, updates):
