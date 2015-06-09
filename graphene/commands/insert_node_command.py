@@ -4,6 +4,7 @@ from graphene.storage import Property
 from graphene.utils.conversion import TypeConversion
 from graphene.errors import BadPropertyException, TypeMismatchException
 import logging
+import sys
 
 class InsertNodeCommand(Command):
     def __init__(self, node_prop_list):
@@ -45,6 +46,11 @@ class InsertNodeCommand(Command):
                     conv_value = TypeConversion.convert_to_value(prop, given_type)
                     self.logger.debug("\t\t%s, %s" %(str(conv_value),
                                                      str(given_type)))
+                if exp_tt is Property.PropertyType.int \
+                    and conv_value > sys.maxsize:
+                    err = "The number %s is too large to fit in the " \
+                            "int type." % prop
+                    raise TypeMismatchException(err)
                 properties.append((exp_tt, conv_value))
             final_types.append(node_type)
             final_props.append(properties)
