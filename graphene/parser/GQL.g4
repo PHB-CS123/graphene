@@ -31,8 +31,11 @@ exit_stmt returns [cmd]
 // MATCH command
 match_stmt returns [cmd]
   @init {$cmd = None}
-  : K_MATCH (nc=node_chain) (K_WHERE (qc=query_chain))? (K_RETURN (rc=return_chain))?
-  {$cmd = MatchCommand($nc.ctx, $qc.ctx, $rc.ctx)}
+  : K_MATCH (nc=node_chain)
+    (K_WHERE (qc=query_chain))?
+    (K_RETURN (rc=return_chain))?
+    (K_LIMIT (limit=IntLiteral) {$limit = int($limit.text)})?
+  {$cmd = MatchCommand($nc.ctx, $qc.ctx, $rc.ctx, $limit)}
   ;
 
 node_chain returns [chain]
@@ -368,7 +371,8 @@ K_TYPES : T Y P E S ;
 K_RELATIONS : R E L A T I O N S ;
 
 K_WHERE : W H E R E ;
-K_RETURN : R E T U R N;
+K_RETURN : R E T U R N ;
+K_LIMIT : L I M I T ;
 
 K_AND : A N D ;
 K_OR : O R ;

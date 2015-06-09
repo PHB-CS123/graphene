@@ -174,7 +174,7 @@ class QueryPlanner:
 
         return iter_tree
 
-    def execute(self, node_chain, query_chain, return_chain):
+    def execute(self, node_chain, query_chain, return_chain, limit=0):
         """
         Executes a query plan given a node chain, query chain and return chain.
         Handles any projection necessary and creates a relation tree for
@@ -199,13 +199,20 @@ class QueryPlanner:
         # TODO: Make it so NodeIterator and RelationIterator return same
         # kind of thing (i.e. RI returns (props, rightNode), NI returns a
         # NodeProperty instance)
+        i = 0
         if len(node_chain) == 1:
             # Node iterator returns slightly diff. struct. than Rel. iterator
             for nodeprop in iter_tree:
+                if limit > 0 and i >= limit:
+                    break
                 results.append(nodeprop.properties)
+                i += 1
         else:
             for props, right in iter_tree:
+                if limit > 0 and i >= limit:
+                    break
                 results.append(props)
+                i += 1
 
         num_unidentified = [nc.name for nc in node_chain].count(None)
 

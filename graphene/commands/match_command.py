@@ -6,10 +6,13 @@ from graphene.utils import PrettyPrinter
 from graphene.query.planner import QueryPlanner
 
 class MatchCommand(Command):
-    def __init__(self, node_chain, query_chain, return_chain):
+    def __init__(self, node_chain, query_chain, return_chain, limit):
         self.nc = node_chain
         self.qc = query_chain
         self.rc = return_chain or ()
+        self.limit = limit or 0
+        if self.limit < 0:
+            self.limit = 0
 
     def __repr__(self):
         lst = ["\t%s" % chain for chain in self.nc]
@@ -30,7 +33,7 @@ class MatchCommand(Command):
 
         # Create a planner and execute given a node chain and query chain
         planner = QueryPlanner(storage_manager)
-        schema, results = planner.execute(self.nc, self.qc, self.rc)
+        schema, results = planner.execute(self.nc, self.qc, self.rc, limit=self.limit)
 
         # If there's nothing found, there were no nodes
         if len(results) == 0:
