@@ -37,8 +37,9 @@ class MatchCommand(Command):
 
         # If there's nothing found, there were no nodes
         if len(results) == 0:
-            printer.print_info("No nodes found.\n", output)
+            printer.print_info("No results found.\n", output)
             return []
 
         printer.print_table(results, schema, output)
+        printer.print_info("%d result(s) found.\n" % len(results))
         return results
