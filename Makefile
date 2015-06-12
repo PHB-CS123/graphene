@@ -5,6 +5,7 @@ SRC = graphene
 BUILD_DIR = build/
 TEST_DIR = tests/
 COV_OPTS = --cov-report term-missing --cov-report html --cov-config .coveragerc --cov $(SRC) $(TEST_DIR)
+PARSER_FILES = $(SRC)/parser/GQLLexer.py $(SRC)/parser/GQLParser.py
 
 default: parser
 
@@ -12,7 +13,9 @@ all: parser docs
 
 clean: clean-parser clean-docs clean-build
 
-parser:
+parser: $(PARSER_FILES)
+
+$(PARSER_FILES): $(SRC)/parser/GQL.g4
 	$(ANTLR4) $(SRC)/parser/GQL.g4
 
 clean-parser:
