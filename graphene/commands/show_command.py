@@ -49,7 +49,8 @@ class ShowCommand(Command):
                 name_list.append(type_name)
             i += 1
 
-        timer.pause() # pause timer for printing
+        if timer is not None:
+            timer.pause() # pause timer for printing
         # Print the resulting name list.
         if not name_list:
             printer.print_info(("No %s found.\n" %

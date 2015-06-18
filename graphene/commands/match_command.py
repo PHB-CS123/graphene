@@ -35,7 +35,8 @@ class MatchCommand(Command):
         planner = QueryPlanner(storage_manager)
         schema, results = planner.execute(self.nc, self.qc, self.rc, limit=self.limit)
 
-        timer.pause() # pause timer for printing
+        if timer is not None:
+            timer.pause() # pause timer for printing
         # If there's nothing found, there were no nodes
         if len(results) == 0:
             printer.print_info("No results found.\n", output)
