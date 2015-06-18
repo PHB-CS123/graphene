@@ -8,7 +8,7 @@ from graphene.errors.parser_error import ParserError
 from graphene.errors.parser_error_listener import ParserErrorListener
 from graphene.storage.storage_manager import StorageManager
 from graphene.utils.pretty_printer import PrettyPrinter
-
+from graphene.utils.timer import CmdTimer
 
 class GrapheneServer:
     """
@@ -17,6 +17,7 @@ class GrapheneServer:
     """
     def __init__(self):
         self.storage_manager = StorageManager()
+        self.timer = CmdTimer()
         # Initialize color escape sequences whether for Windows or Mac/Linux
         colorama.init()
 
@@ -85,10 +86,10 @@ class GrapheneServer:
             if not cmds:
                 return False
             for cmd in cmds:
-                start_time = time.time()
-                cmd.execute(self.storage_manager)
-                end_time = time.time()
-                printer.print_execute_time(start_time, end_time)
+                self.timer.start()
+                cmd.execute(self.storage_manager, timer=self.timer)
+                self.timer.stop()
+                printer.print_execute_time(0, self.timer.time_elapsed)
             return True
         except ParserError as e:
             if eat_errors:

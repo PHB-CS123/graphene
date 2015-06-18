@@ -13,7 +13,7 @@ class ShowCommand(Command):
     def __init__(self, show_type):
         self.show_type = show_type
 
-    def execute(self, storage_manager, output=sys.stdout):
+    def execute(self, storage_manager, output=sys.stdout, timer=None):
         """
         Execute the show command.
         :param storage_manager: a storage manager.
@@ -49,6 +49,7 @@ class ShowCommand(Command):
                 name_list.append(type_name)
             i += 1
 
+        timer.pause() # pause timer for printing
         # Print the resulting name list.
         if not name_list:
             printer.print_info(("No %s found.\n" %

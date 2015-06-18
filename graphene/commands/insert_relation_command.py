@@ -57,7 +57,7 @@ class InsertRelationCommand(Command):
             result[name] = (props[i], tt_type)
         return result
 
-    def execute(self, storage_manager):
+    def execute(self, storage_manager, timer=None):
         """
         Inserts a relationship into the storage layer.
 
