@@ -7,7 +7,7 @@ class CreateRelationCommand(Command):
         self.rel_name = ctx.r
         self.type_list = ctx.tl or ()
 
-    def execute(self, storage_manager):
+    def execute(self, storage_manager, timer=None):
         """
         Create the relation specified by this class.
         :type storage_manager: StorageManager

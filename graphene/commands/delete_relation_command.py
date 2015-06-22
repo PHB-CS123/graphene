@@ -8,7 +8,7 @@ class DeleteRelationCommand(RelationIterator):
         super(DeleteRelationCommand, self).__init__(rel_type, query_chain,
                                                     left_node, right_node)
 
-    def execute(self, storage_manager):
+    def execute(self, storage_manager, timer=None):
         """
         Deletes the relationships obtained from the relation iterator
 

@@ -10,7 +10,7 @@ class DeleteNodeCommand(Command):
         self.node_type = data.t
         self.qc = data.q
 
-    def execute(self, storage_manager):
+    def execute(self, storage_manager, timer=None):
         planner = QueryPlanner(storage_manager)
         # Iterate over nodes using the planner's helper method for convenience
         iter_tree = planner.get_iter_tree([MatchNode(None, self.node_type)],

@@ -19,7 +19,7 @@ class UpdateNodeCommand(Command):
 
         self.logger = logging.getLogger(self.__class__.__name__)
 
-    def execute(self, storage_manager):
+    def execute(self, storage_manager, timer=None):
         """
         Checks that the given update values are valid, and converts the given
         values into properties that can be stored. Then performs update.

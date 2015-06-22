@@ -13,5 +13,6 @@ class Command(object):
     def __repr__(self):
         return "[Command]"
 
-    def execute(self, storage_manager):
+    @abc.abstractmethod
+    def execute(self, storage_manager, timer=None):
         pass

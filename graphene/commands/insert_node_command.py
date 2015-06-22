@@ -11,7 +11,7 @@ class InsertNodeCommand(Command):
         self.node_prop_list = node_prop_list
         self.logger = logging.getLogger(self.__class__.__name__)
 
-    def execute(self, storage_manager):
+    def execute(self, storage_manager, timer=None):
         final_types, final_props = [], []
         self.logger.debug("node_prop_list: " % self.node_prop_list)
         for nodeprop in self.node_prop_list:
