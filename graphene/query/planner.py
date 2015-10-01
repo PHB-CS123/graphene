@@ -64,7 +64,7 @@ class QueryPlanner:
             rel_schema = self.get_schema([rel])
 
             return RelationIterator(self.sm, rel,
-                self.create_relation_tree(left), right, rel_schema)
+                self.create_relation_tree(left), right)
 
     def get_schema(self, node_chain, fullset=False):
         """

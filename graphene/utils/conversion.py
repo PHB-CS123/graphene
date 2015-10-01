@@ -41,7 +41,7 @@ class TypeConversion:
         elif s.upper() == "TRUE" or s.upper() == "FALSE":
             return Property.PropertyType.bool
         elif s.count(".") == 1 and (all(v.isdigit() for v in s.split(".")) or (
-                (s[0] == '-' or s[0] == '+') and all(lambda v: v.isdigit(), s[1:].split(".")))):
+                (s[0] == '-' or s[0] == '+') and all(v.isdigit() for v in s[1:].split(".")))):
             return Property.PropertyType.float
         elif s.isdigit() or \
             ((s[0] == '-' or s[0] == '+') and s[1:].isdigit()):

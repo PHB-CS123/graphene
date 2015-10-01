@@ -82,9 +82,9 @@ class Query:
     @property
     def schema(self):
         if self.ident is not None:
-            s = set(["%s.%s" % (self.ident, self.name)])
+            s = {"%s.%s" % (self.ident, self.name)}
         else:
-            s = set([self.name])
+            s = {self.name}
 
         # right side is a name, so add that
         if type(self.value) is tuple:

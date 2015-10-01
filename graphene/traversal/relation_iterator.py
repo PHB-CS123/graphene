@@ -4,7 +4,7 @@ from graphene.storage import *
 from graphene.expressions import *
 
 class RelationIterator:
-    def __init__(self, storage_manager, match_rel, left_child, right_child, schema):
+    def __init__(self, storage_manager, match_rel, left_child, right_child):
         self.sm = storage_manager
         self.alias = match_rel.name
         self.type_name = match_rel.type
