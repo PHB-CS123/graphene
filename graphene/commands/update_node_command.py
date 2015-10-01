@@ -12,10 +12,10 @@ class UpdateNodeCommand(Command):
     """
     Used to update nodes from the database
     """
-    def __init__(self, data):
-        self.node_type = data.t
-        self.qc = data.q
-        self.update = data.u
+    def __init__(self, node_type, query_chain, update):
+        self.node_type = node_type
+        self.qc = query_chain
+        self.update = update
 
         self.logger = logging.getLogger(self.__class__.__name__)
 

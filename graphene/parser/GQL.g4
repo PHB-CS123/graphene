@@ -213,7 +213,7 @@ update_stmt returns [cmd]
              )
 {
 if $un.ctx is not None:
-    $cmd = UpdateNodeCommand($un.ctx)
+    $cmd = UpdateNodeCommand($un.ctx.t, $un.ctx.q, $un.ctx.u)
 if $ur.ctx is not None:
     $cmd = UpdateRelationCommand($ur.ctx.t, $ur.ctx.q, $ur.ctx.nl, $ur.ctx.nr, $ur.ctx.u)
 }
