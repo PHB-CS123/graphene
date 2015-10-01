@@ -23,9 +23,7 @@ class TestInsertRelationCommand(unittest.TestCase):
         """
         Clean the database so that the tests are independent of one another
         """
-        del self.sm
-        graphene_store = GrapheneStore()
-        graphene_store.remove_test_datafiles()
+        self.sm.close()
 
     def test_bad_rel_prop(self):
         t = self.sm.create_node_type("T", (("a", "int"),))

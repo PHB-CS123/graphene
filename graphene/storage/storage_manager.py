@@ -100,8 +100,15 @@ class StorageManager:
                                self.NAME_BLOCK_SIZE)
 
     def __del__(self):
+        self.close()
+
+    def close(self):
         # Delete the property string manager
         del self.prop_string_manager
+
+        # Delete the caches
+        del self.nodeprop
+        del self.relprop
 
         # Delete the base managers
         del self.node_manager

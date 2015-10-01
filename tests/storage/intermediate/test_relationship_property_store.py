@@ -31,9 +31,7 @@ class TestRelationshipPropertyStore(unittest.TestCase):
         """
         Clean the database so that the tests are independent of one another
         """
-        del self.sm
-        graphene_store = GrapheneStore()
-        graphene_store.remove_test_datafiles()
+        self.sm.close()
 
     def test_relation(self):
         idx = self.sm.insert_relation(self.type, (), self.n1, self.n2).index

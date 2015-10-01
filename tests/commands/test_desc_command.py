@@ -21,9 +21,7 @@ class TestShowCommand(unittest.TestCase):
         """
         Clean the database so that the tests are independent of one another
         """
-        del self.sm
-        graphene_store = GrapheneStore()
-        graphene_store.remove_test_datafiles()
+        self.sm.close()
 
     def test_no_type(self):
         # Create command and ensure that it has the right type

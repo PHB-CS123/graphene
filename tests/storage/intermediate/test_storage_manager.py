@@ -7,7 +7,6 @@ from graphene.storage.intermediate.node_property import NodeProperty
 from graphene.storage.intermediate.relation_property import RelationProperty
 from graphene.storage.base.general_store import EOF
 
-
 class TestStorageManagerMethods(unittest.TestCase):
     def setUp(self):
         GrapheneStore.TESTING = True
@@ -19,9 +18,7 @@ class TestStorageManagerMethods(unittest.TestCase):
         """
         Clean the database so that the tests are independent of one another
         """
-        del self.sm
-        graphene_store = GrapheneStore()
-        graphene_store.remove_test_datafiles()
+        self.sm.close()
 
     def assertIsNoneOrEOF(self, item):
         """

@@ -63,6 +63,9 @@ class IdStore:
         except IOError:
             raise IOError("ERROR: unable to open IdStore file: " + file_path)
 
+    def __del__(self):
+        self.storeFile.close()
+
     def get_file_size(self):
         """
         Get the size of the currently open file

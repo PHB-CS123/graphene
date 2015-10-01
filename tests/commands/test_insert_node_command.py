@@ -21,9 +21,7 @@ class TestInsertNodeCommand(unittest.TestCase):
         """
         Clean the database so that the tests are independent of one another
         """
-        del self.sm
-        graphene_store = GrapheneStore()
-        graphene_store.remove_test_datafiles()
+        self.sm.close()
 
     def test_insert_single_node(self):
         assert self.server.doCommands("CREATE TYPE T ( a: int, b: string );", False)

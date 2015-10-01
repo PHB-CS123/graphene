@@ -36,9 +36,7 @@ class TestQueryPlanner(unittest.TestCase):
         """
         Clean the database so that the tests are independent of one another
         """
-        del cls.sm
-        graphene_store = GrapheneStore()
-        graphene_store.remove_test_datafiles()
+        cls.sm.close()
 
     def assertListEqualUnsorted(self, given, expected):
         self.assertListEqual(sorted(given), sorted(expected))

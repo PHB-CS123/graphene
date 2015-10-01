@@ -52,9 +52,7 @@ class TestDeleteRelationCommand(unittest.TestCase):
         """
         Clean the database so that the tests are independent of one another
         """
-        del self.sm
-        graphene_store = GrapheneStore()
-        graphene_store.remove_test_datafiles()
+        self.sm.close()
 
     def assertListEqualUnsorted(self, given, expected):
         self.assertListEqual(sorted(given), sorted(expected))

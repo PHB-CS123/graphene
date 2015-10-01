@@ -25,9 +25,7 @@ class TestNodePropertyStore(unittest.TestCase):
         """
         Clean the database so that the tests are independent of one another
         """
-        del self.sm
-        graphene_store = GrapheneStore()
-        graphene_store.remove_test_datafiles()
+        self.sm.close()
 
     def test_node(self):
         idx = self.sm.insert_node(self.type, ())[0].index
