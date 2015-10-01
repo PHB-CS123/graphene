@@ -9,11 +9,11 @@ import sys
 import logging
 import inspect
 
-user_errors = inspect.getmembers(query_errors, inspect.isclass) + \
-              inspect.getmembers(storage_manager_errors, inspect.isclass)
-user_error_types = dict(user_errors).values()
-
 class Shell(cmd.Cmd):
+    user_errors = inspect.getmembers(query_errors, inspect.isclass) + \
+              inspect.getmembers(storage_manager_errors, inspect.isclass)
+    user_error_types = dict(user_errors).values()
+
     def __init__(self, server):
         cmd.Cmd.__init__(self)
         self.intro = "Graphene 0.1"
@@ -81,7 +81,7 @@ class Shell(cmd.Cmd):
             # If the error was a user error (i.e. we threw it ourselves because
             # the user inputted a badly formed request), we don't need the stack
             # trace.
-            if type(e) not in user_error_types:
+            if type(e) not in self.user_error_types:
                 trace = self.format_traceback(sys.exc_type, sys.exc_value,
                                                 sys.exc_traceback)
                 printer.print_error(trace)
