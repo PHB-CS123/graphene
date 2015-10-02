@@ -33,9 +33,43 @@ match_stmt returns [cmd]
   @init {$cmd = None}
   : K_MATCH (nc=node_chain)
     (K_WHERE (qc=query_chain))?
-    (K_RETURN (rc=return_chain))?
-    (K_LIMIT (limit=IntLiteral) {$limit = int($limit.text)})?
-  {$cmd = MatchCommand($nc.ctx, $qc.ctx, $rc.ctx, $limit)}
+    (optionals=optional_match_clauses)?
+  {$cmd = MatchCommand($nc.ctx, $qc.ctx, $optionals.ctx)}
+  ;
+
+optional_match_clauses returns [clauses]
+  @init {$clauses = []}
+  : (c1=optional_match_clause {$clauses.append($c1.ctx)})
+    (ci=optional_match_clause {$clauses.append($ci.ctx)})*
+  {return $clauses}
+  ;
+
+optional_match_clause returns [value]
+  : (clause=limit_clause | clause=orderby_clause | clause=return_clause)
+  {return $clause.ctx}
+  ;
+
+return_clause returns [chain]
+  : K_RETURN (rc=return_chain)
+  {return (OptionalClause.RETURN, $rc.ctx)}
+  ;
+
+limit_clause returns [value]
+  : K_LIMIT (limit_value=IntLiteral)
+  {return (OptionalClause.LIMIT, int($limit_value.text))}
+  ;
+
+orderby_clause returns [params]
+  @init {$params = []}
+  : K_ORDER K_BY
+    (o1=orderby_param {$params.append($o1.ctx)})
+    (',' oi=orderby_param {$params.append($oi.ctx)})*
+  {return (OptionalClause.ORDERBY, $params)}
+  ;
+
+orderby_param returns [value]
+  : (name=ident) (order=(K_ASC | K_DESC))?
+  {return ($name.ctx, $order.text)}
   ;
 
 node_chain returns [chain]
@@ -373,6 +407,9 @@ K_RELATIONS : R E L A T I O N S ;
 K_WHERE : W H E R E ;
 K_RETURN : R E T U R N ;
 K_LIMIT : L I M I T ;
+K_ORDER : O R D E R ;
+K_BY : B Y ;
+K_ASC : A S C ;
 
 K_AND : A N D ;
 K_OR : O R ;

@@ -7,6 +7,9 @@ class NonexistentPropertyException(Exception):
     """Error for creating a type that already exists."""
     pass
 
+class TooManyClausesException(Exception):
+    """Error for too many ORDER BY, RETURN or LIMIT clauses."""
+    pass
 
 class DuplicatePropertyException(Exception):
     """Error for attempting to get type data for a non-existent type."""
