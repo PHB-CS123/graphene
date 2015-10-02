@@ -12,7 +12,7 @@ class MatchCommand(Command):
     def __init__(self, node_chain, query_chain, optional_clauses):
         self.nc = node_chain
         self.qc = query_chain
-        self.rc, self.limit, self.orderby = self.parse_clauses(optional_clauses)
+        self.rc, self.limit, self.orderby = self.parse_clauses(optional_clauses or [])
 
     def parse_clauses(self, clauses):
         """
