@@ -174,7 +174,38 @@ class QueryPlanner:
 
         return iter_tree
 
-    def execute(self, node_chain, query_chain, return_chain, limit=0):
+    def get_orderby_fn(self, schema, chain):
+        schema_names = [name for name, ttype in schema]
+        schema_base_names = [name.split(".")[-1] for name, ttype in schema]
+        indexes = []
+        for full_name, direction in chain:
+            if direction is None:
+                direction = 'ASC'
+            multiplier = 1 if direction == 'ASC' else -1
+            ident, name = full_name
+            if ident is None:
+                if schema_base_names.count(name) > 1:
+                    raise AmbiguousPropertyException("Property name `%s` is ambiguous." % name)
+                elif name not in schema_base_names:
+                    raise NonexistentPropertyException("Property name `%s` does not exist." % name)
+                else:
+                    indexes.append((schema_base_names.index(name), multiplier))
+            else:
+                key = "%s.%s" % r
+                if key not in schema_names:
+                    raise NonexistentPropertyException("Property name `%s` does not exist." % key)
+                else:
+                    indexes.append((schema_names.index(key), multiplier))
+        def cmp_fn(a, b):
+            for i, direction in indexes:
+                value = cmp(a.properties[i], b.properties[i])
+                if value != 0:
+                    return value * direction
+            return 0
+        return cmp_fn
+
+    def execute(self, node_chain, query_chain, return_chain, limit=0,
+                orderby=None):
         """
         Executes a query plan given a node chain, query chain and return chain.
         Handles any projection necessary and creates a relation tree for
@@ -182,6 +213,8 @@ class QueryPlanner:
         """
         if return_chain is None:
             return_chain = ()
+        if orderby is None:
+            orderby = []
 
         # Gather schema information from node chain. Collects all property names
         schema = self.get_schema(node_chain, fullset=True)
@@ -192,6 +225,10 @@ class QueryPlanner:
         self.check_query(schema, query_chain)
 
         iter_tree = self.get_iter_tree(node_chain, query_chain)
+
+        if len(orderby) > 0:
+            cmp_fn = self.get_orderby_fn(schema, orderby)
+            iter_tree = sorted(iter_tree, cmp=cmp_fn)
 
         # Gather results
         results = []

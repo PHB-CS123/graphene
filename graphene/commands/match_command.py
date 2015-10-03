@@ -62,7 +62,8 @@ class MatchCommand(Command):
 
         # Create a planner and execute given a node chain and query chain
         planner = QueryPlanner(storage_manager)
-        schema, results = planner.execute(self.nc, self.qc, self.rc, limit=self.limit)
+        schema, results = planner.execute(self.nc, self.qc, self.rc,
+            limit=self.limit, orderby=self.orderby)
 
         if timer is not None:
             timer.pause() # pause timer for printing
