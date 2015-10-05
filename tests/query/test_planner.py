@@ -76,63 +76,145 @@ class TestQueryPlanner(unittest.TestCase):
 
     def test_check_query_single_node(self):
         nc = (MatchNode("t", "T"),)
+        schema = self.planner.get_schema(nc)
+
+        # query_chain is None
+        try:
+            self.planner.check_query(schema, None)
+        except Exception:
+            self.fail("check_query raised an Exception unexpectedly.")
 
         # With identifier
         qc = ((('t', 'a'), '=', '1'),)
         try:
-            self.planner.check_query(self.planner.get_schema(nc), qc)
+            self.planner.check_query(schema, qc)
         except Exception:
             self.fail("check_query raised an Exception unexpectedly.")
 
         # Without identifier
         qc = (((None, 'a'), '=', '1'),)
         try:
-            self.planner.check_query(self.planner.get_schema(nc), qc)
+            self.planner.check_query(schema, qc)
         except Exception:
             self.fail("check_query raised an Exception unexpectedly.")
 
         # No such property
         qc = (((None, 'b'), '=', '1'),)
         with self.assertRaises(NonexistentPropertyException):
-            self.planner.check_query(self.planner.get_schema(nc), qc)
+            self.planner.check_query(schema, qc)
 
         # No such identifier
         qc = ((('s', 'a'), '=', '1'),)
         with self.assertRaises(NonexistentPropertyException):
-            self.planner.check_query(self.planner.get_schema(nc), qc)
+            self.planner.check_query(schema, qc)
 
     def test_check_query_relations(self):
         nc = (MatchNode("t", "T"), MatchRelation("r", "R"), MatchNode("t2", "T"))
+        schema = self.planner.get_schema(nc)
 
         # With identifier
         qc = ((('t', 'a'), '=', '1'),)
         try:
-            self.planner.check_query(self.planner.get_schema(nc), qc)
+            self.planner.check_query(schema, qc)
         except Exception:
             self.fail("check_query raised an Exception unexpectedly.")
 
         qc = ((('r', 'b'), '=', '1'),)
         try:
-            self.planner.check_query(self.planner.get_schema(nc), qc)
+            self.planner.check_query(schema, qc)
+        except Exception:
+            self.fail("check_query raised an Exception unexpectedly.")
+
+        # With two identifiers
+        qc = ((('t', 'a'), '=', ('t2', 'a')),)
+        try:
+            self.planner.check_query(schema, qc)
         except Exception:
             self.fail("check_query raised an Exception unexpectedly.")
 
         # Without identifier, ambiguous
         qc = (((None, 'a'), '=', '1'),)
         with self.assertRaises(AmbiguousPropertyException):
-            self.planner.check_query(self.planner.get_schema(nc), qc)
+            self.planner.check_query(schema, qc)
+
+        qc = ((('r', 'b'), '=', (None, 'a')),)
+        with self.assertRaises(AmbiguousPropertyException):
+            self.planner.check_query(schema, qc)
 
         # Without identifier, unambiguous
         qc = (((None, 'b'), '=', '1'),)
         try:
-            self.planner.check_query(self.planner.get_schema(nc), qc)
+            self.planner.check_query(schema, qc)
         except Exception:
             self.fail("check_query raised an Exception unexpectedly.")
 
         # No such identifier
         qc = ((('s', 'a'), '=', '1'),)
         with self.assertRaises(NonexistentPropertyException):
-            self.planner.check_query(self.planner.get_schema(nc), qc)
+            self.planner.check_query(schema, qc)
+
+        qc = ((('t', 'a'), '=', ('s', 'a')),)
+        with self.assertRaises(NonexistentPropertyException):
+            self.planner.check_query(schema, qc)
+
+        qc = ((('t', 'a'), '=', (None, 'q')),)
+        with self.assertRaises(NonexistentPropertyException):
+            self.planner.check_query(schema, qc)
+
+    def test_get_orderby_indexes(self):
+        nc = (MatchNode("t", "T"), MatchRelation("r", "R"), MatchNode("t2", "T"))
+        schema = self.planner.get_schema(nc)
+
+        chain = [((None, 'a'), 'ASC')]
+        with self.assertRaises(AmbiguousPropertyException):
+            self.planner.get_orderby_indexes(schema, chain)
+
+        chain = [((None, 'q'), 'ASC')]
+        with self.assertRaises(NonexistentPropertyException):
+            self.planner.get_orderby_indexes(schema, chain)
+
+        chain = [(('r', 'a'), 'ASC')]
+        with self.assertRaises(NonexistentPropertyException):
+            self.planner.get_orderby_indexes(schema, chain)
+
+        chain = [(('t', 'a'), 'ASC')]
+        result = self.planner.get_orderby_indexes(schema, chain)
+        self.assertListEqual(result, [(0, 1)])
+
+        chain = [(('t', 'a'), None)]
+        result = self.planner.get_orderby_indexes(schema, chain)
+        self.assertListEqual(result, [(0, 1)])
+
+        chain = [(('t', 'a'), 'DESC')]
+        result = self.planner.get_orderby_indexes(schema, chain)
+        self.assertListEqual(result, [(0, -1)])
+
+        chain = [((None, 'b'), 'ASC')]
+        result = self.planner.get_orderby_indexes(schema, chain)
+        self.assertListEqual(result, [(1, 1)])
+
+    def test_get_orderby_fn(self):
+        nc = (MatchNode("t", "T"), MatchRelation("r", "R"), MatchNode("t2", "T"))
+        schema_rel = self.planner.get_schema(nc)
+        schema = self.planner.get_schema((MatchNode("t", "T"),))
+
+        chain = [(('t', 'a'), 'ASC')]
+        cmp_fn = self.planner.get_orderby_fn(schema, chain, is_relation=False)
+
+        # Nodes are T[1], T[2], T[3], T[4], T[5]
+        node1, node2 = self.sm.get_node(1), self.sm.get_node(2)
+        self.assertListEqual(sorted([node1, node1], cmp=cmp_fn), [node1, node1])
+        self.assertListEqual(sorted([node2, node1], cmp=cmp_fn), [node1, node2])
+
+        chain = [(('t', 'a'), 'DESC')]
+        cmp_fn = self.planner.get_orderby_fn(schema, chain, is_relation=False)
+        self.assertListEqual(sorted([node1, node2], cmp=cmp_fn), [node2, node1])
+
+        chain = [(('r', 'b'), 'ASC')]
+        cmp_fn = self.planner.get_orderby_fn(schema_rel, chain, is_relation=True)
+
+        self.assertListEqual(sorted([([1,2,3], None), ([3,1,2], None)], cmp=cmp_fn), [([3,1,2], None), ([1,2,3], None)])
+        self.assertListEqual(sorted([([1,2,3], None), ([3,2,2], None)], cmp=cmp_fn), [([1,2,3], None), ([3,2,2], None)])
 
     def test_execute_only_nodes(self):
         # Without identifier
@@ -287,3 +369,41 @@ class TestQueryPlanner(unittest.TestCase):
 
         with self.assertRaises(DuplicatePropertyException):
             self.planner.execute((n1, r, n1), None, None)
+
+    def test_execute_limit(self):
+        #ni = no ident
+        n1, n1ni = MatchNode("t", "T"), MatchNode(None, "T")
+        n2, n2ni = MatchNode("t2", "T"), MatchNode(None, "T")
+        r, rni = MatchRelation("r", "R"), MatchRelation(None, "R")
+
+        exp_vals = [[1], [2], [3]]
+        schema, results = self.planner.execute((n1ni,), None, None, limit=3)
+        self.assertListEqual(results, exp_vals)
+
+        exp_vals = [[1], [2], [3], [4], [5]]
+        schema, results = self.planner.execute((n1ni,), None, None, limit=0)
+        self.assertListEqual(results, exp_vals)
+        schema, results = self.planner.execute((n1ni,), None, None, limit=6)
+        self.assertListEqual(results, exp_vals)
+
+        exp_vals = [[1,2,2], [1,3,3], [2,6,3]]
+        schema, results = self.planner.execute((n1, r, n2), None, None, limit=3)
+        self.assertListEqual(results, exp_vals)
+
+    def test_execute_orderby(self):
+        #ni = no ident
+        n1, n1ni = MatchNode("t", "T"), MatchNode(None, "T")
+        n2, n2ni = MatchNode("t2", "T"), MatchNode(None, "T")
+        r, rni = MatchRelation("r", "R"), MatchRelation(None, "R")
+
+        exp_vals = [[5], [4], [3], [2], [1]]
+        schema, results = self.planner.execute((n1ni,), None, None, orderby=[((None, 'a'), 'DESC')])
+        self.assertListEqual(results, exp_vals)
+
+        exp_vals = [[3, 12, 4], [3, 15, 5], [2,6,3], [1,2,2], [1,3,3]]
+        schema, results = self.planner.execute((n1, r, n2), None, None, orderby=[(('t', 'a'), 'DESC')])
+        self.assertListEqual(results, exp_vals)
+
+        exp_vals = [[3, 15, 5], [3, 12, 4], [2,6,3], [1,3,3], [1,2,2]]
+        schema, results = self.planner.execute((n1, r, n2), None, None, orderby=[(('t', 'a'), 'DESC'), (('r', 'b'), 'DESC')])
+        self.assertListEqual(results, exp_vals)

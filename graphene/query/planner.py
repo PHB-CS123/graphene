@@ -174,7 +174,7 @@ class QueryPlanner:
 
         return iter_tree
 
-    def get_orderby_fn(self, schema, chain, is_relation=False):
+    def get_orderby_indexes(self, schema, chain):
         schema_names = [name for name, ttype in schema]
         schema_base_names = [name.split(".")[-1] for name, ttype in schema]
         indexes = []
@@ -196,6 +196,10 @@ class QueryPlanner:
                     raise NonexistentPropertyException("Property name `%s` does not exist." % key)
                 else:
                     indexes.append((schema_names.index(key), multiplier))
+        return indexes
+
+    def get_orderby_fn(self, schema, chain, is_relation=False):
+        indexes = self.get_orderby_indexes(schema, chain)
         if is_relation:
             def cmp_fn(a, b):
                 for i, direction in indexes:
