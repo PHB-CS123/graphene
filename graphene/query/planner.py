@@ -174,7 +174,7 @@ class QueryPlanner:
 
         return iter_tree
 
-    def get_orderby_fn(self, schema, chain):
+    def get_orderby_fn(self, schema, chain, is_relation=False):
         schema_names = [name for name, ttype in schema]
         schema_base_names = [name.split(".")[-1] for name, ttype in schema]
         indexes = []
@@ -191,17 +191,25 @@ class QueryPlanner:
                 else:
                     indexes.append((schema_base_names.index(name), multiplier))
             else:
-                key = "%s.%s" % r
+                key = "%s.%s" % full_name
                 if key not in schema_names:
                     raise NonexistentPropertyException("Property name `%s` does not exist." % key)
                 else:
                     indexes.append((schema_names.index(key), multiplier))
-        def cmp_fn(a, b):
-            for i, direction in indexes:
-                value = cmp(a.properties[i], b.properties[i])
-                if value != 0:
-                    return value * direction
-            return 0
+        if is_relation:
+            def cmp_fn(a, b):
+                for i, direction in indexes:
+                    value = cmp(a[0][i], b[0][i])
+                    if value != 0:
+                        return value * direction
+                return 0
+        else:
+            def cmp_fn(a, b):
+                for i, direction in indexes:
+                    value = cmp(a.properties[i], b.properties[i])
+                    if value != 0:
+                        return value * direction
+                return 0
         return cmp_fn
 
     def execute(self, node_chain, query_chain, return_chain, limit=0,
@@ -227,7 +235,8 @@ class QueryPlanner:
         iter_tree = self.get_iter_tree(node_chain, query_chain)
 
         if len(orderby) > 0:
-            cmp_fn = self.get_orderby_fn(schema, orderby)
+            # See TODO below.
+            cmp_fn = self.get_orderby_fn(schema, orderby, is_relation=(len(node_chain) != 1))
             iter_tree = sorted(iter_tree, cmp=cmp_fn)
 
         # Gather results
