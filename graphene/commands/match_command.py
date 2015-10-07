@@ -5,7 +5,7 @@ from graphene.errors import TooManyClausesException
 from graphene.expressions import OptionalClause
 from graphene.traversal import *
 from graphene.commands.command import Command
-from graphene.utils import PrettyPrinter
+from graphene.utils import PrettyPrinter, CmdTimer
 from graphene.query.planner import QueryPlanner
 
 class MatchCommand(Command):
@@ -47,7 +47,7 @@ class MatchCommand(Command):
         lst = ["\t%s" % chain for chain in self.nc]
         return "[Match\n%s\n]" % "\n".join(lst)
 
-    def execute(self, storage_manager, output=sys.stdout, timer=None):
+    def execute(self, storage_manager, output=sys.stdout, timer=CmdTimer()):
         """
         Runs a MATCH query against the server
 
@@ -65,13 +65,12 @@ class MatchCommand(Command):
         schema, results = planner.execute(self.nc, self.qc, self.rc,
             limit=self.limit, orderby=self.orderby)
 
-        if timer is not None:
-            timer.pause() # pause timer for printing
-        # If there's nothing found, there were no nodes
-        if len(results) == 0:
-            printer.print_info("No results found.\n", output)
-            return []
+        with timer.paused():
+            # If there's nothing found, there were no nodes
+            if len(results) == 0:
+                printer.print_info("No results found.\n", output)
+                return []
 
-        printer.print_table(results, schema, output)
-        printer.print_info("%d result(s) found.\n" % len(results))
+            printer.print_table(results, schema, output)
+            printer.print_info("%d result(s) found.\n" % len(results))
         return results

@@ -1,9 +1,10 @@
 from enum import Enum
+import sys
+
 from graphene.commands.command import Command
-from graphene.utils import PrettyPrinter
+from graphene.utils import PrettyPrinter, CmdTimer
 from graphene.storage import GeneralStore
 from graphene.storage import StorageManager
-import sys
 
 class ShowCommand(Command):
     class ShowType(Enum):
@@ -13,7 +14,7 @@ class ShowCommand(Command):
     def __init__(self, show_type):
         self.show_type = show_type
 
-    def execute(self, storage_manager, output=sys.stdout, timer=None):
+    def execute(self, storage_manager, output=sys.stdout, timer=CmdTimer()):
         """
         Execute the show command.
         :param storage_manager: a storage manager.
@@ -49,11 +50,11 @@ class ShowCommand(Command):
                 name_list.append(type_name)
             i += 1
 
-        if timer is not None:
-            timer.pause() # pause timer for printing
-        # Print the resulting name list.
-        if not name_list:
-            printer.print_info(("No %s found.\n" %
-                                self.show_type.name.lower()), output)
-        else:
-            printer.print_list(name_list, self.show_type.name, output=output)
+        with timer.paused():
+            # Print the resulting name list.
+            if not name_list:
+                printer.print_info(("No %s found.\n" %
+                                    self.show_type.name.lower()), output)
+            else:
+                printer.print_list(name_list, self.show_type.name,
+                    output=output)
