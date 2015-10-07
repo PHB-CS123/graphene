@@ -2,6 +2,8 @@ import unittest
 import os
 
 from graphene.commands import MatchCommand
+from graphene.errors import TooManyClausesException
+from graphene.expressions import OptionalClause
 from graphene.storage import (StorageManager, GrapheneStore, Property)
 from graphene.server.server import GrapheneServer
 from graphene.utils.pretty_printer import PrettyPrinter
@@ -35,6 +37,34 @@ class TestMatchCommand(unittest.TestCase):
 
     def assertListEqualUnsorted(self, given, expected):
         self.assertListEqual(sorted(given), sorted(expected))
+
+    def test_parse_clauses(self):
+        cmd = MatchCommand(None, None, None)
+
+        with self.assertRaises(TooManyClausesException):
+            cmd.parse_clauses(((OptionalClause.ORDERBY, None),(OptionalClause.ORDERBY, None),))
+
+        with self.assertRaises(TooManyClausesException):
+            cmd.parse_clauses(((OptionalClause.RETURN, None),(OptionalClause.RETURN, None),))
+
+        with self.assertRaises(TooManyClausesException):
+            cmd.parse_clauses(((OptionalClause.LIMIT, None),(OptionalClause.LIMIT, None),))
+
+        rc, limit, orderby = cmd.parse_clauses([])
+        self.assertTupleEqual(rc, ())
+        self.assertEqual(limit, 0)
+        self.assertListEqual(orderby, [])
+
+        rc, limit, orderby = cmd.parse_clauses([(OptionalClause.LIMIT, 5),
+            (OptionalClause.RETURN, (1, 2)), (OptionalClause.ORDERBY, [3, 4])])
+        self.assertTupleEqual(rc, (1, 2))
+        self.assertEqual(limit, 5)
+        self.assertListEqual(orderby, [3, 4])
+
+        rc, limit, orderby = cmd.parse_clauses([(OptionalClause.LIMIT, -5)])
+        self.assertTupleEqual(rc, ())
+        self.assertEqual(limit, 0)
+        self.assertListEqual(orderby, [])
 
     def test_match_all(self):
         cmd = self.server.parseString("MATCH (t:T);")[0]
