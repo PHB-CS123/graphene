@@ -370,7 +370,7 @@ class GeneralArrayManager:
         :return: Array of strings
         :rtype: list
         """
-        return map(lambda x: self.stringStoreManager.read_name_at_index(x), ids)
+        return map(lambda x: self.stringStoreManager.read_string_at_index(x), ids)
 
     def delete_names_at_indexes(self, ids):
         """
@@ -382,7 +382,7 @@ class GeneralArrayManager:
         :rtype: bool
         """
         return all(map(lambda x:
-                       self.stringStoreManager.delete_name_at_index(x), ids))
+                       self.stringStoreManager.delete_string_at_index(x), ids))
 
     def update_names_at_indexes(self, ids, new_names):
         """
