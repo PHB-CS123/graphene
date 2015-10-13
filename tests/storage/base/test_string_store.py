@@ -1,6 +1,6 @@
 import unittest
 
-from graphene.storage.base.name_store import *
+from graphene.storage.base.string_store import *
 
 
 class TestNameStoreMethods(unittest.TestCase):
@@ -18,36 +18,36 @@ class TestNameStoreMethods(unittest.TestCase):
 
     def test_init(self):
         """
-        Test that initializing a NameStore succeeds (file is opened)
+        Test that initializing a StringStore succeeds (file is opened)
         """
         try:
-            NameStore(self.TEST_FILENAME)
+            StringStore(self.TEST_FILENAME)
         except IOError:
-            self.fail("NameStore initializer failed: db file failed to open.")
+            self.fail("StringStore initializer failed: db file failed to open.")
 
     def test_double_init(self):
         """
-        Test that initializing a NameStore succeeds when repeated;
+        Test that initializing a StringStore succeeds when repeated;
         i.e. the old file is reopened and no errors occur.
         """
         try:
-            NameStore(self.TEST_FILENAME)
+            StringStore(self.TEST_FILENAME)
         except IOError:
-            self.fail("NameStore initializer failed: "
+            self.fail("StringStore initializer failed: "
                       "db file failed to open.")
         try:
-            NameStore(self.TEST_FILENAME)
+            StringStore(self.TEST_FILENAME)
         except IOError:
-            self.fail("NameStore initializer failed on second attempt: "
+            self.fail("StringStore initializer failed on second attempt: "
                       "db file failed to open.")
 
     def test_invalid_write(self):
         """
         Test that writing a name to index 0 raises an error
         """
-        name_store = NameStore(self.TEST_FILENAME)
+        name_store = StringStore(self.TEST_FILENAME)
 
-        empty_name = Name()
+        empty_name = String()
         with self.assertRaises(ValueError):
             name_store.write_item(empty_name)
 
@@ -55,7 +55,7 @@ class TestNameStoreMethods(unittest.TestCase):
         """
         Test that reading a name from index 0 raises an error
         """
-        name_store = NameStore(self.TEST_FILENAME)
+        name_store = StringStore(self.TEST_FILENAME)
 
         with self.assertRaises(ValueError):
             name_store.item_at_index(0)
@@ -64,7 +64,7 @@ class TestNameStoreMethods(unittest.TestCase):
         """
         Make sure that reading an item when the file is empty returns None
         """
-        name_store = NameStore(self.TEST_FILENAME)
+        name_store = StringStore(self.TEST_FILENAME)
         # Read an uncreated item
         no_item = name_store.item_at_index(1)
         # Make sure it returned None
@@ -76,24 +76,24 @@ class TestNameStoreMethods(unittest.TestCase):
         raises an error
         """
         block_size = 20
-        name_store = NameStore(self.TEST_FILENAME, block_size)
+        name_store = StringStore(self.TEST_FILENAME, block_size)
 
         # Try to write a name that is 1 byte longer than the largest block_size
-        long_name = Name(1, True, 0, 1, 0, (block_size + 1) * "a")
+        long_name = String(1, True, 0, 1, 0, (block_size + 1) * "a")
         with self.assertRaises(ValueError):
             name_store.write_item(long_name)
 
     def test_write_read_1_name(self):
         """
-        Tests that the name written to the NameStore is the name that is read.
+        Tests that the name written to the StringStore is the name that is read.
         """
-        name_store = NameStore(self.TEST_FILENAME)
+        name_store = StringStore(self.TEST_FILENAME)
 
-        # Create a name and add it to the NameStore
-        name_data = Name(1, True, 0, 1, 0, "hello")
+        # Create a name and add it to the StringStore
+        name_data = String(1, True, 0, 1, 0, "hello")
         name_store.write_item(name_data)
 
-        # Read the name from the NameStore file
+        # Read the name from the StringStore file
         name_data_file = name_store.item_at_index(name_data.index)
 
         # Assert that the values are the same
@@ -101,21 +101,21 @@ class TestNameStoreMethods(unittest.TestCase):
 
     def test_write_read_2_names(self):
         """
-        Tests when 2 names are written after 1 name to the NameStore
+        Tests when 2 names are written after 1 name to the StringStore
         """
-        name_store = NameStore(self.TEST_FILENAME)
+        name_store = StringStore(self.TEST_FILENAME)
 
-        # Create one name and write it to the NameStore
-        name_data1 = Name(1, True, 0, 1, 0, "hello")
+        # Create one name and write it to the StringStore
+        name_data1 = String(1, True, 0, 1, 0, "hello")
         name_store.write_item(name_data1)
 
-        # Create 2 names and add them to the NameStore
-        name_data2 = Name(2, True, 2, 1, 2, "bye")
-        name_data3 = Name(3, False, 3, 1, 3, "bye bye")
+        # Create 2 names and add them to the StringStore
+        name_data2 = String(2, True, 2, 1, 2, "bye")
+        name_data3 = String(3, False, 3, 1, 3, "bye bye")
         name_store.write_item(name_data2)
         name_store.write_item(name_data3)
 
-        # Read the names from the NameStore file
+        # Read the names from the StringStore file
         name_data1_file = name_store.item_at_index(name_data1.index)
         name_data2 = name_store.item_at_index(name_data2.index)
         name_data3 = name_store.item_at_index(name_data3.index)
@@ -129,14 +129,14 @@ class TestNameStoreMethods(unittest.TestCase):
         """
         Tests that overwriting a name in a database with 3 names works
         """
-        name_store = NameStore(self.TEST_FILENAME)
+        name_store = StringStore(self.TEST_FILENAME)
 
         # Create 3 names
-        name_data1 = Name(1, True, 0, 1, 0, "hello")
-        name_data2 = Name(2, True, 2, 1, 2, "bye")
-        name_data3 = Name(3, False, 3, 1, 3, "bye bye")
+        name_data1 = String(1, True, 0, 1, 0, "hello")
+        name_data2 = String(2, True, 2, 1, 2, "bye")
+        name_data3 = String(3, False, 3, 1, 3, "bye bye")
 
-        # Write them to the NameStore
+        # Write them to the StringStore
         name_store.write_item(name_data1)
         name_store.write_item(name_data2)
         name_store.write_item(name_data3)
@@ -152,7 +152,7 @@ class TestNameStoreMethods(unittest.TestCase):
         self.assertEquals(name_data3, name_data3_file)
 
         # Create a new name_data2 and overwrite the old name_data2
-        new_name_data2 = Name(2, False, 4, 1, 4, "never mind")
+        new_name_data2 = String(2, False, 4, 1, 4, "never mind")
         name_store.write_item(new_name_data2)
 
         # Verify that the data is still as expected
@@ -169,14 +169,14 @@ class TestNameStoreMethods(unittest.TestCase):
         """
         Tests that deleting 2 names in a database with 3 names works
         """
-        name_store = NameStore(self.TEST_FILENAME)
+        name_store = StringStore(self.TEST_FILENAME)
 
         # Create 3 names
-        name_data1 = Name(1, True, 0, 1, 0, "hello")
-        name_data2 = Name(2, True, 2, 1, 2, "bye")
-        name_data3 = Name(3, False, 3, 1, 3, "bye bye")
+        name_data1 = String(1, True, 0, 1, 0, "hello")
+        name_data2 = String(2, True, 2, 1, 2, "bye")
+        name_data3 = String(3, False, 3, 1, 3, "bye bye")
 
-        # Write them to the NameStore
+        # Write them to the StringStore
         name_store.write_item(name_data1)
         name_store.write_item(name_data2)
         name_store.write_item(name_data3)

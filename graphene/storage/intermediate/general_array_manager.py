@@ -359,7 +359,7 @@ class GeneralArrayManager:
         :return: Array of string IDs
         :rtype: list
         """
-        return map(lambda x: self.stringStoreManager.write_name(x), strings)
+        return map(lambda x: self.stringStoreManager.write_string(x), strings)
 
     def strings_for_string_ids(self, ids):
         """
@@ -414,16 +414,16 @@ class GeneralArrayManager:
             new_names = new_names[:num_ids]
             # Update the names
             map(lambda x, y:
-                self.stringStoreManager.update_name_at_index(x, y),
+                self.stringStoreManager.update_string_at_index(x, y),
                 ids, new_names)
             # Now store the remaining names
-            rest_ids = map(lambda x: self.stringStoreManager.write_name(x),
+            rest_ids = map(lambda x: self.stringStoreManager.write_string(x),
                            remaining_names)
             # Return the updated IDs and the created IDs
             return ids + rest_ids
         # else: len(ids) == len(new_names), perform update for names with ids
         map(lambda x, y:
-            self.stringStoreManager.update_name_at_index(x, y), ids, new_names)
+            self.stringStoreManager.update_string_at_index(x, y), ids, new_names)
         return ids
 
     @staticmethod
