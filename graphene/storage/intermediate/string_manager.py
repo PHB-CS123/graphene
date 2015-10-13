@@ -1,6 +1,6 @@
 import logging
 
-from graphene.storage.base.name_store import *
+from graphene.storage.base.string_store import *
 from graphene.storage.intermediate.general_store_manager import *
 
 
@@ -25,7 +25,7 @@ class StringManager(object):
         # Size of string blocks
         self.blockSize = block_size
         # Create a manager for the string store
-        self.storeManager = GeneralStoreManager(NameStore(filename, block_size))
+        self.storeManager = GeneralStoreManager(StringStore(filename, block_size))
         import pytest
         pytest.set_trace()  # Check class name for logger
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -33,7 +33,7 @@ class StringManager(object):
     def __del__(self):
         del self.storeManager
 
-    def write_name(self, string):
+    def write_string(self, string):
         """
         Write the given variable-length string to the string store
 
@@ -58,13 +58,13 @@ class StringManager(object):
                       'previous_block': 0,
                       'length': length,
                       'next_block': 0,
-                      'name': string_parts[0]}
+                      'string': string_parts[0]}
         else:
             kwargs = {'in_use': False,
                       'previous_block': 0,
                       'length': length,
                       'next_block': ids[1],
-                      'name': string_parts[0]}
+                      'string': string_parts[0]}
 
         # Create first block using kwargs
         self.storeManager.create_item(ids[0], **kwargs)
@@ -79,14 +79,14 @@ class StringManager(object):
                           'previous_block': ids[i - 1],
                           'length': length,
                           'next_block': 0,
-                          'name': string_parts[i]}
+                          'string': string_parts[i]}
             # Create kwargs for middle block
             else:
                 kwargs = {'in_use': False,
                           'previous_block': ids[i - 1],
                           'length': length,
                           'next_block': ids[i + 1],
-                          'name': string_parts[i]}
+                          'string': string_parts[i]}
             # Create next block
             self.storeManager.create_item(ids[i], **kwargs)
         # Return the first index of the string in the store
@@ -115,7 +115,7 @@ class StringManager(object):
                 self.logger.warn("Corrupted data, unexpected EOF.")
                 return EOF
             # Add the next block string to the list
-            strings.append(string_block.name)
+            strings.append(string_block.string)
             # Update index with the index of the next block
             index = string_block.nextBlock
         # Done, combine the strings
@@ -154,7 +154,7 @@ class StringManager(object):
             index = next_index
         return True
 
-    def update_name_at_index(self, index, new_string):
+    def update_string_at_index(self, index, new_string):
         """
         Updates the string at the given index
 
@@ -200,13 +200,13 @@ class StringManager(object):
                       'previous_block': 0,
                       'length': new_length,
                       'next_block': 0,
-                      'name': string_parts[0]}
+                      'string': string_parts[0]}
         else:
             kwargs = {'in_use': False,
                       'previous_block': 0,
                       'length': new_length,
                       'next_block': next_id,
-                      'name': string_parts[0]}
+                      'string': string_parts[0]}
 
         # Create first block using kwargs
         self.storeManager.create_item(cur_id, **kwargs)
@@ -240,14 +240,14 @@ class StringManager(object):
                           'previous_block': prev_id,
                           'length': new_length,
                           'next_block': 0,
-                          'name': string_parts[i]}
+                          'string': string_parts[i]}
             # Create kwargs for middle block
             else:
                 kwargs = {'in_use': False,
                           'previous_block': prev_id,
                           'length': new_length,
                           'next_block': next_id,
-                          'name': string_parts[i]}
+                          'string': string_parts[i]}
             # Create next block
             self.storeManager.create_item(cur_id, **kwargs)
 

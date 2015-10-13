@@ -65,7 +65,7 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         # Create a name with the length of the block size
         name = "a" * self.TEST_BLOCK_SIZE
         # Write the name to the name store
-        name_index = name_manager.write_name(name)
+        name_index = name_manager.write_string(name)
         # Read the name back and make sure it is as expected
         self.assertEquals(name, name_manager.read_string_at_index(name_index))
 
@@ -79,11 +79,11 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         # Create a name with the length of the block size
         name1 = "a" * self.TEST_BLOCK_SIZE
         # Write the name to the name store
-        name_index1 = name_manager.write_name(name1)
+        name_index1 = name_manager.write_string(name1)
         # Create another name with the length of the block size
         name2 = "b" * self.TEST_BLOCK_SIZE
         # Write the name to the name store
-        name_index2 = name_manager.write_name(name2)
+        name_index2 = name_manager.write_string(name2)
         # Read the names back and make sure they are as expected
         self.assertEquals(name1, name_manager.read_string_at_index(name_index1))
         self.assertEquals(name2, name_manager.read_string_at_index(name_index2))
@@ -98,7 +98,7 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         # Create a name with a random length
         name = "a" * self.random_length()
         # Write the name to the name store
-        name_index = name_manager.write_name(name)
+        name_index = name_manager.write_string(name)
         # Read the name back and make sure it is as expected
         self.assertEquals(name, name_manager.read_string_at_index(name_index))
 
@@ -113,7 +113,7 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         # Create a name with a random length (longer than one block)
         name = "a" * (2 * self.TEST_BLOCK_SIZE + 1)
         # Write the name to the name store
-        name_index = name_manager.write_name(name)
+        name_index = name_manager.write_string(name)
         # Mangle the name by deleting from the second block (first block intact)
         name_manager.storeManager.delete_item_at_index(name_index + 1)
         # Make sure that the read_string_at_index method returns None
@@ -130,7 +130,7 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         # Create a name with a random length (longer than one block)
         name = "a" * (2 * self.TEST_BLOCK_SIZE)
         # Write the name to the name store
-        name_index = name_manager.write_name(name)
+        name_index = name_manager.write_string(name)
         # Mangle the name by deleting from the second block (first block intact)
         name_manager.storeManager.delete_item_at_index(name_index + 1)
         # Make sure that the read_string_at_index method returns EOF
@@ -146,7 +146,7 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         # Create a name with a random length (longer than one block)
         name = "a" * self.random_length()
         # Write the name to the name store
-        name_index = name_manager.write_name(name)
+        name_index = name_manager.write_string(name)
         # Try to mangle the name and expect an index error
         with self.assertRaises(IndexError):
             name_manager.delete_string_at_index(name_index + 1)
@@ -162,7 +162,7 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         # Create a name with a random length (longer than one block)
         name = "a" * self.random_length()
         # Write the name to the name store
-        name_index = name_manager.write_name(name)
+        name_index = name_manager.write_string(name)
         # Mangle the name by deleting from the second block (first block intact)
         name_manager.storeManager.delete_item_at_index(name_index + 1)
         # Make sure that the read_string_at_index method returns None
@@ -178,11 +178,11 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         # Create a name with a random length
         name1 = "a" * self.random_length()
         # Write the name to the name store
-        name_index1 = name_manager.write_name(name1)
+        name_index1 = name_manager.write_string(name1)
         # Create another name with a random length
         name2 = "b" * self.random_length()
         # Write the name to the name store
-        name_index2 = name_manager.write_name(name2)
+        name_index2 = name_manager.write_string(name2)
         # Read the names back and make sure they are as expected
         self.assertEquals(name1, name_manager.read_string_at_index(name_index1))
         self.assertEquals(name2, name_manager.read_string_at_index(name_index2))
@@ -197,15 +197,15 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         # Create a name with a random length
         name1 = "a" * self.random_length()
         # Write the name to the name store
-        name_index1 = name_manager.write_name(name1)
+        name_index1 = name_manager.write_string(name1)
         # Create another name with a random length
         name2 = "b" * self.random_length()
         # Write the name to the name store
-        name_index2 = name_manager.write_name(name2)
+        name_index2 = name_manager.write_string(name2)
         # Create a third name with a random length
         name3 = "c" * self.random_length()
         # Write the name to the name store
-        name_index3 = name_manager.write_name(name3)
+        name_index3 = name_manager.write_string(name3)
 
         # Check that the found starting indexes are as expected
         self.assertEquals(name_index1, name_manager.find_string(name1))
@@ -222,19 +222,19 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         # Create a name with a random length
         name1 = "a" * self.random_length()
         # Write the name to the name store
-        name_index1 = name_manager.write_name(name1)
+        name_index1 = name_manager.write_string(name1)
         # Create another name with a random length
         name2 = "b" * self.random_length()
         # Write the name to the name store
-        name_index2 = name_manager.write_name(name2)
+        name_index2 = name_manager.write_string(name2)
         # Create a third name with a random length
         name3 = "c" * self.random_length()
         # Write the name to the name store
-        name_index3 = name_manager.write_name(name3)
+        name_index3 = name_manager.write_string(name3)
         # Create a fourth name with a random length
         name4 = "d" * self.random_length()
         # Write the name to the name store
-        name_index4 = name_manager.write_name(name4)
+        name_index4 = name_manager.write_string(name4)
 
         # Check that none is returned for empty array
         no_names = name_manager.find_strings([])
@@ -258,7 +258,7 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         # Create a name with a random length
         name1 = "a" * self.random_length()
         # Write the name to the name store
-        name_index1 = name_manager.write_name(name1)
+        name_index1 = name_manager.write_string(name1)
         # Check that the name is as expected
         self.assertEquals(name1, name_manager.read_string_at_index(name_index1))
 
@@ -279,21 +279,21 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         # Create a name with a random length
         name1 = "a" * self.random_length()
         # Write the name to the name store
-        name_index1 = name_manager.write_name(name1)
+        name_index1 = name_manager.write_string(name1)
         # Check that the name is as expected
         self.assertEquals(name1, name_manager.read_string_at_index(name_index1))
 
         # Create a second name with a random length
         name2 = "b" * self.random_length()
         # Write the name to the name store
-        name_index2 = name_manager.write_name(name2)
+        name_index2 = name_manager.write_string(name2)
         # Check that the name is as expected
         self.assertEquals(name2, name_manager.read_string_at_index(name_index2))
 
         # Create a third name with a random length
         name3 = "c" * self.random_length()
         # Write the name to the name store
-        name_index3 = name_manager.write_name(name3)
+        name_index3 = name_manager.write_string(name3)
         # Check that the name is as expected
         self.assertEquals(name3, name_manager.read_string_at_index(name_index3))
 
@@ -337,25 +337,25 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         # Create a name that spans a single block
         name1 = "a" * self.TEST_BLOCK_SIZE
         # Write the name to the name store
-        name_index1 = name_manager.write_name(name1)
+        name_index1 = name_manager.write_string(name1)
         # Check that the name is as expected
         self.assertEquals(name1, name_manager.read_string_at_index(name_index1))
 
         # Update the name spanning a single block
         name1_u = "b" * (self.TEST_BLOCK_SIZE - 1)
-        name_manager.update_name_at_index(name_index1, name1_u)
+        name_manager.update_string_at_index(name_index1, name1_u)
         self.assertEquals(name1_u, name_manager.read_string_at_index(name_index1))
 
         # Create a name that spans two blocks
         name2 = "b" * (2 * self.TEST_BLOCK_SIZE)
         # Write the name to the name store
-        name_index2 = name_manager.write_name(name2)
+        name_index2 = name_manager.write_string(name2)
         # Check that the name is as expected
         self.assertEquals(name2, name_manager.read_string_at_index(name_index2))
 
         # Update it with a name spanning two blocks
         name2_u = "c" * (2 * self.TEST_BLOCK_SIZE - 1)
-        name_manager.update_name_at_index(name_index2, name2_u)
+        name_manager.update_string_at_index(name_index2, name2_u)
         self.assertEquals(name2_u, name_manager.read_string_at_index(name_index2))
 
     def test_update_name_at_index_smaller_size(self):
@@ -368,13 +368,13 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         # Create a name that spans a three blocks
         name1 = "d" * (3 * self.TEST_BLOCK_SIZE)
         # Write the name to the name store
-        name_index1 = name_manager.write_name(name1)
+        name_index1 = name_manager.write_string(name1)
         # Check that the name is as expected
         self.assertEquals(name1, name_manager.read_string_at_index(name_index1))
 
         # Update it with a name spanning a single block
         name1_u = "c" * (self.TEST_BLOCK_SIZE - 1)
-        name_manager.update_name_at_index(name_index1, name1_u)
+        name_manager.update_string_at_index(name_index1, name1_u)
         self.assertEquals(name1_u, name_manager.read_string_at_index(name_index1))
         # Make sure the residue spots are deleted
         old_spot1 = name_manager.storeManager.get_item_at_index(name_index1 + 1)
@@ -385,13 +385,13 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         # Create a name that spans 4 blocks
         name2 = "e" * (4 * self.TEST_BLOCK_SIZE)
         # Write the name to the name store
-        name_index2 = name_manager.write_name(name2)
+        name_index2 = name_manager.write_string(name2)
         # Check that the name is as expected
         self.assertEquals(name2, name_manager.read_string_at_index(name_index2))
 
         # Update it with a name spanning no blocks
         name2_u = "" 
-        name_manager.update_name_at_index(name_index2, name2_u)
+        name_manager.update_string_at_index(name_index2, name2_u)
         self.assertEquals(name2_u, name_manager.read_string_at_index(name_index2))
         # Make sure the residue spots are deleted
         old_spot3 = name_manager.storeManager.get_item_at_index(name_index2 + 3)
@@ -407,25 +407,25 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         # Create a name that spans a three blocks
         name1 = "g" * (3 * self.TEST_BLOCK_SIZE)
         # Write the name to the name store
-        name_index1 = name_manager.write_name(name1)
+        name_index1 = name_manager.write_string(name1)
         # Check that the name is as expected
         self.assertEquals(name1, name_manager.read_string_at_index(name_index1))
 
         # Update it with a name spanning 4 blocks
         name1_u = "h" * (4 * self.TEST_BLOCK_SIZE)
-        name_manager.update_name_at_index(name_index1, name1_u)
+        name_manager.update_string_at_index(name_index1, name1_u)
         self.assertEquals(name1_u, name_manager.read_string_at_index(name_index1))
 
         # Create a name that spans 1 block
         name2 = "i" * self.TEST_BLOCK_SIZE
         # Write the name to the name store
-        name_index2 = name_manager.write_name(name2)
+        name_index2 = name_manager.write_string(name2)
         # Check that the name is as expected
         self.assertEquals(name2, name_manager.read_string_at_index(name_index2))
 
         # Update it with a name spanning 6 blocks
         name2_u = "j" * (6 * self.TEST_BLOCK_SIZE)
-        name_manager.update_name_at_index(name_index2, name2_u)
+        name_manager.update_string_at_index(name_index2, name2_u)
         self.assertEquals(name2_u, name_manager.read_string_at_index(name_index2))
 
     @classmethod

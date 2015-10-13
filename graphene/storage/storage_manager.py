@@ -242,7 +242,7 @@ class StorageManager:
             else:
                 raise TypeAlreadyExistsException(
                     "Relation %s already exists!" % type_name)
-        name_index = type_name_manager.write_name(type_name)
+        name_index = type_name_manager.write_string(type_name)
 
         if len(schema) > 0:
             ids = type_type_manager.get_indexes(len(schema))
@@ -252,7 +252,7 @@ class StorageManager:
                 # Replace array syntax with Array following the array type
                 if tt_type.find("[]") > -1:
                     tt_type = tt_type.replace("[]", "Array")
-                tt_name_id = type_type_name_manager.write_name(tt_name)
+                tt_name_id = type_type_name_manager.write_string(tt_name)
                 kwargs = {
                     "property_type": Property.PropertyType[tt_type],
                     "type_name": tt_name_id,
@@ -422,7 +422,7 @@ class StorageManager:
                 # String, so write name
                 if prop_type == Property.PropertyType.string:
                     kwargs["prop_block_id"] = \
-                        self.prop_string_manager.write_name(prop_val)
+                        self.prop_string_manager.write_string(prop_val)
                 # Array, so use array manager
                 elif prop_type.value >= Property.PropertyType.intArray.value:
                     kwargs["prop_block_id"] = \
@@ -539,7 +539,7 @@ class StorageManager:
                     # TODO: Why are new relation property names not getting
                     # written?
                     prop_kwargs["prop_block_id"] = \
-                        self.prop_string_manager.write_name(prop_val)
+                        self.prop_string_manager.write_string(prop_val)
                 # array, so use array manager
                 elif prop_type.value >= Property.PropertyType.intArray.value:
                     prop_kwargs["prop_block_id"] = \
@@ -835,7 +835,7 @@ class StorageManager:
                 # String, so update name
                 if prop.is_string():
                     self.prop_string_manager.\
-                        update_name_at_index(old_val, new_val)
+                        update_string_at_index(old_val, new_val)
                 # Array, so use array manager
                 elif prop.is_array():
                     self.array_manager.\
