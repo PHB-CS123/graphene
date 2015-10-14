@@ -52,8 +52,8 @@ class StorageManager:
 
         # Create a string manager for string property types
         self.prop_string_manager = \
-            GeneralNameManager(self.PROP_STORE_STRINGS_FILENAME,
-                               self.STRING_BLOCK_SIZE)
+            GeneralStringManager(self.PROP_STORE_STRINGS_FILENAME,
+                                 self.STRING_BLOCK_SIZE)
 
         # Create object managers
         self.node_manager = GeneralStoreManager(NodeStore())
@@ -498,7 +498,7 @@ class StorageManager:
         :param node_type: Type index of node
         :type node_type: int
         :return: NodeProperty generator
-        :rtype: NodeProperty
+        :rtype: list[NodeProperty]
         """
         i = 1
         while True:
