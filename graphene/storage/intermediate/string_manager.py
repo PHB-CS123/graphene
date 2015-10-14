@@ -26,8 +26,6 @@ class StringManager(object):
         self.blockSize = block_size
         # Create a manager for the string store
         self.storeManager = GeneralStoreManager(StringStore(filename, block_size))
-        import pytest
-        pytest.set_trace()  # Check class name for logger
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def __del__(self):
@@ -38,7 +36,7 @@ class StringManager(object):
         Write the given variable-length string to the string store
 
         :param string: String to write
-        :type string: str
+        :type string: str | unicode
         :return: Starting index of the stored string
         :rtype: int
         """
@@ -99,7 +97,7 @@ class StringManager(object):
         :param index: Starting index of the string
         :type index: int
         :return: String at the index
-        :rtype: str
+        :rtype: str | unicode
         """
         # Create empty list where the string strings will be stored
         strings = []
@@ -161,10 +159,12 @@ class StringManager(object):
         :param index: Index of original string
         :type index: int
         :param new_string: New string to place at the starting index
-        :type new_string: str
+        :type new_string: str | unicode
         :return: Nothing
         :rtype: None
         """
+        # Encode the given string to store
+        new_string = self.encode(new_string)
         # Get parts of string (separated based on the block size)
         string_parts = self.split_string(new_string)
         # Number of parts
@@ -294,7 +294,7 @@ class StringManager(object):
         Complexity: O(|file|)
 
         :param string: String to look for
-        :type string: str
+        :type string: str | unicode
         :return: Starting index of string
         :rtype: int
         """
@@ -350,7 +350,7 @@ class StringManager(object):
         Encodes the given string (needed for unicode)
 
         :param string: String to encode
-        :type string: str
+        :type string: str | unicode
         :return: Encoded string
         :rtype: str
         """
@@ -362,7 +362,7 @@ class StringManager(object):
         Decodes the given encoded full string block (needed for unicode)
 
         :param string: String to decode
-        :type string: str
+        :type string: str | unicode
         :return: Decoded string
         :rtype: str
         """
@@ -376,6 +376,6 @@ class StringManager(object):
         :param strings: String blocks to combine
         :type strings: list
         :return: Joined string
-        :rtype: str
+        :rtype: str | unicode
         """
         return "".join(strings)

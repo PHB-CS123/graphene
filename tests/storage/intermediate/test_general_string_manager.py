@@ -1,12 +1,14 @@
+# -*- coding: UTF-8 -*-
+
 import unittest
 from random import random
 from math import ceil
 
-from graphene.storage.intermediate.general_name_manager import *
+from graphene.storage.intermediate.general_string_manager import *
 
 
 class TestGeneralNameManagerMethods(unittest.TestCase):
-    TEST_FILENAME = "graphenestore.namestore.db"
+    TEST_FILENAME = "graphenestore.stringstore.db"
     TEST_BLOCK_SIZE = 10
 
     def setUp(self):
@@ -24,9 +26,9 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         Test that initializing a GeneralNameManager succeeds (file is opened)
         """
         try:
-            GeneralNameManager(self.TEST_FILENAME, self.TEST_BLOCK_SIZE)
+            GeneralStringManager(self.TEST_FILENAME, self.TEST_BLOCK_SIZE)
         except IOError:
-            self.fail("GeneralNameManager initializer failed: %s"
+            self.fail("GeneralStringManager initializer failed: %s"
                       "db file failed to open." % self.TEST_FILENAME)
 
     def test_double_init(self):
@@ -35,14 +37,14 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         i.e. the old file is reopened and no errors occur.
         """
         try:
-            GeneralNameManager(self.TEST_FILENAME, self.TEST_BLOCK_SIZE)
+            GeneralStringManager(self.TEST_FILENAME, self.TEST_BLOCK_SIZE)
         except IOError:
-            self.fail("GeneralNameManager initializer failed: %s"
+            self.fail("GeneralStringManager initializer failed: %s"
                       "db file failed to open." % self.TEST_FILENAME)
         try:
-            GeneralNameManager(self.TEST_FILENAME, self.TEST_BLOCK_SIZE)
+            GeneralStringManager(self.TEST_FILENAME, self.TEST_BLOCK_SIZE)
         except IOError:
-            self.fail("GeneralNameManager initializer failed on second"
+            self.fail("GeneralStringManager initializer failed on second"
                       "attempt: %s db file failed to open."
                       % self.TEST_FILENAME)
 
@@ -50,8 +52,8 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         """
         Test that reading from an empty file returns an EOF
         """
-        name_manager = GeneralNameManager(self.TEST_FILENAME,
-                                          self.TEST_BLOCK_SIZE)
+        name_manager = GeneralStringManager(self.TEST_FILENAME,
+                                            self.TEST_BLOCK_SIZE)
         result = name_manager.read_string_at_index(1)
         self.assertEquals(result, EOF)
 
@@ -59,11 +61,11 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         """
         Tests that writing a name that fits in a single block succeeds
         """
-        name_manager = GeneralNameManager(self.TEST_FILENAME,
-                                          self.TEST_BLOCK_SIZE)
+        name_manager = GeneralStringManager(self.TEST_FILENAME,
+                                            self.TEST_BLOCK_SIZE)
 
         # Create a name with the length of the block size
-        name = "a" * self.TEST_BLOCK_SIZE
+        name = u"æ" * self.TEST_BLOCK_SIZE
         # Write the name to the name store
         name_index = name_manager.write_string(name)
         # Read the name back and make sure it is as expected
@@ -73,15 +75,15 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         """
         Tests that writing 2 names that fit in a single block succeeds
         """
-        name_manager = GeneralNameManager(self.TEST_FILENAME,
-                                          self.TEST_BLOCK_SIZE)
+        name_manager = GeneralStringManager(self.TEST_FILENAME,
+                                            self.TEST_BLOCK_SIZE)
 
         # Create a name with the length of the block size
-        name1 = "a" * self.TEST_BLOCK_SIZE
+        name1 = u"æ" * self.TEST_BLOCK_SIZE
         # Write the name to the name store
         name_index1 = name_manager.write_string(name1)
         # Create another name with the length of the block size
-        name2 = "b" * self.TEST_BLOCK_SIZE
+        name2 = u"ę" * self.TEST_BLOCK_SIZE
         # Write the name to the name store
         name_index2 = name_manager.write_string(name2)
         # Read the names back and make sure they are as expected
@@ -92,11 +94,11 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         """
         Tests that writing a name that spans multiple blocks succeeds
         """
-        name_manager = GeneralNameManager(self.TEST_FILENAME,
-                                          self.TEST_BLOCK_SIZE)
+        name_manager = GeneralStringManager(self.TEST_FILENAME,
+                                            self.TEST_BLOCK_SIZE)
 
         # Create a name with a random length
-        name = "a" * self.random_length()
+        name = u"æ" * self.random_length()
         # Write the name to the name store
         name_index = name_manager.write_string(name)
         # Read the name back and make sure it is as expected
@@ -107,11 +109,12 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         Test that when reading a mangled string, the method returns None.
         Assuming the mangling is not at the end of the file
         """
-        name_manager = GeneralNameManager(self.TEST_FILENAME,
-                                          self.TEST_BLOCK_SIZE)
+        name_manager = GeneralStringManager(self.TEST_FILENAME,
+                                            self.TEST_BLOCK_SIZE)
 
         # Create a name with a random length (longer than one block)
-        name = "a" * (2 * self.TEST_BLOCK_SIZE + 1)
+        # Unicode char is 2 bytes
+        name = u"æ" * (self.TEST_BLOCK_SIZE + 1)
         # Write the name to the name store
         name_index = name_manager.write_string(name)
         # Mangle the name by deleting from the second block (first block intact)
@@ -124,11 +127,12 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         Test that when reading a mangled string, the method returns None or EOF.
         Assuming the mangling is at the end of the file (the file is truncated)
         """
-        name_manager = GeneralNameManager(self.TEST_FILENAME,
-                                          self.TEST_BLOCK_SIZE)
+        name_manager = GeneralStringManager(self.TEST_FILENAME,
+                                            self.TEST_BLOCK_SIZE)
 
         # Create a name with a random length (longer than one block)
-        name = "a" * (2 * self.TEST_BLOCK_SIZE)
+        # Unicode char is 2 bytes
+        name = u"æ" * self.TEST_BLOCK_SIZE
         # Write the name to the name store
         name_index = name_manager.write_string(name)
         # Mangle the name by deleting from the second block (first block intact)
@@ -140,11 +144,11 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         """
         Test that deleting a name at a non-starting index throws an error
         """
-        name_manager = GeneralNameManager(self.TEST_FILENAME,
-                                          self.TEST_BLOCK_SIZE)
+        name_manager = GeneralStringManager(self.TEST_FILENAME,
+                                            self.TEST_BLOCK_SIZE)
 
         # Create a name with a random length (longer than one block)
-        name = "a" * self.random_length()
+        name = u"æ" * self.random_length()
         # Write the name to the name store
         name_index = name_manager.write_string(name)
         # Try to mangle the name and expect an index error
@@ -156,11 +160,11 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         Test that when deleting a mangled string, the method returns
         an error (false)
         """
-        name_manager = GeneralNameManager(self.TEST_FILENAME,
-                                          self.TEST_BLOCK_SIZE)
+        name_manager = GeneralStringManager(self.TEST_FILENAME,
+                                            self.TEST_BLOCK_SIZE)
 
         # Create a name with a random length (longer than one block)
-        name = "a" * self.random_length()
+        name = u"æ" * self.random_length()
         # Write the name to the name store
         name_index = name_manager.write_string(name)
         # Mangle the name by deleting from the second block (first block intact)
@@ -172,15 +176,15 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         """
         Tests that writing 2 names that span multiple blocks succeeds
         """
-        name_manager = GeneralNameManager(self.TEST_FILENAME,
-                                          self.TEST_BLOCK_SIZE)
+        name_manager = GeneralStringManager(self.TEST_FILENAME,
+                                            self.TEST_BLOCK_SIZE)
 
         # Create a name with a random length
-        name1 = "a" * self.random_length()
+        name1 = u"ß" * self.random_length()
         # Write the name to the name store
         name_index1 = name_manager.write_string(name1)
         # Create another name with a random length
-        name2 = "b" * self.random_length()
+        name2 = u"œ" * self.random_length()
         # Write the name to the name store
         name_index2 = name_manager.write_string(name2)
         # Read the names back and make sure they are as expected
@@ -191,19 +195,19 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         """
         Tests that the starting index of a name can be found correctly
         """
-        name_manager = GeneralNameManager(self.TEST_FILENAME,
-                                          self.TEST_BLOCK_SIZE)
+        name_manager = GeneralStringManager(self.TEST_FILENAME,
+                                            self.TEST_BLOCK_SIZE)
 
         # Create a name with a random length
-        name1 = "a" * self.random_length()
+        name1 = u"ü" * self.random_length()
         # Write the name to the name store
         name_index1 = name_manager.write_string(name1)
         # Create another name with a random length
-        name2 = "b" * self.random_length()
+        name2 = u"ø" * self.random_length()
         # Write the name to the name store
         name_index2 = name_manager.write_string(name2)
         # Create a third name with a random length
-        name3 = "c" * self.random_length()
+        name3 = u"ÿ" * self.random_length()
         # Write the name to the name store
         name_index3 = name_manager.write_string(name3)
 
@@ -216,23 +220,23 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         """
         Tests that the starting index of various names can be found correctly
         """
-        name_manager = GeneralNameManager(self.TEST_FILENAME,
-                                          self.TEST_BLOCK_SIZE)
+        name_manager = GeneralStringManager(self.TEST_FILENAME,
+                                            self.TEST_BLOCK_SIZE)
 
         # Create a name with a random length
-        name1 = "a" * self.random_length()
+        name1 = u"á" * self.random_length()
         # Write the name to the name store
         name_index1 = name_manager.write_string(name1)
         # Create another name with a random length
-        name2 = "b" * self.random_length()
+        name2 = u"â" * self.random_length()
         # Write the name to the name store
         name_index2 = name_manager.write_string(name2)
         # Create a third name with a random length
-        name3 = "c" * self.random_length()
+        name3 = u"a" * self.random_length()
         # Write the name to the name store
         name_index3 = name_manager.write_string(name3)
         # Create a fourth name with a random length
-        name4 = "d" * self.random_length()
+        name4 = u"ã" * self.random_length()
         # Write the name to the name store
         name_index4 = name_manager.write_string(name4)
 
@@ -252,11 +256,11 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         """
         Tests that deleting an array at a specific index works
         """
-        name_manager = GeneralNameManager(self.TEST_FILENAME,
-                                          self.TEST_BLOCK_SIZE)
+        name_manager = GeneralStringManager(self.TEST_FILENAME,
+                                            self.TEST_BLOCK_SIZE)
 
         # Create a name with a random length
-        name1 = "a" * self.random_length()
+        name1 = u"ā" * self.random_length()
         # Write the name to the name store
         name_index1 = name_manager.write_string(name1)
         # Check that the name is as expected
@@ -273,25 +277,25 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         Tests that deleting a name at a specific index works with more than
         one item in the store
         """
-        name_manager = GeneralNameManager(self.TEST_FILENAME,
-                                          self.TEST_BLOCK_SIZE)
+        name_manager = GeneralStringManager(self.TEST_FILENAME,
+                                            self.TEST_BLOCK_SIZE)
 
         # Create a name with a random length
-        name1 = "a" * self.random_length()
+        name1 = u"š" * self.random_length()
         # Write the name to the name store
         name_index1 = name_manager.write_string(name1)
         # Check that the name is as expected
         self.assertEquals(name1, name_manager.read_string_at_index(name_index1))
 
         # Create a second name with a random length
-        name2 = "b" * self.random_length()
+        name2 = u"ś" * self.random_length()
         # Write the name to the name store
         name_index2 = name_manager.write_string(name2)
         # Check that the name is as expected
         self.assertEquals(name2, name_manager.read_string_at_index(name_index2))
 
         # Create a third name with a random length
-        name3 = "c" * self.random_length()
+        name3 = u"ê" * self.random_length()
         # Write the name to the name store
         name_index3 = name_manager.write_string(name3)
         # Check that the name is as expected
@@ -332,29 +336,29 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         Test that updating a name at a certain starting index works with
         same size updates
         """
-        name_manager = GeneralNameManager(self.TEST_FILENAME,
-                                          self.TEST_BLOCK_SIZE)
+        name_manager = GeneralStringManager(self.TEST_FILENAME,
+                                            self.TEST_BLOCK_SIZE)
         # Create a name that spans a single block
-        name1 = "a" * self.TEST_BLOCK_SIZE
+        name1 = u"ś" * self.TEST_BLOCK_SIZE
         # Write the name to the name store
         name_index1 = name_manager.write_string(name1)
         # Check that the name is as expected
         self.assertEquals(name1, name_manager.read_string_at_index(name_index1))
 
         # Update the name spanning a single block
-        name1_u = "b" * (self.TEST_BLOCK_SIZE - 1)
+        name1_u = u"ē" * (self.TEST_BLOCK_SIZE - 1)
         name_manager.update_string_at_index(name_index1, name1_u)
         self.assertEquals(name1_u, name_manager.read_string_at_index(name_index1))
 
         # Create a name that spans two blocks
-        name2 = "b" * (2 * self.TEST_BLOCK_SIZE)
+        name2 = u"ś" * (2 * self.TEST_BLOCK_SIZE)
         # Write the name to the name store
         name_index2 = name_manager.write_string(name2)
         # Check that the name is as expected
         self.assertEquals(name2, name_manager.read_string_at_index(name_index2))
 
         # Update it with a name spanning two blocks
-        name2_u = "c" * (2 * self.TEST_BLOCK_SIZE - 1)
+        name2_u = u"Í" * (2 * self.TEST_BLOCK_SIZE - 1)
         name_manager.update_string_at_index(name_index2, name2_u)
         self.assertEquals(name2_u, name_manager.read_string_at_index(name_index2))
 
@@ -363,17 +367,19 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         Test that updating a name at a certain starting index works, with
         shorter-sized updates. Check that it deletes old items.
         """
-        name_manager = GeneralNameManager(self.TEST_FILENAME,
-                                          self.TEST_BLOCK_SIZE)
+        name_manager = GeneralStringManager(self.TEST_FILENAME,
+                                            self.TEST_BLOCK_SIZE)
         # Create a name that spans a three blocks
-        name1 = "d" * (3 * self.TEST_BLOCK_SIZE)
+        # Unicode char is 2 bytes
+        name1 = u"Æ" * (self.TEST_BLOCK_SIZE + 1)
         # Write the name to the name store
         name_index1 = name_manager.write_string(name1)
         # Check that the name is as expected
         self.assertEquals(name1, name_manager.read_string_at_index(name_index1))
 
         # Update it with a name spanning a single block
-        name1_u = "c" * (self.TEST_BLOCK_SIZE - 1)
+        # ASCII char in unicode is 1 byte
+        name1_u = u"a" * (self.TEST_BLOCK_SIZE - 1)
         name_manager.update_string_at_index(name_index1, name1_u)
         self.assertEquals(name1_u, name_manager.read_string_at_index(name_index1))
         # Make sure the residue spots are deleted
@@ -383,14 +389,15 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         self.assertTrue(old_spot2 is None or old_spot2 is EOF)
 
         # Create a name that spans 4 blocks
-        name2 = "e" * (4 * self.TEST_BLOCK_SIZE)
+        # Unicode char is 2 bytes
+        name2 = u"Æ" * (2 * self.TEST_BLOCK_SIZE)
         # Write the name to the name store
         name_index2 = name_manager.write_string(name2)
         # Check that the name is as expected
         self.assertEquals(name2, name_manager.read_string_at_index(name_index2))
 
         # Update it with a name spanning no blocks
-        name2_u = "" 
+        name2_u = ""
         name_manager.update_string_at_index(name_index2, name2_u)
         self.assertEquals(name2_u, name_manager.read_string_at_index(name_index2))
         # Make sure the residue spots are deleted
@@ -402,29 +409,29 @@ class TestGeneralNameManagerMethods(unittest.TestCase):
         Test that updating a name at a certain starting index works, with
         longer sized updates.
         """
-        name_manager = GeneralNameManager(self.TEST_FILENAME,
-                                          self.TEST_BLOCK_SIZE)
+        name_manager = GeneralStringManager(self.TEST_FILENAME,
+                                            self.TEST_BLOCK_SIZE)
         # Create a name that spans a three blocks
-        name1 = "g" * (3 * self.TEST_BLOCK_SIZE)
+        name1 = u"¿" * (3 * self.TEST_BLOCK_SIZE)
         # Write the name to the name store
         name_index1 = name_manager.write_string(name1)
         # Check that the name is as expected
         self.assertEquals(name1, name_manager.read_string_at_index(name_index1))
 
         # Update it with a name spanning 4 blocks
-        name1_u = "h" * (4 * self.TEST_BLOCK_SIZE)
+        name1_u = u"÷" * (4 * self.TEST_BLOCK_SIZE)
         name_manager.update_string_at_index(name_index1, name1_u)
         self.assertEquals(name1_u, name_manager.read_string_at_index(name_index1))
 
         # Create a name that spans 1 block
-        name2 = "i" * self.TEST_BLOCK_SIZE
+        name2 = u"æ" * self.TEST_BLOCK_SIZE
         # Write the name to the name store
         name_index2 = name_manager.write_string(name2)
         # Check that the name is as expected
         self.assertEquals(name2, name_manager.read_string_at_index(name_index2))
 
         # Update it with a name spanning 6 blocks
-        name2_u = "j" * (6 * self.TEST_BLOCK_SIZE)
+        name2_u = u"º" * (6 * self.TEST_BLOCK_SIZE)
         name_manager.update_string_at_index(name_index2, name2_u)
         self.assertEquals(name2_u, name_manager.read_string_at_index(name_index2))
 
