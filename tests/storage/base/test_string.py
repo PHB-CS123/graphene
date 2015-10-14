@@ -3,7 +3,7 @@ import unittest
 from graphene.storage.base.string import *
 
 
-class TestNameMethods(unittest.TestCase):
+class TestStringMethods(unittest.TestCase):
     def test_empty_init(self):
         """
         Tests that initializing a Name with no arguments, uses the

@@ -3,7 +3,7 @@ import unittest
 from graphene.storage.base.string_store import *
 
 
-class TestNameStoreMethods(unittest.TestCase):
+class TestStringStoreMethods(unittest.TestCase):
     TEST_FILENAME = "graphenestore.namestore.db"
 
     def setUp(self):
