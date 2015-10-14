@@ -1,5 +1,6 @@
 from graphene.storage.intermediate.string_manager import *
 
+
 class GeneralStringManager(StringManager):
     """
     Handles reading/writing variable-length strings (Unicode)
