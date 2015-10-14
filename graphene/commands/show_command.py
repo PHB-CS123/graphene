@@ -46,7 +46,7 @@ class ShowCommand(Command):
             if cur_type is GeneralStore.EOF:
                 break
             if cur_type is not None:
-                type_name = type_name_manager.read_name_at_index(i)
+                type_name = type_name_manager.read_string_at_index(i)
                 name_list.append(type_name)
             i += 1
 

@@ -295,7 +295,7 @@ class TestGeneralArrayManagerMethods(unittest.TestCase):
         # Mangle the array by deleting from the 2nd block (first block intact)
         array_manager.storeManager.delete_item_at_index(array_idx + 1)
 
-        # Make sure that the read_name_at_index method returns None or EOF
+        # Make sure that the read_string_at_index method returns None or EOF
         result = array_manager.read_array_at_index(array_idx)
         self.assertTrue(result is None or result is EOF)
 
@@ -318,7 +318,7 @@ class TestGeneralArrayManagerMethods(unittest.TestCase):
         # Mangle the array by deleting from the 2nd block (first block intact)
         array_manager.storeManager.delete_item_at_index(array_idx + 1)
 
-        # Make sure that the read_name_at_index method returns None or EOF
+        # Make sure that the read_string_at_index method returns None or EOF
         result = array_manager.read_array_at_index(array_idx)
         self.assertTrue(result is None or result is EOF)
 
