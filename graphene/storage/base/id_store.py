@@ -66,6 +66,24 @@ class IdStore:
     def __del__(self):
         self.storeFile.close()
 
+    def count(self):
+        """
+        Get the number of ids
+
+        :return: Number of IDs
+        :rtype: int
+        """
+        return self.get_file_size() / self.RECORD_SIZE
+
+    def clear(self):
+        """
+        Removes all ids from the IdStore
+
+        :return: Nothing
+        :rtype: None
+        """
+        self.write_all_ids([])
+
     def get_file_size(self):
         """
         Get the size of the currently open file
@@ -87,6 +105,7 @@ class IdStore:
         :return: Nothing
         :rtype: None
         """
+        assert id_value != 0, "Nothing should ever be stored at index 0"
         # Seek to the end of the file
         self.storeFile.seek(0, os.SEEK_END)
         # Pack the given ID
