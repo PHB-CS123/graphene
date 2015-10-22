@@ -69,3 +69,13 @@ class Node:
         """
         args = (self.index, self.relId, self.propId, self.nodeType)
         return "Node: %d. rel_id: %d, prop_id: %d, node_type: %d" % args
+
+    def list(self):
+        """
+        List the items that this type contains, excluding the index. This is
+        essentially how it's stored on disk
+
+        :return: List of data contained in this type
+        :rtype: list
+        """
+        return [self.inUse, self.relId, self.propId, self.nodeType]

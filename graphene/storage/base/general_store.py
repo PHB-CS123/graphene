@@ -19,6 +19,9 @@ class GeneralStore(object):
     # Used to demarcate end of file
     EOF = EOF
 
+    # Type stored by this class
+    STORAGE_TYPE = None
+
     # Used to indicate abstract methods
     __metaclass__ = abc.ABCMeta
 

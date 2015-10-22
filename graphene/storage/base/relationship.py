@@ -115,3 +115,16 @@ class Relationship:
                (self.index, self.propId, self.relType,
                 self.firstNodeId, self.firstPrevRelId, self.firstNextRelId,
                 self.secondNodeId, self.secondPrevRelId, self.secondNextRelId)
+
+    def list(self):
+        """
+        List the items that this type contains, excluding the index. This is
+        essentially how it's stored on disk
+
+        :return: List of data contained in this type
+        :rtype: list
+        """
+        return [str(self.inUse) + "-" + str(self.direction),
+                self.firstNodeId, self.secondNodeId, self.relType,
+                self.firstPrevRelId, self.firstNextRelId,
+                self.secondPrevRelId, self.secondNextRelId, self.propId]
