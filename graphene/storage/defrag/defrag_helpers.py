@@ -6,8 +6,8 @@ from graphene.utils import PrettyPrinter
 
 
 class FilePrinter:
-    def __init__(self, base_store, header=False, type_desc=False,
-                 record_offset=False, item_index=False):
+    def __init__(self, base_store, header=True, type_desc=False,
+                 record_offset=False, item_index=True):
         """
         Initializes a file printer for the given base store
 
