@@ -1,3 +1,5 @@
+import sys
+
 from graphene.commands.command import Command
 from graphene.expressions import *
 from graphene.traversal import Query
@@ -104,7 +106,7 @@ class RelationIterator(Command):
                     continue
             yield relprop
 
-    def execute(self, storage_manager):
+    def execute(self, storage_manager, output=sys.stdout, timer=None):
         """
         Determines the proper iterator to use based on the query
 

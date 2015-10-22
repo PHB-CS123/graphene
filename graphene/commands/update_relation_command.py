@@ -1,4 +1,6 @@
-from relation_iterator import *
+import sys
+
+from graphene.commands.relation_iterator import *
 from graphene.errors import TypeMismatchException, NonexistentPropertyException
 from graphene.storage import Property
 from graphene.utils.conversion import TypeConversion
@@ -13,7 +15,7 @@ class UpdateRelationCommand(RelationIterator):
         super(UpdateRelationCommand, self).__init__(rel_type, query_chain,
                                                     left_node, right_node)
 
-    def execute(self, storage_manager, timer=None):
+    def execute(self, storage_manager, output=sys.stdout, timer=None):
         """
         Update the relationship properties from the query
 

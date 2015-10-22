@@ -1,12 +1,14 @@
+import itertools
+import logging
+import sys
+
 from graphene.commands.command import Command
 from graphene.storage import StorageManager
 from graphene.expressions import *
 from graphene.traversal import *
 from graphene.utils.conversion import TypeConversion
 from graphene.errors import TypeMismatchException, BadPropertyException
-import logging
 
-import itertools
 
 class InsertRelationCommand(Command):
     def __init__(self, ctx):
@@ -57,7 +59,7 @@ class InsertRelationCommand(Command):
             result[name] = (props[i], tt_type)
         return result
 
-    def execute(self, storage_manager, timer=None):
+    def execute(self, storage_manager, output=sys.stdout, timer=None):
         """
         Inserts a relationship into the storage layer.
 
