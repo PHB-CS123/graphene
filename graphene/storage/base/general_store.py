@@ -109,6 +109,15 @@ class GeneralStore(object):
 
         return self.storeFile.tell()
 
+    def count(self):
+        """
+        Get the number of usable blocks in the file (excludes 0)
+
+        :return: Number of blocks in the file
+        :rtype: int
+        """
+        return self.get_file_size() / self.recordSize - 1
+
     def item_at_index(self, index):
         """
         Finds the item with the given index
@@ -116,6 +125,24 @@ class GeneralStore(object):
         :param index: Index of item
         :type index: int
         :return: Item with given index
+        """
+        # Get the packed data from the file
+        packed_data = self.read_from_index_packed_data(index)
+
+        # This occurs when we've reached the end of the file.
+        if packed_data == '':
+            return self.EOF
+        else:
+            return self.item_from_packed_data(index, packed_data)
+
+    def read_from_index_packed_data(self, index):
+        """
+        Gets the data at the given index
+
+        :param index: Index to get data from
+        :type index: int
+        :return: Raw data from file
+        :rtype: bytes
         """
         if index == 0:
             raise ValueError("Item cannot be read from index 0")
@@ -125,13 +152,7 @@ class GeneralStore(object):
         # Seek to the calculated offset
         self.storeFile.seek(file_offset)
         # Get the packed data from the file
-        packed_data = self.storeFile.read(self.recordSize)
-
-        # This occurs when we've reached the end of the file.
-        if packed_data == '':
-            return self.EOF
-        else:
-            return self.item_from_packed_data(index, packed_data)
+        return self.storeFile.read(self.recordSize)
 
     def write_item(self, item):
         """
