@@ -67,6 +67,17 @@ class Array:
         """
         return not (self == other)
 
+    def list(self):
+        """
+        List the items that this type contains, excluding the index. This is
+        essentially how it's stored on disk
+
+        :return: List of data contained in this type
+        :rtype: list
+        """
+        return [self.inUse, self.type, self.previousBlock, self.amount,
+                self.blocks, self.nextBlock, self.items]
+
     def almost_equal(self, other, precision):
         """
         Check that the items in the two arrays are equal within the

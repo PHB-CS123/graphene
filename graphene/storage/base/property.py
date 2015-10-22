@@ -104,6 +104,17 @@ class Property:
         return "Property: %d. Type: %s, nameID: %s, prevPropertyID: %s, " \
                "nextPropertyID: %s, propBlockID: %s" % args
 
+    def list(self):
+        """
+        List the items that this type contains, excluding the index. This is
+        essentially how it's stored on disk
+
+        :return: List of data contained in this type
+        :rtype: list
+        """
+        return [self.inUse, self.type, self.nameId, self.prevPropId,
+                self.nextPropId, self.propBlockId]
+
     def is_primitive(self):
         """
         Returns whether the property is a primitive

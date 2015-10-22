@@ -5,7 +5,7 @@ from graphene.errors.storage_manager_errors import *
 from graphene.storage import *
 from graphene.storage.base.property import Property
 from graphene.storage.intermediate import *
-
+from graphene.storage.defrag.defrag_helpers import *
 
 class StorageManager:
     # Maximum size of the cache (in items)
