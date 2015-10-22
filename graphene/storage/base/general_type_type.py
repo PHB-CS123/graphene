@@ -63,3 +63,13 @@ class GeneralTypeType:
         if self.nextType != 0:
             data.append("next = %d" % self.nextType)
         return "[%s]" % " | ".join(data)
+
+    def list(self):
+        """
+        List the items that this type contains, excluding the index. This is
+        essentially how it's stored on disk
+
+        :return: List of data contained in this type
+        :rtype: list
+        """
+        return [self.inUse, self.typeName, self.propertyType, self.nextType]
