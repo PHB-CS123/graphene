@@ -8,6 +8,7 @@ from graphene.storage.intermediate import *
 from graphene.storage.defrag.defrag_helpers import *
 
 
+
 class StorageManager:
     # Maximum size of the cache (in items)
     MAX_CACHE_SIZE = 10000
