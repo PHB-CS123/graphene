@@ -122,7 +122,7 @@ class Property:
         :return: True if primitive, False otherwise
         :rtype: bool
         """
-        return self.type.value >= 1 and self.type.value <= 7
+        return self.type_is_primitive(self.type)
 
     def is_string(self):
         """
@@ -131,7 +131,7 @@ class Property:
         :return: True if string, False otherwise
         :rtype: bool
         """
-        return self.type.value == 8
+        return self.type_is_string(self.type)
 
     def is_array(self):
         """
@@ -140,4 +140,16 @@ class Property:
         :return: True if string, False otherwise
         :rtype: bool
         """
-        return self.type.value >= 9
+        return self.type_is_array(self.type)
+
+    @staticmethod
+    def type_is_primitive(type):
+        return type.value >= 1 and type.value <= 7
+
+    @staticmethod
+    def type_is_string(type):
+        return type.value == 8
+
+    @staticmethod
+    def type_is_array(type):
+        return type.value >= 9

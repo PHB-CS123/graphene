@@ -18,6 +18,7 @@ kStringType = String.__name__
 kNode = Node.__name__
 kProperty = Property.__name__
 kRelationship = Relationship.__name__
+kPayload = (kStringType, kArrayType)
 
 
 class HeaderType(Enum):
@@ -27,9 +28,14 @@ class HeaderType(Enum):
     char = 3
     data = 4
 
+# --------------------------------- Constants -------------------------------- #
+
+kPropertyTypeOffset = 1
+kPropertyPayloadOffset = 17
+
 # ----------------------------- Offset Descriptor ---------------------------- #
 
-kArrayOffsetDescriptor = {
+ArrayOffsetDescriptor = {
     0: ("inUse", HeaderType.bool),
     1: ("type",  HeaderType.char),
     2: ("previousBlock", HeaderType.int),
@@ -39,20 +45,20 @@ kArrayOffsetDescriptor = {
     18: ("data", HeaderType.data),
 }
 
-kGeneralTypeOffsetDescriptor = {
+GeneralTypeOffsetDescriptor = {
     0: ("inUse", HeaderType.bool),
     1: ("nameId", HeaderType.int),
     5: ("firstType", HeaderType.int),
 }
 
-kGeneralTypeTypeOffsetDescriptor = {
+GeneralTypeTypeOffsetDescriptor = {
     0: ("inUse", HeaderType.bool),
     1: ("typeName", HeaderType.int),
     5: ("propertyType", HeaderType.int),
     9: ("nextType", HeaderType.int),
 }
 
-kStringOffsetDescriptor = {
+StringOffsetDescriptor = {
     0: ("inUse", HeaderType.bool),
     1: ("previousBlock", HeaderType.int),
     5: ("length", HeaderType.int),
@@ -60,14 +66,14 @@ kStringOffsetDescriptor = {
     13: ("data", HeaderType.data),
 }
 
-kNodeOffsetDescriptor = {
+NodeOffsetDescriptor = {
     0: ("inUse", HeaderType.bool),
     1: ("nextRelId", HeaderType.int),
     5: ("nextPropId", HeaderType.int),
     9: ("nodeType", HeaderType.int),
 }
 
-kPropertyOffsetDescriptor = {
+PropertyOffsetDescriptor = {
     0: ("inUse", HeaderType.bool),
     1: ("type", HeaderType.int),
     5: ("nameId", HeaderType.int),
@@ -76,7 +82,7 @@ kPropertyOffsetDescriptor = {
     17: ("propBlockId", HeaderType.data),
 }
 
-kRelationshipOffsetDescriptor = {
+RelationshipOffsetDescriptor = {
     0: ("inUse_direction", HeaderType.bool),
     1: ("firstNode", HeaderType.int),
     5: ("secondNode", HeaderType.int),
@@ -86,6 +92,16 @@ kRelationshipOffsetDescriptor = {
     21: ("secondPrevRelId", HeaderType.int),
     25: ("secondNextRelId", HeaderType.int),
     29: ("nextPropId", HeaderType.int),
+}
+
+OffsetDescriptors = {
+    kArrayType: ArrayOffsetDescriptor,
+    kGeneralType: GeneralTypeOffsetDescriptor,
+    kGeneralTypeType: GeneralTypeTypeOffsetDescriptor,
+    kStringType: StringOffsetDescriptor,
+    kNode: NodeOffsetDescriptor,
+    kProperty: PropertyOffsetDescriptor,
+    kRelationship: RelationshipOffsetDescriptor,
 }
 
 
@@ -98,26 +114,14 @@ def offset_descriptor_for_class(c):
     :return: Offset descriptor sorted by dictionary keys
     :rtype: OrderedDict[str, (str, HeaderType)]
     """
-    if c == Array:
-        return OrderedDict(sorted(kArrayOffsetDescriptor.items()))
-    elif c == GeneralType:
-        return OrderedDict(sorted(kGeneralTypeOffsetDescriptor.items()))
-    elif c == GeneralTypeType:
-        return OrderedDict(sorted(kGeneralTypeTypeOffsetDescriptor.items()))
-    elif c == String:
-        return OrderedDict(sorted(kStringOffsetDescriptor.items()))
-    elif c == Node:
-        return OrderedDict(sorted(kNodeOffsetDescriptor.items()))
-    elif c == Property:
-        return OrderedDict(sorted(kPropertyOffsetDescriptor.items()))
-    elif c == Relationship:
-        return OrderedDict(sorted(kRelationshipOffsetDescriptor.items()))
-    else:
+    try:
+        return OrderedDict(sorted(OffsetDescriptors[c]))
+    except KeyError:
         raise TypeError("Unrecognized class type")
 
 # ---------------------------- Offset -> Type Maps --------------------------- #
 
-kArrayOffsetReferenceMap = {
+ArrayOffsetReferenceMap = {
     0: None,         # inUse (bool, 1 byte)
     1: None,         # type  (char, 1 byte)
     2: kArrayType,   # previousBlock (int, 4 bytes)
@@ -126,43 +130,43 @@ kArrayOffsetReferenceMap = {
     14: kArrayType,  # nextBlock (int, 4 bytes)
 }
 
-kGeneralTypeOffsetReferenceMap = {
+GeneralTypeOffsetReferenceMap = {
     0: None,              # inUse (bool, 1 byte)
-    1: kStringType,         # nameId (int, 4 bytes)
+    1: kStringType,       # nameId (int, 4 bytes)
     5: kGeneralTypeType,  # firstType (int, 4 bytes)
 }
 
-kGeneralTypeTypeOffsetReferenceMap = {
+GeneralTypeTypeOffsetReferenceMap = {
     0: None,              # inUse (bool, 1 byte)
-    1: kStringType,         # typeName (int, 4 bytes)
+    1: kStringType,       # typeName (int, 4 bytes)
     5: None,              # propertyType (int, 4 bytes)
     9: kGeneralTypeType,  # nextType (int, 4 bytes)
 }
 
-kStringOffsetReferenceMap = {
+StringOffsetReferenceMap = {
     0: None,              # inUse (bool, 1 byte)
-    1: kStringType,         # previousBlock (int, 4 bytes)
+    1: kStringType,       # previousBlock (int, 4 bytes)
     5: None,              # length (int, 4 bytes)
-    9: kStringType,         # nextBlock (int, 4 bytes)
+    9: kStringType,       # nextBlock (int, 4 bytes)
 }
 
-kNodeOffsetReferenceMap = {
+NodeOffsetReferenceMap = {
     0: None,              # inUse (bool, 1 byte)
     1: kRelationship,     # nextRelId (int, 4 bytes)
     5: kProperty,         # nextPropId (int, 4 bytes)
     9: kGeneralType,      # nodeType (int, 4 bytes)
 }
 
-kPropertyOffsetReferenceMap = {
-    0: None,                     # inUse (bool, 1 byte)
-    1: None,                     # type (int, 4 bytes)
+PropertyOffsetReferenceMap = {
+    0: None,                       # inUse (bool, 1 byte)
+    1: None,                       # type (int, 4 bytes)
     5: kStringType,                # nameId (int, 4 bytes)
-    9: kProperty,                # prevPropId (int, 4 bytes)
-    13: kProperty,               # nextPropId (int, 4 bytes)
+    9: kProperty,                  # prevPropId (int, 4 bytes)
+    13: kProperty,                 # nextPropId (int, 4 bytes)
     17: (kStringType, kArrayType)  # propBlockId (4 bytes: data, strId, arrayId)
 }
 
-kRelationshipOffsetReferenceMap = {
+RelationshipOffsetReferenceMap = {
     0: None,               # inUse_direction (bool, 1 byte)
     1: kNode,              # firstNode (int, 4 bytes)
     5: kNode,              # secondNode (int, 4 bytes)
@@ -176,39 +180,49 @@ kRelationshipOffsetReferenceMap = {
 
 # ---------------------------- Type -> Offset Maps --------------------------- #
 
-kArrayTypeReferenceMap = {
+ArrayTypeReferenceMap = {
     kArrayType: [2, 14]
 }
 
-kGeneralTypeReferenceMap = {
+GeneralTypeReferenceMap = {
     kStringType: [1],
     kGeneralTypeType: [5],
 }
 
-kGeneralTypeTypeTypeReferenceMap = {
+GeneralTypeTypeReferenceMap = {
     kStringType: [1],
     kGeneralTypeType: [9],
 }
 
-kStringTypeReferenceMap = {
+StringTypeReferenceMap = {
     kStringType: [1, 9],
 }
 
-kNodeTypeReferenceMap = {
+NodeTypeReferenceMap = {
     kRelationship: [1],
     kProperty: [5],
     kGeneralType: [9],
 }
 
-kPropertyTypeReferenceMap = {
+PropertyTypeReferenceMap = {
     kStringType: [5],
     kProperty: [9, 13],
-    (kStringType, kArrayType): [17],
+    kPayload: [kPropertyPayloadOffset],
 }
 
-kRelationshipTypeReferenceMap = {
+RelationshipTypeReferenceMap = {
     kNode: [1, 5],
     kGeneralType: [9],
     kRelationship: [13, 17, 21, 25],
     kProperty: [29],
+}
+
+TypeReferenceMap = {
+    kArrayType: ArrayTypeReferenceMap,
+    kGeneralType: GeneralTypeReferenceMap,
+    kGeneralTypeType: GeneralTypeTypeReferenceMap,
+    kStringType: StringTypeReferenceMap,
+    kNode: NodeTypeReferenceMap,
+    kProperty: PropertyTypeReferenceMap,
+    kRelationship: RelationshipTypeReferenceMap,
 }
