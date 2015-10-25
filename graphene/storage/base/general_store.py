@@ -142,7 +142,7 @@ class GeneralStore(object):
         :param index: Index to get data from
         :type index: int
         :return: Raw data from file
-        :rtype: bytes
+        :rtype: str
         """
         if index == 0:
             raise ValueError("Item cannot be read from index 0")
