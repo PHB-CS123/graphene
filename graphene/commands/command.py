@@ -1,5 +1,5 @@
 import abc
-
+import sys
 
 class Command(object):
 
@@ -14,5 +14,5 @@ class Command(object):
         return "[Command]"
 
     @abc.abstractmethod
-    def execute(self, storage_manager, timer=None):
+    def execute(self, storage_manager, output=sys.stdout, timer=None):
         pass

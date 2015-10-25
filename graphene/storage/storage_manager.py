@@ -6,6 +6,7 @@ from graphene.storage import *
 from graphene.storage.base.property import Property
 from graphene.storage.intermediate import *
 
+
 class StorageManager:
     # Maximum size of the cache (in items)
     MAX_CACHE_SIZE = 10000
