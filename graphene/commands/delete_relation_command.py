@@ -1,3 +1,5 @@
+import sys
+
 from graphene.commands.relation_iterator import *
 
 class DeleteRelationCommand(RelationIterator):
@@ -8,7 +10,7 @@ class DeleteRelationCommand(RelationIterator):
         super(DeleteRelationCommand, self).__init__(rel_type, query_chain,
                                                     left_node, right_node)
 
-    def execute(self, storage_manager, timer=None):
+    def execute(self, storage_manager, output=sys.stdout, timer=None):
         """
         Deletes the relationships obtained from the relation iterator
 

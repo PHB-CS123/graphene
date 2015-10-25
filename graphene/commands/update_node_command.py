@@ -1,4 +1,5 @@
 import logging
+import sys
 
 from graphene.commands.command import Command
 from graphene.expressions.match_node import MatchNode
@@ -19,7 +20,7 @@ class UpdateNodeCommand(Command):
 
         self.logger = logging.getLogger(self.__class__.__name__)
 
-    def execute(self, storage_manager, timer=None):
+    def execute(self, storage_manager, output=sys.stdout, timer=None):
         """
         Checks that the given update values are valid, and converts the given
         values into properties that can be stored. Then performs update.
