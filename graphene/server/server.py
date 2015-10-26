@@ -67,7 +67,8 @@ class GrapheneServer:
         """
         Executes a series of commands.
 
-        :param str data: The data coming in from the client or other input
+        :param data: The data coming in from the client or other input
+        :type data: str
         :return: True if more commands will be accepted, False if an error occurred.
         :rtype: bool
         """
