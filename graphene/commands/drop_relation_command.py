@@ -1,3 +1,5 @@
+import sys
+
 from graphene.commands.command import Command
 
 class DropRelationCommand(Command):
@@ -7,5 +9,5 @@ class DropRelationCommand(Command):
     def __init__(self, data):
         self.rel_name = data.t
 
-    def execute(self, storage_manager, timer=None):
+    def execute(self, storage_manager, output=sys.stdout, timer=None):
         storage_manager.delete_relationship_type(self.rel_name)

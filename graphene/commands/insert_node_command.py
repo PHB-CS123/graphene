@@ -1,17 +1,18 @@
 from __future__ import print_function
+import logging
+import sys
+
 from graphene.commands.command import Command
 from graphene.storage import Property
 from graphene.utils.conversion import TypeConversion
 from graphene.errors import BadPropertyException, TypeMismatchException
-import logging
-import sys
 
 class InsertNodeCommand(Command):
     def __init__(self, node_prop_list):
         self.node_prop_list = node_prop_list
         self.logger = logging.getLogger(self.__class__.__name__)
 
-    def execute(self, storage_manager, timer=None):
+    def execute(self, storage_manager, output=sys.stdout, timer=None):
         final_types, final_props = [], []
         self.logger.debug("node_prop_list: " % self.node_prop_list)
         for nodeprop in self.node_prop_list:
