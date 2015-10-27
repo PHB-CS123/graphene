@@ -5,6 +5,7 @@ from graphene.errors.storage_manager_errors import *
 from graphene.storage import *
 from graphene.storage.base.property import Property
 from graphene.storage.intermediate import *
+from graphene.storage.defrag.defrag_helpers import *
 
 
 class StorageManager:
@@ -52,8 +53,8 @@ class StorageManager:
 
         # Create a string manager for string property types
         self.prop_string_manager = \
-            GeneralNameManager(self.PROP_STORE_STRINGS_FILENAME,
-                               self.STRING_BLOCK_SIZE)
+            GeneralStringManager(self.PROP_STORE_STRINGS_FILENAME,
+                                 self.STRING_BLOCK_SIZE)
 
         # Create object managers
         self.node_manager = GeneralStoreManager(NodeStore())
@@ -235,7 +236,7 @@ class StorageManager:
             type_type_name_manager = self.relTypeTypeNameManager
 
         # Make sure the type does not already exists
-        if type_name_manager.find_name(type_name) is not None:
+        if type_name_manager.find_string(type_name) is not None:
             # The type name already exists!
             if node_flag:
                 raise TypeAlreadyExistsException(
@@ -243,7 +244,7 @@ class StorageManager:
             else:
                 raise TypeAlreadyExistsException(
                     "Relation %s already exists!" % type_name)
-        name_index = type_name_manager.write_name(type_name)
+        name_index = type_name_manager.write_string(type_name)
 
         if len(schema) > 0:
             ids = type_type_manager.get_indexes(len(schema))
@@ -253,7 +254,7 @@ class StorageManager:
                 # Replace array syntax with Array following the array type
                 if tt_type.find("[]") > -1:
                     tt_type = tt_type.replace("[]", "Array")
-                tt_name_id = type_type_name_manager.write_name(tt_name)
+                tt_name_id = type_type_name_manager.write_string(tt_name)
                 kwargs = {
                     "property_type": Property.PropertyType[tt_type],
                     "type_name": tt_name_id,
@@ -297,11 +298,11 @@ class StorageManager:
 
             # Note: type_type.typeName is the index of the type name in node type
             # type name manager, so the following does not suffice.
-            # self.prop_string_manager.delete_name_at_index(type_type.typeName)
+            # self.prop_string_manager.delete_string_at_index(type_type.typeName)
             pass
         # TODO: same for array type_type
 
-        type_type_name_manager.delete_name_at_index(type_type.typeName)
+        type_type_name_manager.delete_string_at_index(type_type.typeName)
         type_type_manager.delete_item(type_type)
 
     def delete_type(self, type_name, node_flag):
@@ -334,7 +335,7 @@ class StorageManager:
         for node in self.get_nodes_of_type(type_data):
             del cache[node.index]
         cache.sync()  # Sync nodeprop cache
-        type_name_manager.delete_name_at_index(type_data.nameId)
+        type_name_manager.delete_string_at_index(type_data.nameId)
         type_manager.delete_item(type_data)
 
     def get_type_data(self, type_name, node_flag):
@@ -371,7 +372,7 @@ class StorageManager:
                 cur_type = None
                 break
             if cur_type is not None and \
-               type_name_manager.read_name_at_index(cur_type.nameId) == type_name:
+               type_name_manager.read_string_at_index(cur_type.nameId) == type_name:
                 break
             idx += 1
         if cur_type is None:
@@ -383,7 +384,7 @@ class StorageManager:
         while cur_type_type_id != 0:
             cur_type_type = type_type_manager.get_item_at_index(cur_type_type_id)
             cur_type_type_name = type_type_name_manager\
-                .read_name_at_index(cur_type_type.typeName)
+                .read_string_at_index(cur_type_type.typeName)
             schema.append(
                 (cur_type_type, cur_type_type_name, cur_type_type.propertyType))
             cur_type_type_id = cur_type_type.nextType
@@ -423,7 +424,7 @@ class StorageManager:
                 # String, so write name
                 if prop_type == Property.PropertyType.string:
                     kwargs["prop_block_id"] = \
-                        self.prop_string_manager.write_name(prop_val)
+                        self.prop_string_manager.write_string(prop_val)
                 # Array, so use array manager
                 elif prop_type.value >= Property.PropertyType.intArray.value:
                     kwargs["prop_block_id"] = \
@@ -467,7 +468,7 @@ class StorageManager:
         :rtype: Any
         """
         if prop.type == Property.PropertyType.string:
-            return self.prop_string_manager.read_name_at_index(prop.propBlockId)
+            return self.prop_string_manager.read_string_at_index(prop.propBlockId)
         elif prop.type.value >= Property.PropertyType.intArray.value:
             return self.array_manager.read_array_at_index(prop.propBlockId)
         else:
@@ -487,7 +488,7 @@ class StorageManager:
         node, properties = nodeprop
         node_type = self.nodeTypeManager.get_item_at_index(node.nodeType)
         type_name = self.nodeTypeNameManager.\
-            read_name_at_index(node_type.nameId)
+            read_string_at_index(node_type.nameId)
         properties = map(self.get_property_value, properties)
         return NodeProperty(node, properties, node_type, type_name)
 
@@ -498,7 +499,7 @@ class StorageManager:
         :param node_type: Type index of node
         :type node_type: int
         :return: NodeProperty generator
-        :rtype: NodeProperty
+        :rtype: list[NodeProperty]
         """
         i = 1
         while True:
@@ -540,7 +541,7 @@ class StorageManager:
                     # TODO: Why are new relation property names not getting
                     # written?
                     prop_kwargs["prop_block_id"] = \
-                        self.prop_string_manager.write_name(prop_val)
+                        self.prop_string_manager.write_string(prop_val)
                 # array, so use array manager
                 elif prop_type.value >= Property.PropertyType.intArray.value:
                     prop_kwargs["prop_block_id"] = \
@@ -625,7 +626,7 @@ class StorageManager:
         rel, properties = relprop
         rel_type = self.relTypeManager.get_item_at_index(rel.relType)
         type_name = self.relTypeNameManager.\
-            read_name_at_index(rel_type.nameId)
+            read_string_at_index(rel_type.nameId)
         properties = map(self.get_property_value, properties)
         return RelationProperty(rel, properties, rel_type, type_name)
 
@@ -720,7 +721,7 @@ class StorageManager:
         if prop.type == Property.PropertyType.string:
             # The property has a string type, so we have to make sure we delete
             # that string
-            self.prop_string_manager.delete_name_at_index(prop.propBlockId)
+            self.prop_string_manager.delete_string_at_index(prop.propBlockId)
         elif prop.type.value >= Property.PropertyType.intArray.value:
             # Property has an array type, so delete the array
             self.array_manager.delete_array_at_index(prop.propBlockId)
@@ -836,7 +837,7 @@ class StorageManager:
                 # String, so update name
                 if prop.is_string():
                     self.prop_string_manager.\
-                        update_name_at_index(old_val, new_val)
+                        update_string_at_index(old_val, new_val)
                 # Array, so use array manager
                 elif prop.is_array():
                     self.array_manager.\

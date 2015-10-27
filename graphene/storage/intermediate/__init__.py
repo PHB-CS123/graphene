@@ -5,3 +5,4 @@ from graphene.storage.intermediate.node_property_store import NodePropertyStore
 from graphene.storage.intermediate.relationship_property_store import RelationshipPropertyStore
 from graphene.storage.intermediate.node_property import NodeProperty
 from graphene.storage.intermediate.relation_property import RelationProperty
+from graphene.storage.intermediate.general_string_manager import GeneralStringManager

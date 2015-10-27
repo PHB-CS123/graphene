@@ -60,3 +60,13 @@ class GeneralType:
         if self.firstType != 0:
             data.append("first_type = %d" % self.firstType)
         return "[%s]" % " | ".join(data)
+
+    def list(self):
+        """
+        List the items that this type contains, excluding the index. This is
+        essentially how it's stored on disk
+
+        :return: List of data contained in this type
+        :rtype: list
+        """
+        return [self.inUse, self.nameId, self.firstType]
