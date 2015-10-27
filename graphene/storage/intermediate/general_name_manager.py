@@ -1,5 +1,6 @@
 from graphene.storage.intermediate.string_manager import *
 
+
 class GeneralNameManager(StringManager):
     """
     Handles reading/writing variable-length names (ASCII strings)

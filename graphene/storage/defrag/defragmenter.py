@@ -139,11 +139,16 @@ class Defragmenter:
             prev_ending = offset + ref_size
         # Append any remaining packed data
         new_packed_data += packed_data[prev_ending:]
-        # Edge case: defragmenting a string type and updating a property store
+        # Edge Case: defragmenting a string type and updating a property store.
+        # Property may contain a string reference
         if defrag_type == kStringType and store_type == kProperty:
             new_packed_data = \
                 self.handle_prop_payload_reference(swap_table, new_packed_data)
-
+        # Edge Case: defragmenting a string type and updating an array store.
+        # Array may be a string array containing string references
+        if defrag_type == kStringType and store_type == kArrayType:
+            new_packed_data = \
+                self.handle_string_array_references(swap_table, new_packed_data)
         return new_packed_data
 
     def fix_references(self, swap_table, base_store, ref_map, id_fix_range):
@@ -195,7 +200,6 @@ class Defragmenter:
         :return: Nothing
         :rtype: None
         """
-        # TODO: handle property payload (string, array, or data type)
         for store in self.referencingStores:
             ref_map = TypeReferenceMap[store.STORAGE_TYPE.__name__]
             id_fix_range = xrange(1, store.count() + 1)
@@ -240,6 +244,10 @@ class Defragmenter:
         return packed_data[:kPropertyPayloadOffset] + \
             self.referenceStruct.pack(swap_table[old_ref]) + \
             packed_data[kPropertyPayloadOffset + self.referenceStruct.size:]
+
+    def handle_string_array_references(self, swap_table, packed_data):
+        # TODO
+        return packed_data
 
     def value_at_offset(self, packed_data, offset):
         """

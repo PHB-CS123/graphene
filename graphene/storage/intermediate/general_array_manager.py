@@ -4,6 +4,7 @@ from graphene.storage.base.array_store import *
 from itertools import chain
 import logging
 
+
 class GeneralArrayManager:
     """
     Handles reading/writing every type of array

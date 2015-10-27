@@ -349,7 +349,7 @@ class TestStorageManagerMethods(unittest.TestCase):
             map(self.sm.property_manager.get_item_at_index,
                 map(lambda p: p.index, rp2)))
         self.assertIsNoneOrEOF(self.sm.prop_string_manager.read_string_at_index(rp2[1].propBlockId))
-        self.assertIsNoneOrEOF(self.sm.array_manager.read_array_at_index(rp2[2].propBlockId))
+        self.assertIsNoneOrEOF(self.sm.prop_array_manager.read_array_at_index(rp2[2].propBlockId))
 
         self.assertEqual(r3.secondNextRelId, 0)
         self.assertEqual(r1.firstPrevRelId, 0)
@@ -364,7 +364,7 @@ class TestStorageManagerMethods(unittest.TestCase):
             map(self.sm.property_manager.get_item_at_index,
                 map(lambda p: p.index, rp3)))
         self.assertIsNoneOrEOF(self.sm.prop_string_manager.read_string_at_index(rp3[1].propBlockId))
-        self.assertIsNoneOrEOF(self.sm.array_manager.read_array_at_index(rp3[2].propBlockId))
+        self.assertIsNoneOrEOF(self.sm.prop_array_manager.read_array_at_index(rp3[2].propBlockId))
 
         self.assertEqual(n3.relId, 0)
         self.assertEqual(n2.relId, r1i)
@@ -378,7 +378,7 @@ class TestStorageManagerMethods(unittest.TestCase):
             map(self.sm.property_manager.get_item_at_index,
                 map(lambda p: p.index, rp1)))
         self.assertIsNoneOrEOF(self.sm.prop_string_manager.read_string_at_index(rp1[1].propBlockId))
-        self.assertIsNoneOrEOF(self.sm.array_manager.read_array_at_index(rp1[2].propBlockId))
+        self.assertIsNoneOrEOF(self.sm.prop_array_manager.read_array_at_index(rp1[2].propBlockId))
 
         self.assertEqual(n1.relId, 0)
         self.assertEqual(n2.relId, 0)
@@ -836,7 +836,7 @@ class TestStorageManagerMethods(unittest.TestCase):
         :rtype: bool
         """
         string_manager = storage_manager.prop_string_manager
-        array_manager = storage_manager.array_manager
+        array_manager = storage_manager.prop_array_manager
 
         for index, new_val in updates.iteritems():
             prop = properties[index]

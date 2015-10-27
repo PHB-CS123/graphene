@@ -18,6 +18,7 @@ kStringType = String.__name__
 kNode = Node.__name__
 kProperty = Property.__name__
 kRelationship = Relationship.__name__
+
 kPayload = (kStringType, kArrayType)
 
 
@@ -122,12 +123,13 @@ def offset_descriptor_for_class(c):
 # ---------------------------- Offset -> Type Maps --------------------------- #
 
 ArrayOffsetReferenceMap = {
-    0: None,         # inUse (bool, 1 byte)
-    1: None,         # type  (char, 1 byte)
-    2: kArrayType,   # previousBlock (int, 4 bytes)
-    6: None,         # amount (int, 4 bytes)
-    10: None,        # blocks (int, 4 bytes)
-    14: kArrayType,  # nextBlock (int, 4 bytes)
+    0: None,                  # inUse (bool, 1 byte)
+    1: None,                  # type  (char, 1 byte)
+    2: kArrayType,            # previousBlock (int, 4 bytes)
+    6: None,                  # amount (int, 4 bytes)
+    10: None,                 # blocks (int, 4 bytes)
+    14: kArrayType,           # nextBlock (int, 4 bytes)
+    18: (None, kStringType)   # Payload (primitives or str references, any size)
 }
 
 GeneralTypeOffsetReferenceMap = {
@@ -148,6 +150,7 @@ StringOffsetReferenceMap = {
     1: kStringType,       # previousBlock (int, 4 bytes)
     5: None,              # length (int, 4 bytes)
     9: kStringType,       # nextBlock (int, 4 bytes)
+    13: None              # Payload (part of string, any size)
 }
 
 NodeOffsetReferenceMap = {
@@ -179,9 +182,12 @@ RelationshipOffsetReferenceMap = {
 }
 
 # ---------------------------- Type -> Offset Maps --------------------------- #
+# ** Reference maps denote the types that these types reference, not
+# ** what types references these types.
 
 ArrayTypeReferenceMap = {
-    kArrayType: [2, 14]
+    kArrayType: [2, 14],
+    kStringType: [18],
 }
 
 GeneralTypeReferenceMap = {

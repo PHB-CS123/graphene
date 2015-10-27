@@ -60,7 +60,7 @@ class StorageManager:
         self.node_manager = GeneralStoreManager(NodeStore())
         self.property_manager = GeneralStoreManager(PropertyStore())
         self.relationship_manager = GeneralStoreManager(RelationshipStore())
-        self.array_manager = GeneralArrayManager()
+        self.prop_array_manager = GeneralArrayManager()
 
         # Create combined object managers along with their cache handlers
         nodeprop = NodePropertyStore(self)
@@ -116,7 +116,7 @@ class StorageManager:
         del self.node_manager
         del self.property_manager
         del self.relationship_manager
-        del self.array_manager
+        del self.prop_array_manager
 
         # Delete the node type managers
         del self.nodeTypeManager
@@ -428,7 +428,7 @@ class StorageManager:
                 # Array, so use array manager
                 elif prop_type.value >= Property.PropertyType.intArray.value:
                     kwargs["prop_block_id"] = \
-                        self.array_manager.write_array(prop_val, prop_type)
+                        self.prop_array_manager.write_array(prop_val, prop_type)
                 # Otherwise primitive
                 else:
                     kwargs["prop_block_id"] = prop_val
@@ -470,7 +470,7 @@ class StorageManager:
         if prop.type == Property.PropertyType.string:
             return self.prop_string_manager.read_string_at_index(prop.propBlockId)
         elif prop.type.value >= Property.PropertyType.intArray.value:
-            return self.array_manager.read_array_at_index(prop.propBlockId)
+            return self.prop_array_manager.read_array_at_index(prop.propBlockId)
         else:
             return prop.propBlockId
 
@@ -545,7 +545,7 @@ class StorageManager:
                 # array, so use array manager
                 elif prop_type.value >= Property.PropertyType.intArray.value:
                     prop_kwargs["prop_block_id"] = \
-                        self.array_manager.write_array(prop_val, prop_type)
+                        self.prop_array_manager.write_array(prop_val, prop_type)
                 else:
                     prop_kwargs["prop_block_id"] = prop_val
                 stored_prop = self.property_manager.create_item(**prop_kwargs)
@@ -724,7 +724,7 @@ class StorageManager:
             self.prop_string_manager.delete_string_at_index(prop.propBlockId)
         elif prop.type.value >= Property.PropertyType.intArray.value:
             # Property has an array type, so delete the array
-            self.array_manager.delete_array_at_index(prop.propBlockId)
+            self.prop_array_manager.delete_array_at_index(prop.propBlockId)
 
         # Delete property itself
         self.property_manager.delete_item(prop)
@@ -840,7 +840,7 @@ class StorageManager:
                         update_string_at_index(old_val, new_val)
                 # Array, so use array manager
                 elif prop.is_array():
-                    self.array_manager.\
+                    self.prop_array_manager.\
                         update_array_at_index(old_val, new_val)
                 # Otherwise primitive
                 else:
