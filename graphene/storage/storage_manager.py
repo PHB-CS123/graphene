@@ -15,27 +15,27 @@ class StorageManager:
     # Filename for the node type store
     NODE_TYPE_STORE_FILENAME = "graphenestore.nodetypestore.db"
     # Filename for the dynamic name manager for node type names store
-    NODE_TYPE_STORE_NAMES_FILENAME = "graphenestore.nodetypestore.db.names"
+    NODE_TYPE_STORE_NAMES_FILENAME = "graphenestore.nodetypestore.names.db"
     # Filename for the store manager for types of node types
     NODE_TYPE_TYPE_STORE_FILENAME = "graphenestore.nodetypestore.types.db"
     # Filename for the dynamic name manager for types of node types
     NODE_TYPE_TYPE_STORE_NAMES_FILENAME = \
-        "graphenestore.nodetypestore.types.db.names"
+        "graphenestore.nodetypestore.types.names.db"
 
     # Filename for the relationship type store
     RELATIONSHIP_TYPE_STORE_FILENAME = "graphenestore.relationshiptypestore.db"
     # Filename for the dynamic name manager for relationship type names store
     RELATIONSHIP_TYPE_STORE_NAMES_FILENAME = \
-        "graphenestore.relationshiptypestore.db.names"
+        "graphenestore.relationshiptypestore.names.db"
     # Filename for the store manager for types of relationship types
     RELATIONSHIP_TYPE_TYPE_STORE_FILENAME = \
         "graphenestore.relationshiptypestore.types.db"
     # Filename for the dynamic name manager for types of relationship types
     RELATIONSHIP_TYPE_TYPE_STORE_NAMES_FILENAME = \
-        "graphenestore.relationshiptypestore.types.db.names"
+        "graphenestore.relationshiptypestore.types.names.db"
 
     # Filename for the dynamic string property manager
-    PROP_STORE_STRINGS_FILENAME = "graphenestore.propertystore.db.strings"
+    PROP_STORE_STRINGS_FILENAME = "graphenestore.propertystore.strings.db"
 
     # Size of name blocks
     NAME_BLOCK_SIZE = 10
@@ -640,7 +640,7 @@ class StorageManager:
             if relation is not None and relation.type == relation_type:
                 yield relation
 
-# --- Deletion methods --- #
+# --- Deletion Methods --- #
     def update_relation_links(self, node_id, prev_rel_id, next_rel_id):
         """
         Update the linked lists this relation was attached to for a given node
@@ -800,7 +800,7 @@ class StorageManager:
         """
         self.update_properties(relprops, updates, False)
 
-# --- Update methods --- #
+# --- Update Methods --- #
     def update_properties(self, itemprops, updates, node_flag):
         """
         Updates the given nodes or relationship properties
