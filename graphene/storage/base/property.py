@@ -72,13 +72,7 @@ class Property:
         :rtype: bool
         """
         if isinstance(other, self.__class__):
-            return (self.index == other.index) and \
-                   (self.inUse == other.inUse) and \
-                   (self.type == other.type) and \
-                   (self.nameId == other.nameId) and \
-                   (self.prevPropId == other.prevPropId) and\
-                   (self.nextPropId == other.nextPropId) and \
-                   (self.propBlockId == other.propBlockId)
+            return (self.index == other.index) and self.equal_payload(other)
         else:
             return False
 
@@ -103,6 +97,23 @@ class Property:
                 self.nextPropId, self.propBlockId)
         return "Property: %d. Type: %s, nameID: %s, prevPropertyID: %s, " \
                "nextPropertyID: %s, propBlockID: %s" % args
+
+    def equal_payload(self, other):
+        """
+        Returns true if the payload of the this property equals that of the
+        other property.
+
+        :param other: Other property
+        :type other: Property
+        :return: True if equal, False otherwise
+        :rtype: bool
+        """
+        return (self.inUse == other.inUse) and \
+               (self.type == other.type) and \
+               (self.nameId == other.nameId) and \
+               (self.prevPropId == other.prevPropId) and\
+               (self.nextPropId == other.nextPropId) and \
+               (self.propBlockId == other.propBlockId)
 
     def list(self):
         """

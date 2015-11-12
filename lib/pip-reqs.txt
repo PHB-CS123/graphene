@@ -8,3 +8,4 @@ python-coveralls
 names
 colorama
 coverage==3.7.1
+mock

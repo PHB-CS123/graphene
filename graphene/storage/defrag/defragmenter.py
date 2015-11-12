@@ -42,10 +42,12 @@ class Defragmenter:
         :return: Nothing
         :rtype: None
         """
-        # Get total number of blocks (excluding 0)
-        total_num_blocks = self.baseStore.count()
         # Get IDs of empty blocks
         empty_blocks = sorted(self.idStore.get_all_ids())
+        # We're done if there are no empty blocks to defragment
+        if len(empty_blocks) == 0: return
+        # Get total number of blocks (excluding 0)
+        total_num_blocks = self.baseStore.count()
         # Get IDs of full blocks
         full_blocks = self.full_blocks(empty_blocks, total_num_blocks)
         # Split into continuous IDs and non-continuous ids from full IDs
@@ -122,8 +124,8 @@ class Defragmenter:
         defrag_type = self.baseStore.STORAGE_TYPE.__name__
         # Size of the reference struct (4 bytes)
         ref_size = self.referenceStruct.size
-        assert(defrag_type in ref_map,
-               "Can't update defrag references if reference map has none")
+        assert defrag_type in ref_map, \
+               "Can't update defrag references if reference map has none"
         # New packed data after updates
         new_packed_data = ""
         prev_ending = 0
@@ -175,8 +177,8 @@ class Defragmenter:
         # its name at offset 5, and may or may not have a reference to a String
         # in its payload.
         if not ref_map:
-            assert(self.baseStore.STORAGE_TYPE.__name__ == kArrayType,
-                   "Only arrays are allowed to have no reference map")
+            assert self.baseStore.STORAGE_TYPE.__name__ == kArrayType, \
+                   "Only arrays are allowed to have no reference map"
             # Update the property payloads for the array type
             self.handle_prop_payload_references(swap_table, base_store,
                                                 id_fix_range)
@@ -295,9 +297,9 @@ class Defragmenter:
         :return: List of full blocks
         :rtype: list[int]
         """
-        # Get a list of all the IDs, it's total_blocks - 1 because offsets go
-        # up to the total number of blocks - 1
-        all_ids = set(range(1, total_blocks - 1))
+        # Get a list of all the IDs, it's range(1, total_blocks + 1) because
+        # offsets go up to the total number of blocks
+        all_ids = set(range(1, total_blocks + 1))
         return [i for i in all_ids if i not in empty_ids]
 
     @staticmethod
@@ -314,25 +316,25 @@ class Defragmenter:
         :return: List of non-continuous IDs
         :rtype: (list[int],list[int])
         """
-        for idx, i in enumerate(sorted(ids)):
+        # We're 1-indexing since block 0 is always empty
+        for idx, i in enumerate(sorted(ids), 1):
             if idx != i:
-                return ids[:idx], ids[idx:]
+                return ids[:idx-1], ids[idx-1:]
         return ids, []
 
     @staticmethod
-    def create_swap_table(full_non_continuous_blocks, empty_blocks):
+    def create_swap_table(full_non_cont_blocks, empty_blocks):
         """
         Creates a swap table mapping fragmented block IDs to their new
         destination
 
-        :param full_non_continuous_blocks: Sorted list IDs of full
-                                           non-continuous blocks
-        :type full_non_continuous_blocks: list[int]
+        :param full_non_cont_blocks: Sorted IDs of full non-continuous blocks
+        :type full_non_cont_blocks: list[int]
         :param empty_blocks: Sorted list of IDs of empty blocks
         :type empty_blocks: list[int]
         :return: Dictionary of src->dest index maps for the swaps needed
         :rtype: dict[int,int]
         """
-        num_swaps = len(full_non_continuous_blocks)
-        new_slots = list(range(empty_blocks[0], num_swaps))
-        return dict(zip(full_non_continuous_blocks, new_slots))
+        num_swaps = len(full_non_cont_blocks)
+        new_slots = list(range(empty_blocks[0], empty_blocks[0] + num_swaps))
+        return dict(zip(full_non_cont_blocks, new_slots))
