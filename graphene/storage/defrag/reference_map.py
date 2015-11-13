@@ -32,7 +32,7 @@ class HeaderType(Enum):
 # --------------------------------- Constants -------------------------------- #
 
 kPropertyTypeOffset = 1
-kPropertyPayloadOffset = 17
+kPropertyPayloadOffset = 14
 
 # ----------------------------- Offset Descriptor ---------------------------- #
 
@@ -211,8 +211,8 @@ NodeTypeReferenceMap = {
 }
 
 PropertyTypeReferenceMap = {
-    kStringType: [5],
-    kProperty: [9, 13],
+    kStringType: [2],
+    kProperty: [6, 10],
     kPayload: [kPropertyPayloadOffset],
 }
 

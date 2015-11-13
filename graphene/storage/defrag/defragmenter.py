@@ -63,13 +63,12 @@ class Defragmenter:
         # File should not have any remaining ids, clear id store
         self.idStore.clear()
         # Fix self references in this store (if any)
-        if not self.shouldUpdateSelfRef:
-            # The remaining self-reference offsets that were not updated are the
-            # full continuous blocks that were not swapped).
-            # These references weren't fixed since they weren't loaded into RAM
-            remaining_ref_range = xrange(1, max(full_cont_blocks) + 1, 1)
+        if self.shouldUpdateSelfRef:
+            # Remaining self-reference offsets that need to be updated
+            rem_ref_range = self.remaining_references(full_cont_blocks,
+                                                      self.baseStore.count())
             self.fix_references(swap_table, self.baseStore,
-                                self.referenceMap, remaining_ref_range)
+                                self.referenceMap, rem_ref_range)
         # Fix the references in any of the files that reference this store
         self.fix_external_references(swap_table)
 
@@ -115,6 +114,8 @@ class Defragmenter:
         :type ref_map: dict[str, list[int]]
         :param packed_data: Packed data to update
         :type packed_data: str
+        :param swap_table: Dictionary of src->dest index maps for updates needed
+        :type swap_table: dict[int, int]
         :param store_type: STORAGE_TYPE.__name__ of the packed data's store
         :type store_type: str
         :return: Updated packed data
@@ -125,7 +126,7 @@ class Defragmenter:
         # Size of the reference struct (4 bytes)
         ref_size = self.referenceStruct.size
         assert defrag_type in ref_map, \
-               "Can't update defrag references if reference map has none"
+            "Can't update defrag references if reference map has none"
         # New packed data after updates
         new_packed_data = ""
         prev_ending = 0
@@ -338,3 +339,22 @@ class Defragmenter:
         num_swaps = len(full_non_cont_blocks)
         new_slots = list(range(empty_blocks[0], empty_blocks[0] + num_swaps))
         return dict(zip(full_non_cont_blocks, new_slots))
+
+    @staticmethod
+    def remaining_references(full_cont_blocks, new_block_amt):
+        """
+        The remaining self-reference offsets that were not updated are the
+        full continuous blocks that were not swapped).
+        These references weren't fixed since they weren't loaded into RAM
+
+        :param full_cont_blocks: IDs of full continuous blocks
+        :type full_cont_blocks: list[int]
+        :param new_block_amt: Number of blocks in the new, defragmented file
+        :type new_block_amt: int
+        :return: IDs of remaining references to be updated
+        :rtype: xrange
+        """
+        if len(full_cont_blocks) == 0:
+            return xrange(1, new_block_amt)
+        else:
+            return xrange(1, max(full_cont_blocks) + 1, 1)
