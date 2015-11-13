@@ -1,4 +1,4 @@
-from graphene.storage.intermediate.general_name_manager import *
+from graphene.storage.intermediate.general_string_manager import *
 from graphene.storage.base.array_store import *
 
 from itertools import chain
@@ -10,7 +10,7 @@ class GeneralArrayManager:
     Handles reading/writing every type of array
     """
 
-    STR_ARRAY_FILENAME = "graphenestore.arraystore.strings.db"
+    STR_ARRAY_FILENAME = "graphenestore.propertystore.array.strings.db"
 
     def __init__(self, block_size=40, string_block_size=10):
         # Size of array blocks. Must be a multiple of 8
@@ -18,8 +18,8 @@ class GeneralArrayManager:
         # Create a manager for the array store
         self.storeManager = GeneralStoreManager(ArrayStore(block_size))
         # Create a manager for the strings in string arrays
-        self.stringStoreManager = GeneralNameManager(self.STR_ARRAY_FILENAME,
-                                                     string_block_size)
+        self.stringStoreManager = GeneralStringManager(self.STR_ARRAY_FILENAME,
+                                                       string_block_size)
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def __del__(self):
