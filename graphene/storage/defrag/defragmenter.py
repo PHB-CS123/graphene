@@ -354,6 +354,5 @@ class Defragmenter:
         :return: IDs of remaining references to be updated
         :rtype: xrange
         """
-
         return [] if len(full_cont_blocks) == 0 \
             else xrange(1, max(full_cont_blocks) + 1, 1)
