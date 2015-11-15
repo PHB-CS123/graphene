@@ -2,6 +2,7 @@ from pylru import WriteBackCacheManager
 import logging
 
 from graphene.errors.storage_manager_errors import *
+from graphene.errors.query_errors import NonexistentPropertyException
 from graphene.storage import *
 from graphene.storage.base.property import Property
 from graphene.storage.intermediate import *
@@ -848,6 +849,100 @@ class StorageManager:
                     self.property_manager.write_item(prop)
         # Done with updates, clear cache
         cache.clear()
+
+# --- Alter Methods --- #
+    def drop_property(self, type_name, prop_name, node_flag):
+        type_data, type_schema = self.get_type_data(type_name, node_flag)
+
+        # Get the appropriate managers
+        # Deleting a node property
+        if node_flag:
+            cache = self.nodeprop
+            type_manager = self.nodeTypeManager
+            tt_manager = self.nodeTypeTypeManager
+            tt_name_manager = self.nodeTypeTypeNameManager
+            get_items = self.get_nodes_of_type
+        # Deleting a relationship property
+        else:
+            cache = self.relprop
+            type_manager = self.relTypeManager
+            tt_manager = self.relTypeTypeManager
+            tt_name_manager = self.relTypeTypeNameManager
+            get_items = self.get_relations_of_type
+
+        # Here we iterate over the schema of the node/relation to remove the
+        # corresponding property
+        prev_tt_id = None # schemas are singly-linked, so we need to track this
+        cur_tt_id = type_data.firstType
+        tt_index = 0
+        while cur_tt_id != 0:
+            tt = tt_manager.get_item_at_index(cur_tt_id)
+            type_name = tt_name_manager.read_string_at_index(tt.typeName)
+
+            if type_name == prop_name:
+                next_tt_id = tt.nextType
+                if prev_tt_id is not None:
+                    # not the first type
+                    prev_tt = tt_manager.get_item_at_index(prev_tt_id)
+                    prev_tt.nextType = next_tt_id
+                    tt_manager.write_item(prev_tt)
+                else:
+                    # the first type
+                    type_data.firstType = next_tt_id
+                    type_manager.write_item(type_data)
+                self.delete_type_type(tt, node_flag)
+                break
+
+            prev_tt_id = cur_tt_id
+            cur_tt_id = tt.nextType
+            tt_index += 1
+        else:
+            # If we never broke, that means we never found the desired property.
+            raise NonexistentPropertyException("Property with name %s does not exist." % prop_name)
+
+        for item_prop in get_items(type_data):
+            if node_flag:
+                item = item_prop.node
+            else:
+                item = item_prop.rel
+
+            # Now we remove the property from every node of this type.
+            cur_prop_id = item.propId
+            props = []
+            cur_prop_idx = 0
+            while cur_prop_id != 0:
+                prop = self.property_manager.get_item_at_index(cur_prop_id)
+
+                prev_prop_id = cur_prop_id
+                cur_prop_id = prop.nextPropId
+
+                # The properties are linked in the same order as the schema, so
+                # we just need the index.
+                if cur_prop_idx == tt_index:
+                    # Properties are doubly-linked, so we don't need to keep
+                    # track of prev/next.
+                    if prop.prevPropId != 0:
+                        # Not the first property
+                        prev_prop = self.property_manager.get_item_at_index(prop.prevPropId)
+                        prev_prop.nextPropId = prop.nextPropId
+                        self.property_manager.write_item(prev_prop)
+                    else:
+                        # The first property
+                        item.propId = prop.nextPropId
+                    # Actually delete it
+                    self.delete_property(prop)
+                else:
+                    # Otherwise, add it to the property list we'll need to
+                    # update the cache with
+                    props.append(prop)
+
+                cur_prop_idx += 1
+
+            # Update the cache to reflect the new properties
+            cache[item.index] = (item, props)
+        # Sync cache to disk
+        cache.sync()
+
 
 # --- Tools --- #
     def cache_diagnostic(self):

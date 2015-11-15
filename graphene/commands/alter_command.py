@@ -27,7 +27,7 @@ class AlterCommand(Command):
         print "Altering %s %s:" % ("node" if self.node_flag else "relation", self.type_name)
         for mod in self.mods:
             if mod.type == AlterCommand.AlterType.DROP_PROPERTY:
-                print "\tdrop property %s.%s." % (self.type_name, mod.n)
+                storage_manager.drop_property(self.type_name, mod.n, self.node_flag)
             elif mod.type == AlterCommand.AlterType.ADD_PROPERTY:
                 print "\tadd property %s.%s with type %s." % (self.type_name, mod.n, mod.t)
             elif mod.type == AlterCommand.AlterType.CHANGE_PROPERTY:
