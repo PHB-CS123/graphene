@@ -908,12 +908,11 @@ class StorageManager:
 
             # Now we remove the property from every node of this type.
             cur_prop_id = item.propId
-            props = []
+            prop_ids = []
             cur_prop_idx = 0
             while cur_prop_id != 0:
                 prop = self.property_manager.get_item_at_index(cur_prop_id)
 
-                prev_prop_id = cur_prop_id
                 cur_prop_id = prop.nextPropId
 
                 # The properties are linked in the same order as the schema, so
@@ -929,19 +928,30 @@ class StorageManager:
                     else:
                         # The first property
                         item.propId = prop.nextPropId
+
+                    if prop.nextPropId != 0:
+                        # Not the last property
+                        next_prop = self.property_manager.get_item_at_index(prop.nextPropId)
+                        next_prop.prevPropId = prop.prevPropId
+                        self.property_manager.write_item(next_prop)
                     # Actually delete it
                     self.delete_property(prop)
                 else:
                     # Otherwise, add it to the property list we'll need to
-                    # update the cache with
-                    props.append(prop)
+                    # update the cache with. We use ids here rather than the
+                    # actual properties because we need to ensure we have the
+                    # updated value.
+                    prop_ids.append(prop.index)
 
                 cur_prop_idx += 1
 
             # Update the cache to reflect the new properties
+            props = map(self.property_manager.get_item_at_index, prop_ids)
             cache[item.index] = (item, props)
         # Sync cache to disk
         cache.sync()
+
+
 
 
 # --- Tools --- #
