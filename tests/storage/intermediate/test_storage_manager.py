@@ -1,6 +1,7 @@
 import unittest
 
 from graphene.errors.storage_manager_errors import *
+from graphene.errors.query_errors import NonexistentPropertyException
 from graphene.storage import (StorageManager, GrapheneStore, Property,
                               Relationship, Node)
 from graphene.storage.intermediate.node_property import NodeProperty
@@ -884,25 +885,23 @@ class TestStorageManagerMethods(unittest.TestCase):
         self.assertEqual(self.sm.property_manager.get_item_at_index(propIdLeft).nextPropId, propIdRight)
         self.assertEqual(self.sm.property_manager.get_item_at_index(propIdRight).prevPropId, propIdLeft)
 
-    def property_is_first(self, nodeId, propId):
-        self.assertEqual(self.sm.node_manager.get_item_at_index(nodeId).propId, propId)
+    def property_is_first(self, itemId, propId, node_flag):
+        if node_flag:
+            item_manager = self.sm.node_manager
+        else:
+            item_manager = self.sm.relationship_manager
+        self.assertEqual(item_manager.get_item_at_index(itemId).propId, propId)
         self.assertEqual(self.sm.property_manager.get_item_at_index(propId).prevPropId, 0)
 
-    def test_drop_property(self):
-        schema = ( ("a", "string"), ("b", "int"), ("c", "int[]"), ("d", "bool"), ("e", "string[]") )
-        types = (Property.PropertyType.string, Property.PropertyType.int,
-                 Property.PropertyType.intArray, Property.PropertyType.bool,
-                 Property.PropertyType.stringArray)
-        t = self.sm.create_node_type("T", schema)
-        n1, p1 = self.sm.insert_node(t, zip(types, ("foo", 1, [1,2], False, ["bar"])))
-        n2, p2 = self.sm.insert_node(t, zip(types, ("bat", 8, [3], True, [])))
-        n3, p3 = self.sm.insert_node(t, zip(types, ("yar", 3, [], True, ["baz", "qux"])))
+    def drop_property_three_items_five_props(self, name, (i1, p1), (i2, p2), (i3, p3), node_flag):
+        i1i, p1i = i1.index, map(lambda p: p.index, p1)
+        i2i, p2i = i2.index, map(lambda p: p.index, p2)
+        i3i, p3i = i3.index, map(lambda p: p.index, p3)
 
-        n1i, p1i = n1.index, map(lambda p: p.index, p1)
-        n2i, p2i = n2.index, map(lambda p: p.index, p2)
-        n3i, p3i = n3.index, map(lambda p: p.index, p3)
+        with self.assertRaises(NonexistentPropertyException):
+            self.sm.drop_property(name, "foo", node_flag)
 
-        self.sm.drop_property("T", "c", True)
+        self.sm.drop_property(name, "c", node_flag)
 
         self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p1i[2]))
         self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p2i[2]))
@@ -912,17 +911,17 @@ class TestStorageManagerMethods(unittest.TestCase):
         self.properties_attached(p2i[1], p2i[3])
         self.properties_attached(p3i[1], p3i[3])
 
-        self.sm.drop_property("T", "a", True)
+        self.sm.drop_property(name, "a", node_flag)
 
         self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p1i[0]))
         self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p2i[0]))
         self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p3i[0]))
 
-        self.property_is_first(n1i, p1i[1])
-        self.property_is_first(n2i, p2i[1])
-        self.property_is_first(n3i, p3i[1])
+        self.property_is_first(i1i, p1i[1], node_flag)
+        self.property_is_first(i2i, p2i[1], node_flag)
+        self.property_is_first(i3i, p3i[1], node_flag)
 
-        self.sm.drop_property("T", "e", True)
+        self.sm.drop_property(name, "e", node_flag)
 
         self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p1i[4]))
         self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p2i[4]))
@@ -931,3 +930,30 @@ class TestStorageManagerMethods(unittest.TestCase):
         self.assertEqual(self.sm.property_manager.get_item_at_index(p1i[3]).nextPropId, 0)
         self.assertEqual(self.sm.property_manager.get_item_at_index(p2i[3]).nextPropId, 0)
         self.assertEqual(self.sm.property_manager.get_item_at_index(p3i[3]).nextPropId, 0)
+
+
+    def test_drop_property(self):
+        schema = ( ("a", "string"), ("b", "int"), ("c", "int[]"), ("d", "bool"), ("e", "string[]") )
+        types = (Property.PropertyType.string, Property.PropertyType.int,
+                 Property.PropertyType.intArray, Property.PropertyType.bool,
+                 Property.PropertyType.stringArray)
+        data1 = zip(types, ("foo", 1, [1,2], False, ["bar"]))
+        data2 = zip(types, ("bat", 8, [3], True, []))
+        data3 = zip(types, ("yar", 3, [], True, ["baz", "qux"]))
+
+        t = self.sm.create_node_type("T", schema)
+        n1, p1 = self.sm.insert_node(t, data1)
+        n2, p2 = self.sm.insert_node(t, data2)
+        n3, p3 = self.sm.insert_node(t, data3)
+
+        self.drop_property_three_items_five_props("T", (n1, p1), (n2, p2), (n3, p3), True)
+
+        r = self.sm.create_relationship_type("R", schema)
+        r1 = self.sm.insert_relation(r, data1, n1, n2)
+        p1 = self.sm.relprop[r1.index][1]
+        r2 = self.sm.insert_relation(r, data2, n1, n3)
+        p2 = self.sm.relprop[r2.index][1]
+        r3 = self.sm.insert_relation(r, data3, n2, n3)
+        p3 = self.sm.relprop[r3.index][1]
+
+        self.drop_property_three_items_five_props("R", (r1, p1), (r2, p2), (r3, p3), False)
