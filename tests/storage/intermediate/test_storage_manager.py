@@ -879,3 +879,55 @@ class TestStorageManagerMethods(unittest.TestCase):
             if val1 != val2:
                 return False
         return True
+
+    def properties_attached(self, propIdLeft, propIdRight):
+        self.assertEqual(self.sm.property_manager.get_item_at_index(propIdLeft).nextPropId, propIdRight)
+        self.assertEqual(self.sm.property_manager.get_item_at_index(propIdRight).prevPropId, propIdLeft)
+
+    def property_is_first(self, nodeId, propId):
+        self.assertEqual(self.sm.node_manager.get_item_at_index(nodeId).propId, propId)
+        self.assertEqual(self.sm.property_manager.get_item_at_index(propId).prevPropId, 0)
+
+    def test_drop_property(self):
+        schema = ( ("a", "string"), ("b", "int"), ("c", "int[]"), ("d", "bool"), ("e", "string[]") )
+        types = (Property.PropertyType.string, Property.PropertyType.int,
+                 Property.PropertyType.intArray, Property.PropertyType.bool,
+                 Property.PropertyType.stringArray)
+        t = self.sm.create_node_type("T", schema)
+        n1, p1 = self.sm.insert_node(t, zip(types, ("foo", 1, [1,2], False, ["bar"])))
+        n2, p2 = self.sm.insert_node(t, zip(types, ("bat", 8, [3], True, [])))
+        n3, p3 = self.sm.insert_node(t, zip(types, ("yar", 3, [], True, ["baz", "qux"])))
+
+        n1i, p1i = n1.index, map(lambda p: p.index, p1)
+        n2i, p2i = n2.index, map(lambda p: p.index, p2)
+        n3i, p3i = n3.index, map(lambda p: p.index, p3)
+
+        self.sm.drop_property("T", "c", True)
+
+        self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p1i[2]))
+        self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p2i[2]))
+        self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p3i[2]))
+
+        self.properties_attached(p1i[1], p1i[3])
+        self.properties_attached(p2i[1], p2i[3])
+        self.properties_attached(p3i[1], p3i[3])
+
+        self.sm.drop_property("T", "a", True)
+
+        self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p1i[0]))
+        self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p2i[0]))
+        self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p3i[0]))
+
+        self.property_is_first(n1i, p1i[1])
+        self.property_is_first(n2i, p2i[1])
+        self.property_is_first(n3i, p3i[1])
+
+        self.sm.drop_property("T", "e", True)
+
+        self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p1i[4]))
+        self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p2i[4]))
+        self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p3i[4]))
+
+        self.assertEqual(self.sm.property_manager.get_item_at_index(p1i[3]).nextPropId, 0)
+        self.assertEqual(self.sm.property_manager.get_item_at_index(p2i[3]).nextPropId, 0)
+        self.assertEqual(self.sm.property_manager.get_item_at_index(p3i[3]).nextPropId, 0)
