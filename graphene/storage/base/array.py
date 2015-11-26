@@ -36,6 +36,17 @@ class Array:
         self.nextBlock = next_block
         self.items = items
 
+    def __repr__(self):
+        """
+        String representation of this array.
+
+        :return: Human-readable representation of this array.
+        """
+        args = (self.index, self.inUse, self.type, self.previousBlock,
+                self.amount, self.blocks, self.nextBlock, self.items)
+        return "Array: %d. inUse: %s, type: %s, previousBlock: %s, " \
+               "amount: %s, blocks: %s, nextBlock: %s, items: %s" % args
+
     def __eq__(self, other):
         """
         Overload the == operator

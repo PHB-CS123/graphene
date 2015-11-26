@@ -246,7 +246,7 @@ class ArrayStore(GeneralStore):
             size = 4
             format_str = cls.INT_FORMAT_STR
         else:
-            raise ValueError("Invalid array type.")
+            raise ValueError("Invalid array type %s." % array_type)
 
         return size, format_str
 
