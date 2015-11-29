@@ -412,27 +412,12 @@ class StorageManager:
             for i, idx in enumerate(prop_ids):
                 # Get current property type and value for the type
                 prop_type, prop_val = node_properties[i]
-                kwargs = {
-                    "index": idx,
-                    "prop_type": prop_type
-                }
+                kwargs = self.generate_property_args(idx, prop_type, prop_val)
                 # Non edge cases, prop_ids non-zero
                 if i > 0:
                     kwargs["prev_prop_id"] = prop_ids[i - 1]
                 if i < len(prop_ids) - 1:
                     kwargs["next_prop_id"] = prop_ids[i + 1]
-
-                # String, so write name
-                if prop_type == Property.PropertyType.string:
-                    kwargs["prop_block_id"] = \
-                        self.prop_string_manager.write_string(prop_val)
-                # Array, so use array manager
-                elif prop_type.value >= Property.PropertyType.intArray.value:
-                    kwargs["prop_block_id"] = \
-                        self.array_manager.write_array(prop_val, prop_type)
-                # Otherwise primitive
-                else:
-                    kwargs["prop_block_id"] = prop_val
                 # Create property and add it to the list of properties
                 stored_prop = self.property_manager.create_item(**kwargs)
                 properties.append(stored_prop)
@@ -557,7 +542,7 @@ class StorageManager:
         first_prop_idx = properties[0].index if rel_properties else 0
 
         # Just get one index for this relationship
-        rel_idx = self.relationship_manager.get_indexes(1)[0]
+        rel_idx = self.relationship_manager.get_indexes()[0]
 
         src_idx, dst_idx = src_node.index, dst_node.index
 
@@ -951,7 +936,99 @@ class StorageManager:
         # Sync cache to disk
         cache.sync()
 
+    def add_property(self, type_name, tt_name, tt_type, node_flag):
+        type_data, type_schema = self.get_type_data(type_name, node_flag)
 
+        # Get the appropriate managers
+        # Deleting a node property
+        if node_flag:
+            cache = self.nodeprop
+            type_manager = self.nodeTypeManager
+            tt_manager = self.nodeTypeTypeManager
+            tt_name_manager = self.nodeTypeTypeNameManager
+            get_items = self.get_nodes_of_type
+        # Deleting a relationship property
+        else:
+            cache = self.relprop
+            type_manager = self.relTypeManager
+            tt_manager = self.relTypeTypeManager
+            tt_name_manager = self.relTypeTypeNameManager
+            get_items = self.get_relations_of_type
+
+        tt_id = tt_manager.get_indexes()[0]
+        if tt_type.find("[]") > -1:
+            tt_type = tt_type.replace("[]", "Array")
+        tt_name_id = tt_name_manager.write_string(tt_name)
+        kwargs = {
+            "property_type": Property.PropertyType[tt_type],
+            "type_name": tt_name_id,
+            "index": tt_id
+        }
+        new_tt = tt_manager.create_item(**kwargs)
+        if len(type_schema) > 0:
+            last_tt, _, __ = type_schema[-1]
+            last_tt.nextType = new_tt.index
+            tt_manager.write_item(last_tt)
+
+        default_val = getattr(Property.DefaultValue, tt_type)
+        for item_prop in get_items(type_data):
+            if node_flag:
+                item = item_prop.node
+            else:
+                item = item_prop.rel
+            props = []
+
+            cur_prop_id = item.propId
+            last_prop_id = 0
+            i = 0
+            while cur_prop_id != 0:
+                cur_prop = self.property_manager.get_item_at_index(cur_prop_id)
+                props.append(cur_prop)
+                last_prop_id = cur_prop_id
+                cur_prop_id = cur_prop.nextPropId
+
+            index = self.property_manager.get_indexes()[0]
+            kwargs = self.generate_property_args(index, Property.PropertyType[tt_type], default_val)
+            stored_prop = self.property_manager.create_item(**kwargs)
+
+            if last_prop_id == 0:
+                # If this is 0, that means we were in a relation with an empty
+                # schema.
+                item.propId = stored_prop.index
+            else:
+                # Otherwise, there was a schema beforehand.
+                stored_prop.prevPropId = last_prop_id
+                props[-1].nextPropId = stored_prop.index
+                self.property_manager.write_item(props[-1])
+
+            props.append(stored_prop)
+            cache[item.index] = (item, props)
+        # Sync cache to disk
+        cache.sync()
+
+        return new_tt
+
+
+# --- Helpers --- #
+    def generate_property_args(self, index, prop_type, prop_val):
+        kwargs = {
+            "index": index,
+            "prop_type": prop_type
+        }
+
+        # String, so write name
+        if prop_type == Property.PropertyType.string:
+            kwargs["prop_block_id"] = \
+                self.prop_string_manager.write_string(prop_val)
+        # Array, so use array manager
+        elif prop_type.value >= Property.PropertyType.intArray.value:
+            kwargs["prop_block_id"] = \
+                self.array_manager.write_array(prop_val, prop_type)
+        # Otherwise primitive
+        else:
+            kwargs["prop_block_id"] = prop_val
+
+        return kwargs
 
 
 # --- Tools --- #

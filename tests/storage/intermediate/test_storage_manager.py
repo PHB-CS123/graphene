@@ -957,3 +957,68 @@ class TestStorageManagerMethods(unittest.TestCase):
         p3 = self.sm.relprop[r3.index][1]
 
         self.drop_property_three_items_five_props("R", (r1, p1), (r2, p2), (r3, p3), False)
+
+    def add_property_three_items(self, name, (i1, p1), (i2, p2), (i3, p3), node_flag):
+        if node_flag:
+            item_manager = self.sm.node_manager
+            get_item = self.sm.get_node
+        else:
+            item_manager = self.sm.relationship_manager
+            get_item = self.sm.get_relation
+
+        i1i, p1i = i1.index, map(lambda p: p.index, p1)
+        i2i, p2i = i2.index, map(lambda p: p.index, p2)
+        i3i, p3i = i3.index, map(lambda p: p.index, p3)
+
+        i1props = map(lambda i: self.sm.get_property_value(
+                                self.sm.property_manager.get_item_at_index(i)),
+                      p1i)
+        i2props = map(lambda i: self.sm.get_property_value(
+                                self.sm.property_manager.get_item_at_index(i)),
+                      p2i)
+        i3props = map(lambda i: self.sm.get_property_value(
+                                self.sm.property_manager.get_item_at_index(i)),
+                      p3i)
+
+        props_to_add = (
+            ("b", "int", Property.PropertyType.int, Property.DefaultValue.int),
+            ("c", "float", Property.PropertyType.float, Property.DefaultValue.float),
+            ("d", "string", Property.PropertyType.string, Property.DefaultValue.string),
+            ("e", "bool", Property.PropertyType.bool, Property.DefaultValue.bool),
+            ("f", "int[]", Property.PropertyType.intArray, Property.DefaultValue.intArray),
+        )
+
+        for prop_name, prop_type, prop_tt_type, default_val in props_to_add:
+            i1props.append(default_val)
+            i2props.append(default_val)
+            i3props.append(default_val)
+
+            new_tt = self.sm.add_property(name, prop_name, prop_type, node_flag)
+
+            self.assertEqual(new_tt.propertyType, prop_tt_type)
+
+            self.assertListEqual(get_item(i1i).properties, i1props)
+            self.assertListEqual(get_item(i2i).properties, i2props)
+            self.assertListEqual(get_item(i3i).properties, i3props)
+
+    def test_add_property(self):
+        schema = ( ("a", "string"), )
+        types = (Property.PropertyType.string,)
+        data1 = zip(types, ("a",))
+        data2 = zip(types, ("b",))
+        data3 = zip(types, ("c",))
+
+        t = self.sm.create_node_type("T", schema)
+        n1, p1 = self.sm.insert_node(t, data1)
+        n2, p2 = self.sm.insert_node(t, data2)
+        n3, p3 = self.sm.insert_node(t, data3)
+        self.add_property_three_items("T", (n1, p1), (n2, p2), (n3, p3), True)
+
+        r = self.sm.create_relationship_type("R", ())
+        r1 = self.sm.insert_relation(r, (), n1, n2)
+        p1 = self.sm.relprop[r1.index][1]
+        r2 = self.sm.insert_relation(r, (), n1, n3)
+        p2 = self.sm.relprop[r2.index][1]
+        r3 = self.sm.insert_relation(r, (), n2, n3)
+        p3 = self.sm.relprop[r3.index][1]
+        self.add_property_three_items("R", (r1, p1), (r2, p2), (r3, p3), False)

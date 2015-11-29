@@ -2,6 +2,28 @@ from enum import Enum
 
 
 class Property:
+    class DefaultValue:
+        # Primitive types
+        int = 0
+        long = 0
+        bool = False
+        short = 0
+        char = ''
+        float = 0.0
+        double = 0.0
+        # String type (dynamic)
+        string = ""
+        # Array types (dynamic)
+        intArray = []
+        longArray = []
+        boolArray = []
+        shortArray = []
+        charArray = []
+        floatArray = []
+        doubleArray = []
+        stringArray = []
+
+
     class PropertyType(Enum):
         """
         Types of properties. NOTE: change is_primitive, is_string, and is_array

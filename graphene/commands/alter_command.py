@@ -29,7 +29,7 @@ class AlterCommand(Command):
             if mod.type == AlterCommand.AlterType.DROP_PROPERTY:
                 storage_manager.drop_property(self.type_name, mod.n, self.node_flag)
             elif mod.type == AlterCommand.AlterType.ADD_PROPERTY:
-                print "\tadd property %s.%s with type %s." % (self.type_name, mod.n, mod.t)
+                storage_manager.add_property(self.type_name, mod.n, mod.t, self.node_flag)
             elif mod.type == AlterCommand.AlterType.CHANGE_PROPERTY:
                 print "\tchange property type of %s.%s to %s." % (self.type_name, mod.n, mod.t)
             elif mod.type == AlterCommand.AlterType.RENAME_PROPERTY:
