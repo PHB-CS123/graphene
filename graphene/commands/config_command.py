@@ -1,6 +1,6 @@
 import sys
 from graphene.commands.command import Command
-from graphene.storage.config.config_store import ConfigStore
+# from graphene.storage.config.config_store import ConfigStore
 
 
 class ConfigCommand(Command):

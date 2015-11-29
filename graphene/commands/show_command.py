@@ -12,7 +12,6 @@ class ShowCommand(Command):
         RELATIONS = 2
 
     def __init__(self, show_type):
-        super(ShowCommand, self).__init__()
         self.show_type = show_type
 
     def execute(self, storage_manager, output=sys.stdout, timer=CmdTimer()):

@@ -1,9 +1,9 @@
 from enum import Enum
-from ConfigParser import ConfigParser
+from ConfigParser import ConfigParser, NoSectionError
 import logging
 import os
 
-from storage.base.graphene_store import GrapheneStore
+from graphene.storage.base import GrapheneStore
 
 
 class ConfigStore(object):
@@ -30,7 +30,7 @@ class ConfigStore(object):
 
     def __del__(self):
         """ Writes configs back to the config file """
-        config_file = open(self.file_path)
+        config_file = open(self.file_path, "w")
         self.config.write(config_file)
         config_file.close()
 
@@ -47,7 +47,13 @@ class ConfigStore(object):
         :return: Value for the config
         :rtype: int | bool | str
         """
-        value = self.config_section_map(section)[name]
+        values = self.config_section_map(section)
+        if not values:
+            return None
+        try:
+            value = values[name.lower()]
+        except KeyError:
+            return None
         return self.convert_value_to_type(value, config_type)
 
     def set_config(self, name, value, section="Main"):
@@ -65,7 +71,7 @@ class ConfigStore(object):
         """
         if not self.config.has_section(section):
             self.config.add_section(section)
-        self.config.set(section, name, value)
+        self.config.set(section, name.lower(), value)
 
     def convert_value_to_type(self, value, config_type):
         """
@@ -81,7 +87,7 @@ class ConfigStore(object):
         if config_type is self.ConfigType.int:
             return int(value)
         elif config_type is self.ConfigType.bool:
-            return bool(value)
+            return True if value == str(True) else False
         elif config_type is self.ConfigType.string:
             return value
         else:
@@ -97,14 +103,13 @@ class ConfigStore(object):
         :rtype: dict[str, str]
         """
         values = {}
-        options = self.config.options(section)
+        try:
+            options = self.config.options(section)
+        except NoSectionError:
+            return None
+
         for option in options:
-            try:
-                values[option] = self.config.get(section, option)
-                if values[option] == -1:
-                    self.logger.debug("Unable to find section: %s" % option)
-            except Exception, e:
-                self.logger.warning("Caught exception %s when looking through "
-                                    "section %s" % (e, section))
-                values[option] = None
+            values[option] = self.config.get(section, option)
+            if values[option] == -1:
+                self.logger.debug("Unable to find section: %s" % option)
         return values
