@@ -53,3 +53,13 @@ class RelationshipType:
         :rtype: bool
         """
         return not (self == other)
+
+    def list(self):
+        """
+        List the items that this type contains, excluding the index. This is
+        essentially how it's stored on disk
+
+        :return: List of data contained in this type
+        :rtype: list
+        """
+        return [self.inUse, self.typeBlockId]

@@ -67,7 +67,7 @@ class ArrayStore(GeneralStore):
     STORAGE_TYPE = Array
 
     # Name of ArrayStore File
-    FILE_NAME = "graphenestore.arraystore.db"
+    FILE_NAME = "graphenestore.propertystore.array.db"
     ''':type str'''
 
     def __init__(self, block_size=40):

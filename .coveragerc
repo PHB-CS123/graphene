@@ -1,7 +1,7 @@
 [report]
 show_missing = true
 report = html term-missing
-omit = */__init__.py, graphene/parser/GQL*.py, graphene/utils/gp_logging.py
+omit = */__init__.py, graphene/parser/GQL*.py, graphene/utils/gp_logging.py, graphene/storage/defrag/defrag_helpers.py
 exclude_lines =
     ######### General #########
     # Have to re-enable the standard pragma

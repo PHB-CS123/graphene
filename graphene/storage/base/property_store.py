@@ -160,7 +160,6 @@ class PropertyStore(GeneralStore):
         else:
             return general_value
 
-
     @classmethod
     def value_to_data(cls, prop_type, value):
         """

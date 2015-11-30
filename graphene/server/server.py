@@ -33,7 +33,9 @@ class GrapheneServer:
         """
         Parses a list of commands.
 
-        :param list commands: List of commands
+        :param commands: List of commands
+        :type commands: list
+        :rtype: list
         """
         result = []
         for cmd in commands:

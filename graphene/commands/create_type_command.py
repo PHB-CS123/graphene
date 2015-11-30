@@ -1,3 +1,5 @@
+import sys
+
 from graphene.commands.command import Command
 
 
@@ -11,6 +13,6 @@ class CreateTypeCommand(Command):
         return fmt % (self.type_name,
                       ",\n".join("\t%s %s" % decl for decl in self.type_list))
 
-    def execute(self, storage_manager, timer=None):
+    def execute(self, storage_manager, output=sys.stdout, timer=None):
         created_type = storage_manager.create_node_type(self.type_name,
                                                         self.type_list)

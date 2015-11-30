@@ -70,7 +70,7 @@ class TestStorageManagerMethods(unittest.TestCase):
         """
         for i, tt in enumerate(type_types):
             tt_name = self.sm.nodeTypeTypeNameManager. \
-                read_name_at_index(tt.typeName)
+                read_string_at_index(tt.typeName)
             tt_type = tt.propertyType.name
             s_name, s_type = schema[i]
             if "[]" in s_type:
@@ -84,7 +84,7 @@ class TestStorageManagerMethods(unittest.TestCase):
         schema = ( ("name", "string"), ("age", "int"), ("address", "string"),
                     ("phones", "string[]") )
         t = self.sm.create_node_type("Person", schema)
-        type_name = self.sm.nodeTypeNameManager.read_name_at_index(t.nameId)
+        type_name = self.sm.nodeTypeNameManager.read_string_at_index(t.nameId)
         self.assertEquals(type_name, "Person")
 
         type_types = self.get_all_type_types(t)
@@ -139,9 +139,9 @@ class TestStorageManagerMethods(unittest.TestCase):
         t1 = self.sm.create_node_type("T", schema1)
         t2 = self.sm.create_node_type("U", schema2)
 
-        self.assertEquals(self.sm.nodeTypeNameManager.read_name_at_index(
+        self.assertEquals(self.sm.nodeTypeNameManager.read_string_at_index(
             t1.nameId), "T")
-        self.assertEquals(self.sm.nodeTypeNameManager.read_name_at_index(
+        self.assertEquals(self.sm.nodeTypeNameManager.read_string_at_index(
             t2.nameId), "U")
 
         t1_tts, t2_tts = self.get_all_type_types(t1), self.get_all_type_types(t2)
@@ -348,7 +348,7 @@ class TestStorageManagerMethods(unittest.TestCase):
         map(self.assertIsNoneOrEOF,
             map(self.sm.property_manager.get_item_at_index,
                 map(lambda p: p.index, rp2)))
-        self.assertIsNoneOrEOF(self.sm.prop_string_manager.read_name_at_index(rp2[1].propBlockId))
+        self.assertIsNoneOrEOF(self.sm.prop_string_manager.read_string_at_index(rp2[1].propBlockId))
         self.assertIsNoneOrEOF(self.sm.array_manager.read_array_at_index(rp2[2].propBlockId))
 
         self.assertEqual(r3.secondNextRelId, 0)
@@ -363,7 +363,7 @@ class TestStorageManagerMethods(unittest.TestCase):
         map(self.assertIsNoneOrEOF,
             map(self.sm.property_manager.get_item_at_index,
                 map(lambda p: p.index, rp3)))
-        self.assertIsNoneOrEOF(self.sm.prop_string_manager.read_name_at_index(rp3[1].propBlockId))
+        self.assertIsNoneOrEOF(self.sm.prop_string_manager.read_string_at_index(rp3[1].propBlockId))
         self.assertIsNoneOrEOF(self.sm.array_manager.read_array_at_index(rp3[2].propBlockId))
 
         self.assertEqual(n3.relId, 0)
@@ -377,7 +377,7 @@ class TestStorageManagerMethods(unittest.TestCase):
         map(self.assertIsNoneOrEOF,
             map(self.sm.property_manager.get_item_at_index,
                 map(lambda p: p.index, rp1)))
-        self.assertIsNoneOrEOF(self.sm.prop_string_manager.read_name_at_index(rp1[1].propBlockId))
+        self.assertIsNoneOrEOF(self.sm.prop_string_manager.read_string_at_index(rp1[1].propBlockId))
         self.assertIsNoneOrEOF(self.sm.array_manager.read_array_at_index(rp1[2].propBlockId))
 
         self.assertEqual(n1.relId, 0)
@@ -842,7 +842,7 @@ class TestStorageManagerMethods(unittest.TestCase):
             prop = properties[index]
             cur_val = prop.propBlockId
             if prop.is_string():
-                if string_manager.read_name_at_index(cur_val) != new_val:
+                if string_manager.read_string_at_index(cur_val) != new_val:
                     return False
             elif prop.is_array():
                 if array_manager.read_array_at_index(cur_val) != new_val:

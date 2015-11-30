@@ -1,4 +1,4 @@
-from graphene.storage.intermediate.general_name_manager import *
+from graphene.storage.intermediate.general_string_manager import *
 from graphene.storage.base.array_store import *
 
 from itertools import chain
@@ -9,7 +9,7 @@ class GeneralArrayManager:
     Handles reading/writing every type of array
     """
 
-    STR_ARRAY_FILENAME = "graphenestore.arraystore.strings.db"
+    STR_ARRAY_FILENAME = "graphenestore.propertystore.array.strings.db"
 
     def __init__(self, block_size=40, string_block_size=10):
         # Size of array blocks. Must be a multiple of 8
@@ -17,8 +17,8 @@ class GeneralArrayManager:
         # Create a manager for the array store
         self.storeManager = GeneralStoreManager(ArrayStore(block_size))
         # Create a manager for the strings in string arrays
-        self.stringStoreManager = GeneralNameManager(self.STR_ARRAY_FILENAME,
-                                                     string_block_size)
+        self.stringStoreManager = GeneralStringManager(self.STR_ARRAY_FILENAME,
+                                                       string_block_size)
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def __del__(self):
@@ -359,7 +359,7 @@ class GeneralArrayManager:
         :return: Array of string IDs
         :rtype: list
         """
-        return map(lambda x: self.stringStoreManager.write_name(x), strings)
+        return map(lambda x: self.stringStoreManager.write_string(x), strings)
 
     def strings_for_string_ids(self, ids):
         """
@@ -370,7 +370,7 @@ class GeneralArrayManager:
         :return: Array of strings
         :rtype: list
         """
-        return map(lambda x: self.stringStoreManager.read_name_at_index(x), ids)
+        return map(lambda x: self.stringStoreManager.read_string_at_index(x), ids)
 
     def delete_names_at_indexes(self, ids):
         """
@@ -382,7 +382,7 @@ class GeneralArrayManager:
         :rtype: bool
         """
         return all(map(lambda x:
-                       self.stringStoreManager.delete_name_at_index(x), ids))
+                       self.stringStoreManager.delete_string_at_index(x), ids))
 
     def update_names_at_indexes(self, ids, new_names):
         """
@@ -414,16 +414,16 @@ class GeneralArrayManager:
             new_names = new_names[:num_ids]
             # Update the names
             map(lambda x, y:
-                self.stringStoreManager.update_name_at_index(x, y),
+                self.stringStoreManager.update_string_at_index(x, y),
                 ids, new_names)
             # Now store the remaining names
-            rest_ids = map(lambda x: self.stringStoreManager.write_name(x),
+            rest_ids = map(lambda x: self.stringStoreManager.write_string(x),
                            remaining_names)
             # Return the updated IDs and the created IDs
             return ids + rest_ids
         # else: len(ids) == len(new_names), perform update for names with ids
         map(lambda x, y:
-            self.stringStoreManager.update_name_at_index(x, y), ids, new_names)
+            self.stringStoreManager.update_string_at_index(x, y), ids, new_names)
         return ids
 
     @staticmethod
