@@ -208,9 +208,36 @@ class Defragmenter:
             id_fix_range = xrange(1, store.count() + 1)
             self.fix_references(swap_table, store, ref_map, id_fix_range)
 
+    def value_at_offset(self, packed_data, offset):
+        """
+        Returns the integer value in the packed data at the given offset
+
+        :param packed_data: Packed data to get value from
+        :type packed_data: str
+        :param offset: Offset to look for value
+        :type offset: int
+        :return: Integer value at the given offset in the packed data
+        :rtype: int
+        """
+        packed_value = packed_data[offset:offset+self.referenceStruct.size]
+        return self.referenceStruct.unpack(packed_value)[0]
+
+    # ---------------------- Edge Cases ---------------------- #
     def handle_prop_payload_references(self, swap_table, base_store,
                                        id_fix_range):
+        """
+        Handle when the property payload is a reference type, i.e. string or
+        array reference.
 
+        :param swap_table: Swap table to check for reference in
+        :type swap_table: dict[int, int]
+        :param base_store: Base store to update references of
+        :type base_store: GeneralStore
+        :param id_fix_range: Range of IDs that might need their references fixed
+        :type id_fix_range: xrange
+        :return: Nothing
+        :rtype: None
+        """
         for block_idx in id_fix_range:
             # Update references if property type is a reference type
             packed_data = base_store.read_from_index_packed_data(block_idx)
@@ -235,8 +262,8 @@ class Defragmenter:
                  the reference is not in the swap table
         :rtype: str
         """
-        old_ref = self.value_at_offset(packed_data, kPropertyPayloadOffset)
         # TODO: swap these checks to the most unlikely one being first
+        old_ref = self.value_at_offset(packed_data, kPropertyPayloadOffset)
         # Don't update if a swap didn't happen for the payload reference
         if old_ref not in swap_table:
             return packed_data
@@ -251,20 +278,6 @@ class Defragmenter:
     def handle_string_array_references(self, swap_table, packed_data):
         # TODO
         return packed_data
-
-    def value_at_offset(self, packed_data, offset):
-        """
-        Returns the integer value in the packed data at the given offset
-
-        :param packed_data: Packed data to get value from
-        :type packed_data: str
-        :param offset: Offset to look for value
-        :type offset: int
-        :return: Integer value at the given offset in the packed data
-        :rtype: int
-        """
-        packed_value = packed_data[offset:offset+self.referenceStruct.size]
-        return self.referenceStruct.unpack(packed_value)[0]
 
     def property_type_is_defrag_reference(self, packed_data):
         """
@@ -285,6 +298,7 @@ class Defragmenter:
         else:
             return False
 
+    # ------------------ Computation Helpers ----------------- #
     @staticmethod
     def full_blocks(empty_ids, total_blocks):
         """
