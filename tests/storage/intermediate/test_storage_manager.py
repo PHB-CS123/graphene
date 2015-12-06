@@ -1061,8 +1061,20 @@ class TestStorageManagerMethods(unittest.TestCase):
         self.assertEqual(type(new_value), float)
         self.assertEqual(new_value, 0.0)
 
+        self.sm.change_property(name, "a", "string", node_flag)
+
+        new_value = get_item(i.index).properties[1]
+        self.assertEqual(type(new_value), unicode)
+        self.assertEqual(new_value, "")
+
+        self.sm.change_property(name, "c", "string", node_flag)
+
+        new_value = get_item(i.index).properties[0]
+        self.assertEqual(type(new_value), unicode)
+        self.assertEqual(new_value, "a")
+
     def test_change_property(self):
-        schema = ( ("c", "string[]"), ("a", "int"), )
+        schema = ( ("c", "string"), ("a", "int"), )
         types = (Property.PropertyType.string, Property.PropertyType.int,)
         data = zip(types, ("a", 1,))
         data2 = zip(types, ("b", 2,))

@@ -1053,8 +1053,6 @@ class StorageManager:
             old_value = item_prop.properties[prop_index]
             new_value = self.convert_value_between_types(old_value, old_type, new_type)
 
-            print "%s -> %s" % (old_value, new_value)
-
             cur_prop_id = item.propId
             i = 0
             while cur_prop_id != 0:
@@ -1073,6 +1071,12 @@ class StorageManager:
                             # Didn't have an array before, so have to write an
                             # array and put it there
                             cur_prop.propBlockId = self.array_manager.write_array(new_value, new_type)
+                    elif Property.PropertyType.is_string(new_type):
+                        if Property.PropertyType.is_string(old_type):
+                            # Already had a string, so update
+                            self.prop_string_manager.update_string_at_index(cur_prop.propBlockId, new_value)
+                        else:
+                            cur_prop.propBlockId = self.prop_string_manager.write_string(new_value)
                     else:
                         cur_prop.propBlockId = new_value
                 props.append(cur_prop)
