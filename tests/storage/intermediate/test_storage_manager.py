@@ -881,6 +881,7 @@ class TestStorageManagerMethods(unittest.TestCase):
                 return False
         return True
 
+    # --- Alter command tests --- #
     def properties_attached(self, propIdLeft, propIdRight):
         self.assertEqual(self.sm.property_manager.get_item_at_index(propIdLeft).nextPropId, propIdRight)
         self.assertEqual(self.sm.property_manager.get_item_at_index(propIdRight).prevPropId, propIdLeft)
@@ -1022,3 +1023,92 @@ class TestStorageManagerMethods(unittest.TestCase):
         r3 = self.sm.insert_relation(r, (), n2, n3)
         p3 = self.sm.relprop[r3.index][1]
         self.add_property_three_items("R", (r1, p1), (r2, p2), (r3, p3), False)
+
+    def change_property_item(self, name, (i, p), node_flag):
+        if node_flag:
+            item_manager = self.sm.node_manager
+            get_item = self.sm.get_node
+        else:
+            item_manager = self.sm.relationship_manager
+            get_item = self.sm.get_relation
+
+        with self.assertRaises(NonexistentPropertyException):
+            self.sm.change_property(name, "q", "float", node_flag)
+
+        self.sm.change_property(name, "a", "float", node_flag)
+
+        new_value = get_item(i.index).properties[1]
+        self.assertEqual(type(new_value), float)
+        self.assertEqual(new_value, 1.0)
+
+        self.sm.change_property(name, "a", "float[]", node_flag)
+
+        new_value = get_item(i.index).properties[1]
+        self.assertEqual(type(new_value), list)
+        self.assertEqual(type(new_value[0]), float)
+        self.assertEqual(new_value, [1.0])
+
+        self.sm.change_property(name, "a", "int[]", node_flag)
+
+        new_value = get_item(i.index).properties[1]
+        self.assertEqual(type(new_value), list)
+        self.assertEqual(type(new_value[0]), int)
+        self.assertEqual(new_value, [1])
+
+        self.sm.change_property(name, "a", "float", node_flag)
+
+        new_value = get_item(i.index).properties[1]
+        self.assertEqual(type(new_value), float)
+        self.assertEqual(new_value, 0.0)
+
+    def test_change_property(self):
+        schema = ( ("c", "string[]"), ("a", "int"), )
+        types = (Property.PropertyType.string, Property.PropertyType.int,)
+        data = zip(types, ("a", 1,))
+        data2 = zip(types, ("b", 2,))
+
+        t = self.sm.create_node_type("T", schema)
+        n, p = self.sm.insert_node(t, data)
+        n2, p2 = self.sm.insert_node(t, data2)
+
+        self.change_property_item("T", (n, p), True)
+
+        rt = self.sm.create_relationship_type("R", schema)
+        r = self.sm.insert_relation(rt, data, n, n2)
+        rp = self.sm.relprop[r.index][1]
+
+        self.change_property_item("R", (r, rp), False)
+
+    # --- Helpers --- #
+    def test_is_convertible(self):
+        numerical_types = [
+            Property.PropertyType.int,
+            Property.PropertyType.long,
+            Property.PropertyType.short,
+            Property.PropertyType.float,
+            Property.PropertyType.double
+        ]
+        numerical_arrays = map(lambda t: Property.PropertyType.get_array_type(t),
+                               numerical_types)
+        for t in numerical_types:
+            for s in numerical_types:
+                # All numerical types are OK to convert amongst each other
+                self.assertTrue(self.sm.is_convertible(t, s))
+            for s in numerical_arrays:
+                # All numerical types are OK to convert to an array of any other
+                # numerical type
+                self.assertTrue(self.sm.is_convertible(t, s))
+            # Can convert from bool to number, but not from string or char to
+            # number
+            self.assertTrue(self.sm.is_convertible(Property.PropertyType.bool, t))
+            self.assertFalse(self.sm.is_convertible(Property.PropertyType.char, t))
+            self.assertFalse(self.sm.is_convertible(Property.PropertyType.string, t))
+
+        # Can't convert from array to any non-array value
+        for t in Property.PropertyType:
+            if not Property.PropertyType.is_array(t):
+                continue
+            for s in Property.PropertyType:
+                if Property.PropertyType.is_array(t):
+                    continue
+                self.assertFalse(self.sm.is_convertible(t, s), "%s %s" % (t, s))

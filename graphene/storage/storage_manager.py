@@ -1008,6 +1008,81 @@ class StorageManager:
 
         return new_tt
 
+    def change_property(self, type_name, tt_name, new_tt_type, node_flag):
+        type_data, type_schema = self.get_type_data(type_name, node_flag)
+
+        # Get the appropriate managers
+        # Deleting a node property
+        if node_flag:
+            cache = self.nodeprop
+            type_manager = self.nodeTypeManager
+            tt_manager = self.nodeTypeTypeManager
+            tt_name_manager = self.nodeTypeTypeNameManager
+            get_items = self.get_nodes_of_type
+        # Deleting a relationship property
+        else:
+            cache = self.relprop
+            type_manager = self.relTypeManager
+            tt_manager = self.relTypeTypeManager
+            tt_name_manager = self.relTypeTypeNameManager
+            get_items = self.get_relations_of_type
+
+        for i, (tt, name, tt_type) in enumerate(type_schema):
+            if name == tt_name:
+                prop_index = i
+                prop = tt
+                prop_type = tt_type
+                break
+        else:
+            raise NonexistentPropertyException("Property with name %s does not exist." % tt_name)
+
+        if new_tt_type.find("[]") > -1:
+            new_tt_type = new_tt_type.replace("[]", "Array")
+        new_type = Property.PropertyType[new_tt_type]
+        old_type = prop.propertyType
+        prop.propertyType = new_type
+
+        tt_manager.write_item(prop)
+
+        for item_prop in get_items(type_data):
+            if node_flag:
+                item = item_prop.node
+            else:
+                item = item_prop.rel
+            props = []
+            old_value = item_prop.properties[prop_index]
+            new_value = self.convert_value_between_types(old_value, old_type, new_type)
+
+            print "%s -> %s" % (old_value, new_value)
+
+            cur_prop_id = item.propId
+            i = 0
+            while cur_prop_id != 0:
+                cur_prop = self.property_manager.get_item_at_index(cur_prop_id)
+                if i == prop_index:
+                    cur_prop.type = new_type
+                    if Property.PropertyType.is_array(new_type):
+                        if Property.PropertyType.is_array(old_type):
+                            # Already had an array, so update
+                            array_idx = cur_prop.propBlockId
+                            array_block = self.array_manager.storeManager.get_item_at_index(array_idx)
+                            array_block.type = new_type
+                            self.array_manager.storeManager.write_item(array_block)
+                            self.array_manager.update_array_at_index(cur_prop.propBlockId, new_value)
+                        else:
+                            # Didn't have an array before, so have to write an
+                            # array and put it there
+                            cur_prop.propBlockId = self.array_manager.write_array(new_value, new_type)
+                    else:
+                        cur_prop.propBlockId = new_value
+                props.append(cur_prop)
+                cur_prop_id = cur_prop.nextPropId
+                i += 1
+
+            cache[item.index] = (item, props)
+        # Sync cache to disk
+        cache.sync()
+
 
 # --- Helpers --- #
     def generate_property_args(self, index, prop_type, prop_val):
@@ -1030,6 +1105,107 @@ class StorageManager:
 
         return kwargs
 
+    def is_convertible(self, from_type, to_type):
+        # Obviously, a type can be converted to itself.
+        if from_type == to_type:
+            return True
+        elif Property.PropertyType.is_array(from_type):
+            # T[] to S[] is valid only if T to S is.
+            if Property.PropertyType.is_array(to_type):
+                return self.is_convertible(Property.PropertyType.get_base_type(from_type),
+                                           Property.PropertyType.get_base_type(to_type))
+            # T[] to S is not valid.
+            else:
+                return False
+        elif Property.PropertyType.is_array(to_type):
+            # T to S[] is valid only if T to S is valid.
+            return self.is_convertible(from_type, Property.PropertyType.get_base_type(to_type))
+        else:
+            # T to S case, so we actually have to check.
+            if to_type == Property.PropertyType.bool or \
+               to_type == Property.PropertyType.char:
+                # Can't convert to a bool from anything other than a bool, same
+                # with chars
+                return False
+            elif from_type == Property.PropertyType.char and \
+                 to_type == Property.PropertyType.string:
+                # chars are convertible to strings
+                return True
+            elif (from_type == Property.PropertyType.bool or \
+                  Property.PropertyType.is_numerical(from_type)) and \
+                 Property.PropertyType.is_numerical(to_type):
+                # bools are convertible to numbers (True -> 1, False -> 0), and
+                # number to number is fine.
+                return True
+        return False
+
+    def convert_value_between_types(self, value, from_type, to_type):
+        """
+        Converts a value from one type to the other. There are a few potential
+        caveats here.
+
+        Converting from type T[] to type S will always result in the default
+        value for S, as there is no obvious choice for how to convert an array
+        to a single value.
+
+        Converting from type T to type S will attempt to convert from T to S if
+        the values have valid conversion methods; otherwise, we will return the
+        default value for S.
+
+        Converting from type T to type T[] will result in the original value
+        being wrapped in an array; e.g. from int to int[], 3 will be converted
+        into [3].
+
+        Converting from type T to type S[] has two possibilities. If T can be
+        converted validly to S, then that value is converted first and then
+        wrapped in an array. If not, we return the default value for S[].
+
+        Converting from T[] to type S[] works similarly as T to S[]; if T is
+        convertible to S, then we convert each value in the array. Otherwise, we
+        return the default value of S[].
+
+        :param value: Original value of property
+        :type value: object
+        :param from_type: Original type
+        :type from_type: Property.PropertyType
+        :param to_type: New type
+        :type to_type: Property.PropertyType
+        :return: The converted value
+        :rtype: object
+        """
+        if not self.is_convertible(from_type, to_type):
+            return getattr(Property.DefaultValue, to_type.name)
+        elif from_type == to_type:
+            return value
+        else:
+            if Property.PropertyType.is_array(to_type):
+                # Converting to an array...
+                if Property.PropertyType.is_array(from_type):
+                    # If the original is an array, do a map
+                    from_base = Property.PropertyType.get_base_type(from_type)
+                    to_base = Property.PropertyType.get_base_type(to_type)
+                    return map(lambda v: self.convert_value_between_types(v, from_base, to_base),
+                               value)
+                else:
+                    # Otherwise, just wrap value
+                    return [value]
+            elif from_type == Property.PropertyType.bool:
+                # Bool can only be converted to a number, so make a number first
+                # then convert.
+                num_value = 1 if value else 0
+                return self.convert_value_between_types(num_value, Property.PropertyType.int, to_type)
+            elif from_type == Property.PropertyType.char:
+                # Chars can be converted to strings... doesn't actually change
+                # the value though
+                return value
+            else:
+                # Otherwise dealing with numerical conversions.
+                if to_type in [Property.PropertyType.float, Property.PropertyType.double]:
+                    # Float/Double
+                    return float(value)
+                else:
+                    # Integer of some kind
+                    return int(value)
 
 # --- Tools --- #
     def cache_diagnostic(self):
