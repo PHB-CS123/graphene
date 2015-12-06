@@ -1012,14 +1012,14 @@ class StorageManager:
         type_data, type_schema = self.get_type_data(type_name, node_flag)
 
         # Get the appropriate managers
-        # Deleting a node property
+        # Changing a node property
         if node_flag:
             cache = self.nodeprop
             type_manager = self.nodeTypeManager
             tt_manager = self.nodeTypeTypeManager
             tt_name_manager = self.nodeTypeTypeNameManager
             get_items = self.get_nodes_of_type
-        # Deleting a relationship property
+        # Changing a relationship property
         else:
             cache = self.relprop
             type_manager = self.relTypeManager
@@ -1086,6 +1086,42 @@ class StorageManager:
             cache[item.index] = (item, props)
         # Sync cache to disk
         cache.sync()
+
+    def rename_property(self, type_name, tt_name, new_tt_name, node_flag):
+        type_data, type_schema = self.get_type_data(type_name, node_flag)
+
+        # Get the appropriate managers
+        # Renaming a node property
+        if node_flag:
+            cache = self.nodeprop
+            type_manager = self.nodeTypeManager
+            tt_manager = self.nodeTypeTypeManager
+            tt_name_manager = self.nodeTypeTypeNameManager
+        # Renaming a relationship property
+        else:
+            cache = self.relprop
+            type_manager = self.relTypeManager
+            tt_manager = self.relTypeTypeManager
+            tt_name_manager = self.relTypeTypeNameManager
+
+        # Here we iterate over the schema of the node/relation to rename the
+        # corresponding property
+        cur_tt_id = type_data.firstType
+        tt_index = 0
+        while cur_tt_id != 0:
+            tt = tt_manager.get_item_at_index(cur_tt_id)
+            type_name = tt_name_manager.read_string_at_index(tt.typeName)
+
+            if type_name == tt_name:
+                name_id = tt.typeName
+                tt_name_manager.update_string_at_index(name_id, new_tt_name)
+                break
+
+            cur_tt_id = tt.nextType
+            tt_index += 1
+        else:
+            # If we never broke, that means we never found the desired property.
+            raise NonexistentPropertyException("Property with name %s does not exist." % tt_name)
 
 
 # --- Helpers --- #

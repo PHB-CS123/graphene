@@ -32,4 +32,4 @@ class AlterCommand(Command):
             elif mod.type == AlterCommand.AlterType.CHANGE_PROPERTY:
                 storage_manager.change_property(self.type_name, mod.n, mod.t, self.node_flag)
             elif mod.type == AlterCommand.AlterType.RENAME_PROPERTY:
-                print "\trename property %s.%s to %s.%s." % (self.type_name, mod.n, self.type_name, mod.n2)
+                storage_manager.rename_property(self.type_name, mod.n, mod.n2, self.node_flag)

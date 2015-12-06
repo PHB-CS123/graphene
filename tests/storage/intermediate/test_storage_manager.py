@@ -1091,6 +1091,28 @@ class TestStorageManagerMethods(unittest.TestCase):
 
         self.change_property_item("R", (r, rp), False)
 
+    def rename_property_helper(self, name, node_flag):
+        _, type_schema = self.sm.get_type_data(name, node_flag)
+        self.assertEqual(type_schema[0][1], "a")
+
+        self.sm.rename_property(name, "a", "b", node_flag)
+
+        _, type_schema = self.sm.get_type_data(name, node_flag)
+        self.assertEqual(type_schema[0][1], "b")
+
+        with self.assertRaises(NonexistentPropertyException):
+            self.sm.rename_property(name, "a", "b", node_flag)
+
+    def test_rename_property(self):
+        schema = ( ("a", "string"), )
+        types = (Property.PropertyType.string,)
+
+        t = self.sm.create_node_type("T", schema)
+        self.rename_property_helper("T", True)
+
+        r = self.sm.create_relationship_type("R", schema)
+        self.rename_property_helper("R", False)
+
     # --- Helpers --- #
     def test_is_convertible(self):
         numerical_types = [
