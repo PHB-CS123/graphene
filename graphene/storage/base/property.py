@@ -51,6 +51,35 @@ class Property:
         doubleArray = 15
         stringArray = 16
 
+        @staticmethod
+        def get_base_type(prop_type):
+            assert Property.PropertyType.is_array(prop_type)
+            return Property.PropertyType(prop_type.value - 8)
+
+        @staticmethod
+        def get_array_type(prop_type):
+            assert Property.PropertyType.is_primitive(prop_type) or \
+                   Property.PropertyType.is_string(prop_type)
+            return Property.PropertyType(prop_type.value + 8)
+
+        @staticmethod
+        def is_array(prop_type):
+            return prop_type.value >= 9
+
+        @staticmethod
+        def is_primitive(prop_type):
+            return 1 <= prop_type.value <= 7
+
+        @staticmethod
+        def is_numerical(prop_type):
+            return Property.PropertyType.is_primitive(prop_type) and \
+                   prop_type not in [Property.PropertyType.bool,
+                                           Property.PropertyType.char]
+
+        @staticmethod
+        def is_string(prop_type):
+            return prop_type.value == 8
+
     def __init__(self, index=0, in_use=True, prop_type=PropertyType.undefined,
                  name_id=0, prev_prop_id=0, next_prop_id=0, prop_block_id=0):
         """
@@ -144,7 +173,7 @@ class Property:
         :return: True if primitive, False otherwise
         :rtype: bool
         """
-        return self.type.value >= 1 and self.type.value <= 7
+        return Property.PropertyType.is_primitive(self.type)
 
     def is_string(self):
         """
@@ -153,7 +182,7 @@ class Property:
         :return: True if string, False otherwise
         :rtype: bool
         """
-        return self.type.value == 8
+        return Property.PropertyType.is_string(self.type)
 
     def is_array(self):
         """
@@ -162,4 +191,4 @@ class Property:
         :return: True if string, False otherwise
         :rtype: bool
         """
-        return self.type.value >= 9
+        return Property.PropertyType.is_array(self.type)
