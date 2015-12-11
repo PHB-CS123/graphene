@@ -19,6 +19,7 @@ stmt
     | c=exit_stmt
     | c=show_stmt | c=desc_stmt
     | c=insert_stmt | c=delete_stmt | c=update_stmt
+    | c=alter_stmt
     )
   ;
 
@@ -190,6 +191,64 @@ create_relation
   : K_RELATION
     (r=(I_RELATION|I_TYPE) {$r.text.isupper()}? {$r=$r.text})
     ('(' (tl=type_list)? ')')?;
+
+// ALTER command
+alter_stmt returns [cmd]
+  @init {$cmd = None}
+  : K_ALTER (at=alter_type | ar=alter_relation) (m=modifications)
+  {
+if $at.ctx is not None:
+    $cmd = AlterCommand($at.ctx, $m.ctx, True)
+else:
+    $cmd = AlterCommand($ar.ctx, $m.ctx, False)
+  }
+  ;
+
+alter_type
+  : K_TYPE
+    (t=I_TYPE {$t=$t.text})
+  {return $t}
+  ;
+
+alter_relation
+  : K_RELATION
+    (r=(I_RELATION|I_TYPE) {$r.text.isupper()}? {$r=$r.text})
+  {return $r}
+  ;
+
+modifications returns [mods]
+  : mod1=modification {$mods = [$modification.ctx]}
+    (',' (modi=modification {$mods.append($modi.ctx)}))*
+  {return $mods}
+  ;
+
+modification returns [type]
+  @init {$type = None}
+  : (K_DROP K_PROPERTY n=I_NAME
+    {
+$type = AlterCommand.AlterType.DROP_PROPERTY
+$n = $n.text
+    }
+    | K_ADD K_PROPERTY n=I_NAME t=prop_type
+    {
+$type = AlterCommand.AlterType.ADD_PROPERTY
+$n = $n.text
+$t.ctx = $t.text
+    }
+    | K_CHANGE K_PROPERTY n=I_NAME t=prop_type
+    {
+$type = AlterCommand.AlterType.CHANGE_PROPERTY
+$n = $n.text
+$t.ctx = $t.text
+    }
+    | K_RENAME K_PROPERTY n=I_NAME n2=I_NAME
+    {
+$type = AlterCommand.AlterType.RENAME_PROPERTY
+$n = $n.text
+$n2 = $n2.text
+    }
+    )
+  ;
 
 // DROP command
 drop_stmt returns [cmd]
@@ -388,6 +447,7 @@ BooleanLiteral : (T R U E | F A L S E) ;
 // Keywords
 K_MATCH : M A T C H ;
 K_CREATE : C R E A T E ;
+K_ALTER : A L T E R ;
 K_DELETE : D E L E T E ;
 K_DROP : D R O P ;
 K_EXIT : E X I T ;
@@ -403,6 +463,11 @@ K_RELATION : R E L A T I O N ;
 K_NODE : N O D E ;
 K_TYPES : T Y P E S ;
 K_RELATIONS : R E L A T I O N S ;
+
+K_ADD : A D D ;
+K_CHANGE : C H A N G E ;
+K_RENAME : R E N A M E ;
+K_PROPERTY : P R O P E R T Y ;
 
 K_WHERE : W H E R E ;
 K_RETURN : R E T U R N ;
