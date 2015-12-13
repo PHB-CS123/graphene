@@ -9,6 +9,7 @@ from graphene.errors import BadPropertyException, TypeMismatchException
 
 class InsertNodeCommand(Command):
     def __init__(self, node_prop_list):
+        super(InsertNodeCommand, self).__init__()
         self.node_prop_list = node_prop_list
         self.logger = logging.getLogger(self.__class__.__name__)
 

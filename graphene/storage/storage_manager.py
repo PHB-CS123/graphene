@@ -6,6 +6,7 @@ from graphene.storage import *
 from graphene.storage.base.property import Property
 from graphene.storage.intermediate import *
 from graphene.storage.defrag.defrag_helpers import *
+from graphene.storage.index.index_manager import IndexManager
 
 
 class StorageManager:
@@ -100,6 +101,8 @@ class StorageManager:
         self.relTypeTypeNameManager = \
             GeneralNameManager(self.RELATIONSHIP_TYPE_TYPE_STORE_NAMES_FILENAME,
                                self.NAME_BLOCK_SIZE)
+
+        self.indexManager = IndexManager()
 
     def __del__(self):
         self.close()
@@ -337,6 +340,11 @@ class StorageManager:
         cache.sync()  # Sync nodeprop cache
         type_name_manager.delete_string_at_index(type_data.nameId)
         type_manager.delete_item(type_data)
+        # Delete any index files
+        if node_flag:
+            self.indexManager.delete_index_for_node_type(type_data.index)
+        else:
+            self.indexManager.delete_index_for_rel_type(type_data.index)
 
     def get_type_data(self, type_name, node_flag):
         """
@@ -398,9 +406,9 @@ class StorageManager:
         :param node_type: Type of node
         :type node_type: GeneralType
         :param node_properties: List of tuples containing (PropertyType, Value)
-        :type node_properties: tuple
+        :type node_properties: (PropertyType, Value)
         :return: ID of new node and the IDs of the properties of the node
-        :rtype: tuple
+        :rtype: (int, list[int])
         """
         properties = []
         if len(node_properties) > 0:
@@ -445,6 +453,9 @@ class StorageManager:
         # Update cache with new values and sync with store
         self.nodeprop[new_node.index] = (new_node, properties)
         self.nodeprop.sync()
+        # Handle the insert in the index manager
+        self.indexManager.handle_node_insert(node_type.index, new_node.index,
+                                             properties)
         return (new_node, properties)
 
     def get_node_type(self, node):
@@ -496,13 +507,12 @@ class StorageManager:
         """
         Get NodeProperty items of the given type. Generator
 
-        :param node_type: Type index of node
-        :type node_type: int
+        :param node_type: Type of node
+        :type node_type: GeneralType
         :return: NodeProperty generator
         :rtype: list[NodeProperty]
         """
-        i = 1
-        while True:
+        for i in sorted(self.indexManager.get_indexes_for_node_type(node_type.index)):
             node = self.get_node(i)
             if node == GeneralStore.EOF:
                 break
@@ -613,10 +623,11 @@ class StorageManager:
         self.nodeprop.sync()
 
         new_rel = self.relationship_manager.create_item(**rel_kwargs)
-
         self.relprop[new_rel.index] = (new_rel, properties)
         self.relprop.sync()
         self.logger.debug("New Relationship: %s" % new_rel)
+        self.indexManager.handle_rel_insert(rel_type.index, new_rel.index,
+                                            properties)
         return new_rel
 
     def get_relation(self, index):
@@ -631,8 +642,7 @@ class StorageManager:
         return RelationProperty(rel, properties, rel_type, type_name)
 
     def get_relations_of_type(self, relation_type):
-        i = 1
-        while True:
+        for i in sorted(self.indexManager.get_indexes_for_rel_type(relation_type.index)):
             relation = self.get_relation(i)
             if relation == GeneralStore.EOF:
                 break
@@ -700,19 +710,23 @@ class StorageManager:
         # Update the links between relations to ensure that the lists are
         # attached properly
         self.update_relation_links(rel.firstNodeId, rel.firstPrevRelId,
-            rel.firstNextRelId)
+                                   rel.firstNextRelId)
         self.update_relation_links(rel.secondNodeId, rel.secondPrevRelId,
-            rel.secondNextRelId)
+                                   rel.secondNextRelId)
 
         # Delete the properties the relation references
         cur_prop_id = rel.propId
+        prop_idxs = []
         while cur_prop_id != 0:
+            prop_idxs.append(cur_prop_id)
             prop = self.property_manager.get_item_at_index(cur_prop_id)
             cur_prop_id = prop.nextPropId
             self.delete_property(prop)
 
         # Delete relation itself
         self.relationship_manager.delete_item(rel)
+        # Delete relation data from the index
+        self.indexManager.handle_rel_delete(rel.relType, rel.index, prop_idxs)
 
     def delete_property(self, prop):
         """
@@ -733,7 +747,6 @@ class StorageManager:
         """
         Deletes a node and everything that contains it as a reference.
         """
-
         # Delete all relations that are attached to this node (since they can't
         # be attached to nothing)
         cur_rel_id = node.relId
@@ -754,13 +767,17 @@ class StorageManager:
 
         # Delete all properties referred to by this node
         cur_prop_id = node.propId
+        prop_idxs = []
         while cur_prop_id != 0:
+            prop_idxs.append(cur_prop_id)
             prop = self.property_manager.get_item_at_index(cur_prop_id)
             cur_prop_id = prop.nextPropId
             self.delete_property(prop)
 
         # Delete node itself
         self.node_manager.delete_item(node)
+        # Delete node data from the index
+        self.indexManager.handle_node_delete(node.nodeType, node.index, prop_idxs)
 
         # Because delete_relation is unaware of whether it's being deleted
         # because a node was deleted, if this node has only ONE relation
