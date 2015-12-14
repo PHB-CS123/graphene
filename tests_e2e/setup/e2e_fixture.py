@@ -1,13 +1,15 @@
 from graphene.storage.base.graphene_store import GrapheneStore
-from tests_e2e.setup.e2e_utils import E2EUtils
 
 
 class E2EFixture:
+    """
+    :type utils: E2EUtils
+    """
 
     END_OF_COMMAND = ";"
 
     def __init__(self, setup_file, e2e_utils):
-        self.setupFile = open(setup_file, "r")
+        self.setupFilename = setup_file
         self.utils = e2e_utils
         GrapheneStore.TESTING = True
         self.gpStore = GrapheneStore()
@@ -16,24 +18,8 @@ class E2EFixture:
         self.tear_down()
 
     def set_up(self):
-        command = ""
-        for line in self.setupFile:
-            command += self.process_line(line)
-            if command.find(self.END_OF_COMMAND) != -1:
-                self.utils.do_command(command)
-                command = ""
+        for command in self.utils.commands_from_file(self.setupFilename):
+            self.utils.do_command(command)
 
     def tear_down(self):
         self.gpStore.remove_test_datafiles()
-
-    @staticmethod
-    def process_line(line):
-        """
-        Removes newlines from the given line
-
-        :param line: Line to process
-        :type line: str
-        :return: Processed line
-        :rtype: str
-        """
-        return line.replace("\n", " ")

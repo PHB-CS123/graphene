@@ -1,11 +1,14 @@
 from StringIO import StringIO
 from difflib import unified_diff
 
+from graphene.storage.base.graphene_store import GrapheneStore
 from tests_e2e.setup.server_ext import GrapheneTestServer
 
-
 class E2EUtils:
+    END_OF_COMMAND = ";"
+
     def __init__(self):
+        GrapheneStore.TESTING = True
         self.testServer = GrapheneTestServer()
         # Previous output by the server
         self.previousOutputIO = None
@@ -59,3 +62,27 @@ class E2EUtils:
         for line in unified_diff(prev, new, fromfile='previous',
                                  tofile='new', lineterm=''):
             print line
+
+    @classmethod
+    def commands_from_file(cls, filename):
+        commands = []
+        command = ""
+        setup_file = open(filename)
+        for line in setup_file.readlines():
+            command += cls.process_line(line)
+            if command.find(cls.END_OF_COMMAND) != -1:
+                commands.append(command)
+                command = ""
+        return commands
+
+    @staticmethod
+    def process_line(line):
+        """
+        Removes newlines from the given line
+
+        :param line: Line to process
+        :type line: str
+        :return: Processed line
+        :rtype: str
+        """
+        return line.replace("\n", " ")
