@@ -6,6 +6,7 @@ from graphene.utils.pretty_printer import PrettyPrinter
 
 FIXTURE_SUFFIX = "-fixture"
 
+
 def get_argument_parser():
     h_filename = "The .gp file to set up the database with (must have suffix " \
                  "'%s'), as well as the .gp file to benchmark this " \
@@ -23,8 +24,18 @@ def get_argument_parser():
     return parser
 
 
-def print_results(results):
-    PrettyPrinter().print_table(results.items(), header=["Command", "Time"])
+def print_results(header, results, output):
+    if not output:
+        p = PrettyPrinter()
+        p.print_info(header)
+        p.print_table(results.items(), header=["Command", "Time"])
+    else:
+        PrettyPrinter.NO_COLORS = True
+        p = PrettyPrinter()
+        f = open(output, "a")
+        p.print_info(header, output=f)
+        p.print_table(results.items(), header=["Command", "Time"], output=f)
+
 
 def filter_filenames_and_fixtures(filenames):
     # Map of fixture base filenames to a tuple containing the full fixture
@@ -43,7 +54,7 @@ def filter_filenames_and_fixtures(filenames):
         else:
             fixture_name = base_name.replace(".", "%s." % FIXTURE_SUFFIX)
             try:
-                fix_path = fixture_benchmark_map[fixture_name]
+                fix_path = fixture_benchmark_map[fixture_name][0]
                 fixture_benchmark_map[fixture_name] = (fix_path, filename)
             # Fixture has not yet been processed
             except KeyError:
@@ -71,6 +82,6 @@ if __name__ == '__main__':
     fix_benchmarks_paths = filter_filenames_and_fixtures(args.filenames)
     for fixture_path, benchmark_path in fix_benchmarks_paths.items():
         b = Benchmark(fixture_path, benchmark_path)
-        if not args.output:
-            print_results(b.execute())
+        h = "Fixture: %s\nBenchmark: %s\n" % (fixture_path, benchmark_path)
+        print_results(h, b.execute(), args.output)
         b.clean_up()

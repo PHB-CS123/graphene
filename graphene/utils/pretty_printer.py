@@ -141,7 +141,7 @@ class SyntaxHighlighting:
 
 class PrettyPrinter:
     # Set when testing to avoid getting output with color escape sequences
-    TESTING = False
+    NO_COLORS = False
 
     def __init__(self):
         """
@@ -154,29 +154,29 @@ class PrettyPrinter:
         #TODO: change this to get themes from dict where NO_COLORS is a key
         # --- Color presets --- #
         # Color text green for the time to execute a command, make it dim
-        self.timeFormat = Fore.GREEN + Style.DIM if not self.TESTING else ""
+        self.timeFormat = Fore.GREEN + Style.DIM if not self.NO_COLORS else ""
         # Color of the table with output
-        self.tableColor = Fore.YELLOW if not self.TESTING else ""
+        self.tableColor = Fore.YELLOW if not self.NO_COLORS else ""
         # Color of the header of the table
-        self.headerColor = Fore.RED if not self.TESTING else ""
+        self.headerColor = Fore.RED if not self.NO_COLORS else ""
         # Color of the elements in the table
-        self.elementColor = Fore.BLUE if not self.TESTING else ""
+        self.elementColor = Fore.BLUE if not self.NO_COLORS else ""
         # Color errors red, and make them bright
-        self.errorFormat = Fore.RED + Style.BRIGHT if not self.TESTING else ""
+        self.errorFormat = Fore.RED + Style.BRIGHT if not self.NO_COLORS else ""
         # Color help green
-        self.helpColor = Fore.GREEN if not self.TESTING else ""
+        self.helpColor = Fore.GREEN if not self.NO_COLORS else ""
         # Color the info text white, make it bright
-        self.infoFormat = Fore.WHITE + Style.BRIGHT if not self.TESTING else ""
+        self.infoFormat = Fore.WHITE + Style.BRIGHT if not self.NO_COLORS else ""
 
         # Format for keyword highlighting
-        self.keywordFormat = Fore.RED if not self.TESTING else ""
+        self.keywordFormat = Fore.RED if not self.NO_COLORS else ""
         # Format for symbol highlighting
-        self.symbolFormat = Fore.WHITE if not self.TESTING else ""
+        self.symbolFormat = Fore.WHITE if not self.NO_COLORS else ""
         # Format for type highlighting
-        self.typeFormat = Fore.CYAN if not self.TESTING else ""
+        self.typeFormat = Fore.CYAN if not self.NO_COLORS else ""
 
         # End of color, reset to normal terminal color
-        self.endFormat = Fore.RESET + Style.RESET_ALL if not self.TESTING else ""
+        self.endFormat = Fore.RESET + Style.RESET_ALL if not self.NO_COLORS else ""
 
         # --- Table Elements --- #
         self.pipeFormat = self.tableColor + "|" + self.endFormat
