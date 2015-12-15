@@ -1,0 +1,56 @@
+Fixture: gp-scripts/benchmarks/Node-Insertion-Times/1500-people-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Node-Insertion-Times/1500-people-benchmark.gp
+-----------------------------------------------------
+| COMMAND                           | TIME          |
+-----------------------------------------------------
+| INSERT NODE Person(1, "GENE ME... | 1.91344404221 |
+-----------------------------------------------------
+Fixture: gp-scripts/benchmarks/Node-Insertion-Times/3500-people-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Node-Insertion-Times/3500-people-benchmark.gp
+-----------------------------------------------------
+| COMMAND                           | TIME          |
+-----------------------------------------------------
+| INSERT NODE Person(1, "ANTONIO... | 4.43855905533 |
+-----------------------------------------------------
+Fixture: gp-scripts/benchmarks/Node-Insertion-Times/2500-people-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Node-Insertion-Times/2500-people-benchmark.gp
+-----------------------------------------------------
+| COMMAND                           | TIME          |
+-----------------------------------------------------
+| INSERT NODE Person(1, "HERMAN ... | 3.15076518059 |
+-----------------------------------------------------
+Fixture: gp-scripts/benchmarks/Node-Insertion-Times/4500-people-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Node-Insertion-Times/4500-people-benchmark.gp
+-----------------------------------------------------
+| COMMAND                           | TIME          |
+-----------------------------------------------------
+| INSERT NODE Person(1, "RICKY W... | 6.59361410141 |
+-----------------------------------------------------
+Fixture: gp-scripts/benchmarks/Node-Insertion-Times/5500-people-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Node-Insertion-Times/5500-people-benchmark.gp
+-----------------------------------------------------
+| COMMAND                           | TIME          |
+-----------------------------------------------------
+| INSERT NODE Person(1, "CALVIN ... | 7.90819001198 |
+-----------------------------------------------------
+Fixture: gp-scripts/benchmarks/Node-Insertion-Times/6500-people-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Node-Insertion-Times/6500-people-benchmark.gp
+-----------------------------------------------------
+| COMMAND                           | TIME          |
+-----------------------------------------------------
+| INSERT NODE Person(1, "THEODOR... | 8.63660883904 |
+-----------------------------------------------------
+Fixture: gp-scripts/benchmarks/Node-Insertion-Times/2000-people-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Node-Insertion-Times/2000-people-benchmark.gp
+-----------------------------------------------------
+| COMMAND                           | TIME          |
+-----------------------------------------------------
+| INSERT NODE Person(1, "ANTONIO... | 2.76674199104 |
+-----------------------------------------------------
+
+1500, 1.91344404221
+2000, 2.76674199104
+2500, 3.15076518059
+4500, 6.59361410141
+5500, 7.90819001198
+6500, 8.63660883904

@@ -1,0 +1,64 @@
+6500 result(s) found.
+Fixture: gp-scripts/benchmarks/Node-Matching/6500-people-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Node-Matching/6500-people-benchmark.gp
+------------------------------------
+| COMMAND         | TIME           |
+------------------------------------
+| MATCH (Person); | 0.515285968781 |
+------------------------------------
+4500 result(s) found.
+Fixture: gp-scripts/benchmarks/Node-Matching/4500-people-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Node-Matching/4500-people-benchmark.gp
+------------------------------------
+| COMMAND         | TIME           |
+------------------------------------
+| MATCH (Person); | 0.354863882065 |
+------------------------------------
+5500 result(s) found.
+Fixture: gp-scripts/benchmarks/Node-Matching/5500-people-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Node-Matching/5500-people-benchmark.gp
+------------------------------------
+| COMMAND         | TIME           |
+------------------------------------
+| MATCH (Person); | 0.426476955414 |
+------------------------------------
+3500 result(s) found.
+Fixture: gp-scripts/benchmarks/Node-Matching/3500-people-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Node-Matching/3500-people-benchmark.gp
+------------------------------------
+| COMMAND         | TIME           |
+------------------------------------
+| MATCH (Person); | 0.270823001862 |
+------------------------------------
+2000 result(s) found.
+Fixture: gp-scripts/benchmarks/Node-Matching/2000-people-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Node-Matching/2000-people-benchmark.gp
+------------------------------------
+| COMMAND         | TIME           |
+------------------------------------
+| MATCH (Person); | 0.164130926132 |
+------------------------------------
+2500 result(s) found.
+Fixture: gp-scripts/benchmarks/Node-Matching/2500-people-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Node-Matching/2500-people-benchmark.gp
+-----------------------------------
+| COMMAND         | TIME          |
+-----------------------------------
+| MATCH (Person); | 0.18581700325 |
+-----------------------------------
+1500 result(s) found.
+Fixture: gp-scripts/benchmarks/Node-Matching/1500-people-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Node-Matching/1500-people-benchmark.gp
+------------------------------------
+| COMMAND         | TIME           |
+------------------------------------
+| MATCH (Person); | 0.124377965927 |
+------------------------------------
+
+1500, 0.124377965927
+2500, 0.18581700325
+2000, 0.164130926132
+3500, 0.270823001862
+4500, 0.354863882065 
+5500, 0.426476955414
+6500, 0.515285968781
