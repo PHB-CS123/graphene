@@ -1,0 +1,65 @@
+Fixture: gp-scripts/benchmarks/Relations-1000-Nodes/1000-people-1000-rels-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Relations-1000-Nodes/1000-people-1000-rels-benchmark.gp
+-----------------------------------------------------
+| COMMAND                           | TIME          |
+-----------------------------------------------------
+| INSERT RELATION Person(id=209)... | 5.87069797516 |
+-----------------------------------------------------
+Fixture: gp-scripts/benchmarks/Relations-1000-Nodes/1000-people-1250-rels-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Relations-1000-Nodes/1000-people-1250-rels-benchmark.gp
+-----------------------------------------------------
+| COMMAND                           | TIME          |
+-----------------------------------------------------
+| INSERT RELATION Person(id=949)... | 7.42110180855 |
+-----------------------------------------------------
+Fixture: gp-scripts/benchmarks/Relations-1000-Nodes/1000-people-2000-rels-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Relations-1000-Nodes/1000-people-2000-rels-benchmark.gp
+-----------------------------------------------------
+| COMMAND                           | TIME          |
+-----------------------------------------------------
+| INSERT RELATION Person(id=344)... | 11.7357609272 |
+-----------------------------------------------------
+Fixture: gp-scripts/benchmarks/Relations-1000-Nodes/1000-people-500-rels-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Relations-1000-Nodes/1000-people-500-rels-benchmark.gp
+-----------------------------------------------------
+| COMMAND                           | TIME          |
+-----------------------------------------------------
+| INSERT RELATION Person(id=506)... | 3.09641289711 |
+-----------------------------------------------------
+Fixture: gp-scripts/benchmarks/Relations-1000-Nodes/1000-people-1750-rels-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Relations-1000-Nodes/1000-people-1750-rels-benchmark.gp
+-----------------------------------------------------
+| COMMAND                           | TIME          |
+-----------------------------------------------------
+| INSERT RELATION Person(id=602)... | 11.5881891251 |
+-----------------------------------------------------
+Fixture: gp-scripts/benchmarks/Relations-1000-Nodes/1000-people-750-rels-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Relations-1000-Nodes/1000-people-750-rels-benchmark.gp
+-----------------------------------------------------
+| COMMAND                           | TIME          |
+-----------------------------------------------------
+| INSERT RELATION Person(id=9)-[... | 4.57635211945 |
+-----------------------------------------------------
+Fixture: gp-scripts/benchmarks/Relations-1000-Nodes/1000-people-250-rels-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Relations-1000-Nodes/1000-people-250-rels-benchmark.gp
+-----------------------------------------------------
+| COMMAND                           | TIME          |
+-----------------------------------------------------
+| INSERT RELATION Person(id=6)-[... | 1.69726800919 |
+-----------------------------------------------------
+Fixture: gp-scripts/benchmarks/Relations-1000-Nodes/1000-people-1500-rels-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Relations-1000-Nodes/1000-people-1500-rels-benchmark.gp
+-----------------------------------------------------
+| COMMAND                           | TIME          |
+-----------------------------------------------------
+| INSERT RELATION Person(id=385)... | 9.08438515663 |
+-----------------------------------------------------
+
+250, 1.69726800919
+500, 3.09641289711
+750, 4.57635211945
+1000, 5.87069797516
+1250, 7.42110180855
+1500, 9.08438515663
+1750, 11.5881891251
+2000, 11.7357609272

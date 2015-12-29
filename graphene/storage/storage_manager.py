@@ -8,7 +8,6 @@ from graphene.storage.base.property import Property
 from graphene.storage.intermediate import *
 from graphene.storage.defrag.defrag_helpers import *
 
-
 class StorageManager:
     # Maximum size of the cache (in items)
     MAX_CACHE_SIZE = 10000
@@ -418,6 +417,18 @@ class StorageManager:
                     kwargs["prev_prop_id"] = prop_ids[i - 1]
                 if i < len(prop_ids) - 1:
                     kwargs["next_prop_id"] = prop_ids[i + 1]
+
+                # String, so write name
+                if prop_type == Property.PropertyType.string:
+                    kwargs["prop_block_id"] = \
+                        self.prop_string_manager.write_string(prop_val)
+                # Array, so use array manager
+                elif prop_type.value >= Property.PropertyType.intArray.value:
+                    kwargs["prop_block_id"] = \
+                        self.array_manager.write_array(prop_val, prop_type)
+                # Otherwise primitive
+                else:
+                    kwargs["prop_block_id"] = prop_val
                 # Create property and add it to the list of properties
                 stored_prop = self.property_manager.create_item(**kwargs)
                 properties.append(stored_prop)
