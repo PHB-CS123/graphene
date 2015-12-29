@@ -1,6 +1,7 @@
 import unittest
 
 from graphene.errors.storage_manager_errors import *
+from graphene.errors.query_errors import NonexistentPropertyException
 from graphene.storage import (StorageManager, GrapheneStore, Property,
                               Relationship, Node)
 from graphene.storage.intermediate.node_property import NodeProperty
@@ -879,3 +880,269 @@ class TestStorageManagerMethods(unittest.TestCase):
             if val1 != val2:
                 return False
         return True
+
+    # --- Alter command tests --- #
+    def properties_attached(self, propIdLeft, propIdRight):
+        self.assertEqual(self.sm.property_manager.get_item_at_index(propIdLeft).nextPropId, propIdRight)
+        self.assertEqual(self.sm.property_manager.get_item_at_index(propIdRight).prevPropId, propIdLeft)
+
+    def property_is_first(self, itemId, propId, node_flag):
+        if node_flag:
+            item_manager = self.sm.node_manager
+        else:
+            item_manager = self.sm.relationship_manager
+        self.assertEqual(item_manager.get_item_at_index(itemId).propId, propId)
+        self.assertEqual(self.sm.property_manager.get_item_at_index(propId).prevPropId, 0)
+
+    def drop_property_three_items_five_props(self, name, (i1, p1), (i2, p2), (i3, p3), node_flag):
+        i1i, p1i = i1.index, map(lambda p: p.index, p1)
+        i2i, p2i = i2.index, map(lambda p: p.index, p2)
+        i3i, p3i = i3.index, map(lambda p: p.index, p3)
+
+        with self.assertRaises(NonexistentPropertyException):
+            self.sm.drop_property(name, "foo", node_flag)
+
+        self.sm.drop_property(name, "c", node_flag)
+
+        self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p1i[2]))
+        self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p2i[2]))
+        self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p3i[2]))
+
+        self.properties_attached(p1i[1], p1i[3])
+        self.properties_attached(p2i[1], p2i[3])
+        self.properties_attached(p3i[1], p3i[3])
+
+        self.sm.drop_property(name, "a", node_flag)
+
+        self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p1i[0]))
+        self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p2i[0]))
+        self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p3i[0]))
+
+        self.property_is_first(i1i, p1i[1], node_flag)
+        self.property_is_first(i2i, p2i[1], node_flag)
+        self.property_is_first(i3i, p3i[1], node_flag)
+
+        self.sm.drop_property(name, "e", node_flag)
+
+        self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p1i[4]))
+        self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p2i[4]))
+        self.assertIsNoneOrEOF(self.sm.property_manager.get_item_at_index(p3i[4]))
+
+        self.assertEqual(self.sm.property_manager.get_item_at_index(p1i[3]).nextPropId, 0)
+        self.assertEqual(self.sm.property_manager.get_item_at_index(p2i[3]).nextPropId, 0)
+        self.assertEqual(self.sm.property_manager.get_item_at_index(p3i[3]).nextPropId, 0)
+
+
+    def test_drop_property(self):
+        schema = ( ("a", "string"), ("b", "int"), ("c", "int[]"), ("d", "bool"), ("e", "string[]") )
+        types = (Property.PropertyType.string, Property.PropertyType.int,
+                 Property.PropertyType.intArray, Property.PropertyType.bool,
+                 Property.PropertyType.stringArray)
+        data1 = zip(types, ("foo", 1, [1,2], False, ["bar"]))
+        data2 = zip(types, ("bat", 8, [3], True, []))
+        data3 = zip(types, ("yar", 3, [], True, ["baz", "qux"]))
+
+        t = self.sm.create_node_type("T", schema)
+        n1, p1 = self.sm.insert_node(t, data1)
+        n2, p2 = self.sm.insert_node(t, data2)
+        n3, p3 = self.sm.insert_node(t, data3)
+
+        self.drop_property_three_items_five_props("T", (n1, p1), (n2, p2), (n3, p3), True)
+
+        r = self.sm.create_relationship_type("R", schema)
+        r1 = self.sm.insert_relation(r, data1, n1, n2)
+        p1 = self.sm.relprop[r1.index][1]
+        r2 = self.sm.insert_relation(r, data2, n1, n3)
+        p2 = self.sm.relprop[r2.index][1]
+        r3 = self.sm.insert_relation(r, data3, n2, n3)
+        p3 = self.sm.relprop[r3.index][1]
+
+        self.drop_property_three_items_five_props("R", (r1, p1), (r2, p2), (r3, p3), False)
+
+    def add_property_three_items(self, name, (i1, p1), (i2, p2), (i3, p3), node_flag):
+        if node_flag:
+            item_manager = self.sm.node_manager
+            get_item = self.sm.get_node
+        else:
+            item_manager = self.sm.relationship_manager
+            get_item = self.sm.get_relation
+
+        i1i, p1i = i1.index, map(lambda p: p.index, p1)
+        i2i, p2i = i2.index, map(lambda p: p.index, p2)
+        i3i, p3i = i3.index, map(lambda p: p.index, p3)
+
+        i1props = map(lambda i: self.sm.get_property_value(
+                                self.sm.property_manager.get_item_at_index(i)),
+                      p1i)
+        i2props = map(lambda i: self.sm.get_property_value(
+                                self.sm.property_manager.get_item_at_index(i)),
+                      p2i)
+        i3props = map(lambda i: self.sm.get_property_value(
+                                self.sm.property_manager.get_item_at_index(i)),
+                      p3i)
+
+        props_to_add = (
+            ("b", "int", Property.PropertyType.int, Property.DefaultValue.int),
+            ("c", "float", Property.PropertyType.float, Property.DefaultValue.float),
+            ("d", "string", Property.PropertyType.string, Property.DefaultValue.string),
+            ("e", "bool", Property.PropertyType.bool, Property.DefaultValue.bool),
+            ("f", "int[]", Property.PropertyType.intArray, Property.DefaultValue.intArray),
+        )
+
+        for prop_name, prop_type, prop_tt_type, default_val in props_to_add:
+            i1props.append(default_val)
+            i2props.append(default_val)
+            i3props.append(default_val)
+
+            new_tt = self.sm.add_property(name, prop_name, prop_type, node_flag)
+
+            self.assertEqual(new_tt.propertyType, prop_tt_type)
+
+            self.assertListEqual(get_item(i1i).properties, i1props)
+            self.assertListEqual(get_item(i2i).properties, i2props)
+            self.assertListEqual(get_item(i3i).properties, i3props)
+
+    def test_add_property(self):
+        schema = ( ("a", "string"), )
+        types = (Property.PropertyType.string,)
+        data1 = zip(types, ("a",))
+        data2 = zip(types, ("b",))
+        data3 = zip(types, ("c",))
+
+        t = self.sm.create_node_type("T", schema)
+        n1, p1 = self.sm.insert_node(t, data1)
+        n2, p2 = self.sm.insert_node(t, data2)
+        n3, p3 = self.sm.insert_node(t, data3)
+        self.add_property_three_items("T", (n1, p1), (n2, p2), (n3, p3), True)
+
+        r = self.sm.create_relationship_type("R", ())
+        r1 = self.sm.insert_relation(r, (), n1, n2)
+        p1 = self.sm.relprop[r1.index][1]
+        r2 = self.sm.insert_relation(r, (), n1, n3)
+        p2 = self.sm.relprop[r2.index][1]
+        r3 = self.sm.insert_relation(r, (), n2, n3)
+        p3 = self.sm.relprop[r3.index][1]
+        self.add_property_three_items("R", (r1, p1), (r2, p2), (r3, p3), False)
+
+    def change_property_item(self, name, (i, p), node_flag):
+        if node_flag:
+            item_manager = self.sm.node_manager
+            get_item = self.sm.get_node
+        else:
+            item_manager = self.sm.relationship_manager
+            get_item = self.sm.get_relation
+
+        with self.assertRaises(NonexistentPropertyException):
+            self.sm.change_property(name, "q", "float", node_flag)
+
+        self.sm.change_property(name, "a", "float", node_flag)
+
+        new_value = get_item(i.index).properties[1]
+        self.assertEqual(type(new_value), float)
+        self.assertEqual(new_value, 1.0)
+
+        self.sm.change_property(name, "a", "float[]", node_flag)
+
+        new_value = get_item(i.index).properties[1]
+        self.assertEqual(type(new_value), list)
+        self.assertEqual(type(new_value[0]), float)
+        self.assertEqual(new_value, [1.0])
+
+        self.sm.change_property(name, "a", "int[]", node_flag)
+
+        new_value = get_item(i.index).properties[1]
+        self.assertEqual(type(new_value), list)
+        self.assertEqual(type(new_value[0]), int)
+        self.assertEqual(new_value, [1])
+
+        self.sm.change_property(name, "a", "float", node_flag)
+
+        new_value = get_item(i.index).properties[1]
+        self.assertEqual(type(new_value), float)
+        self.assertEqual(new_value, 0.0)
+
+        self.sm.change_property(name, "a", "string", node_flag)
+
+        new_value = get_item(i.index).properties[1]
+        self.assertEqual(type(new_value), unicode)
+        self.assertEqual(new_value, "")
+
+        self.sm.change_property(name, "c", "string", node_flag)
+
+        new_value = get_item(i.index).properties[0]
+        self.assertEqual(type(new_value), unicode)
+        self.assertEqual(new_value, "a")
+
+    def test_change_property(self):
+        schema = ( ("c", "string"), ("a", "int"), )
+        types = (Property.PropertyType.string, Property.PropertyType.int,)
+        data = zip(types, ("a", 1,))
+        data2 = zip(types, ("b", 2,))
+
+        t = self.sm.create_node_type("T", schema)
+        n, p = self.sm.insert_node(t, data)
+        n2, p2 = self.sm.insert_node(t, data2)
+
+        self.change_property_item("T", (n, p), True)
+
+        rt = self.sm.create_relationship_type("R", schema)
+        r = self.sm.insert_relation(rt, data, n, n2)
+        rp = self.sm.relprop[r.index][1]
+
+        self.change_property_item("R", (r, rp), False)
+
+    def rename_property_helper(self, name, node_flag):
+        _, type_schema = self.sm.get_type_data(name, node_flag)
+        self.assertEqual(type_schema[0][1], "a")
+
+        self.sm.rename_property(name, "a", "b", node_flag)
+
+        _, type_schema = self.sm.get_type_data(name, node_flag)
+        self.assertEqual(type_schema[0][1], "b")
+
+        with self.assertRaises(NonexistentPropertyException):
+            self.sm.rename_property(name, "a", "b", node_flag)
+
+    def test_rename_property(self):
+        schema = ( ("a", "string"), )
+        types = (Property.PropertyType.string,)
+
+        t = self.sm.create_node_type("T", schema)
+        self.rename_property_helper("T", True)
+
+        r = self.sm.create_relationship_type("R", schema)
+        self.rename_property_helper("R", False)
+
+    # --- Helpers --- #
+    def test_is_convertible(self):
+        numerical_types = [
+            Property.PropertyType.int,
+            Property.PropertyType.long,
+            Property.PropertyType.short,
+            Property.PropertyType.float,
+            Property.PropertyType.double
+        ]
+        numerical_arrays = map(lambda t: Property.PropertyType.get_array_type(t),
+                               numerical_types)
+        for t in numerical_types:
+            for s in numerical_types:
+                # All numerical types are OK to convert amongst each other
+                self.assertTrue(self.sm.is_convertible(t, s))
+            for s in numerical_arrays:
+                # All numerical types are OK to convert to an array of any other
+                # numerical type
+                self.assertTrue(self.sm.is_convertible(t, s))
+            # Can convert from bool to number, but not from string or char to
+            # number
+            self.assertTrue(self.sm.is_convertible(Property.PropertyType.bool, t))
+            self.assertFalse(self.sm.is_convertible(Property.PropertyType.char, t))
+            self.assertFalse(self.sm.is_convertible(Property.PropertyType.string, t))
+
+        # Can't convert from array to any non-array value
+        for t in Property.PropertyType:
+            if not Property.PropertyType.is_array(t):
+                continue
+            for s in Property.PropertyType:
+                if Property.PropertyType.is_array(t):
+                    continue
+                self.assertFalse(self.sm.is_convertible(t, s), "%s %s" % (t, s))

@@ -2,6 +2,7 @@ from pylru import WriteBackCacheManager
 import logging
 
 from graphene.errors.storage_manager_errors import *
+from graphene.errors.query_errors import NonexistentPropertyException
 from graphene.storage import *
 from graphene.storage.base.property import Property
 from graphene.storage.intermediate import *
@@ -14,27 +15,27 @@ class StorageManager:
     # Filename for the node type store
     NODE_TYPE_STORE_FILENAME = "graphenestore.nodetypestore.db"
     # Filename for the dynamic name manager for node type names store
-    NODE_TYPE_STORE_NAMES_FILENAME = "graphenestore.nodetypestore.db.names"
+    NODE_TYPE_STORE_NAMES_FILENAME = "graphenestore.nodetypestore.names.db"
     # Filename for the store manager for types of node types
     NODE_TYPE_TYPE_STORE_FILENAME = "graphenestore.nodetypestore.types.db"
     # Filename for the dynamic name manager for types of node types
     NODE_TYPE_TYPE_STORE_NAMES_FILENAME = \
-        "graphenestore.nodetypestore.types.db.names"
+        "graphenestore.nodetypestore.types.names.db"
 
     # Filename for the relationship type store
     RELATIONSHIP_TYPE_STORE_FILENAME = "graphenestore.relationshiptypestore.db"
     # Filename for the dynamic name manager for relationship type names store
     RELATIONSHIP_TYPE_STORE_NAMES_FILENAME = \
-        "graphenestore.relationshiptypestore.db.names"
+        "graphenestore.relationshiptypestore.names.db"
     # Filename for the store manager for types of relationship types
     RELATIONSHIP_TYPE_TYPE_STORE_FILENAME = \
         "graphenestore.relationshiptypestore.types.db"
     # Filename for the dynamic name manager for types of relationship types
     RELATIONSHIP_TYPE_TYPE_STORE_NAMES_FILENAME = \
-        "graphenestore.relationshiptypestore.types.db.names"
+        "graphenestore.relationshiptypestore.types.names.db"
 
     # Filename for the dynamic string property manager
-    PROP_STORE_STRINGS_FILENAME = "graphenestore.propertystore.db.strings"
+    PROP_STORE_STRINGS_FILENAME = "graphenestore.propertystore.strings.db"
 
     # Size of name blocks
     NAME_BLOCK_SIZE = 10
@@ -410,10 +411,7 @@ class StorageManager:
             for i, idx in enumerate(prop_ids):
                 # Get current property type and value for the type
                 prop_type, prop_val = node_properties[i]
-                kwargs = {
-                    "index": idx,
-                    "prop_type": prop_type
-                }
+                kwargs = self.generate_property_args(idx, prop_type, prop_val)
                 # Non edge cases, prop_ids non-zero
                 if i > 0:
                     kwargs["prev_prop_id"] = prop_ids[i - 1]
@@ -555,7 +553,7 @@ class StorageManager:
         first_prop_idx = properties[0].index if rel_properties else 0
 
         # Just get one index for this relationship
-        rel_idx = self.relationship_manager.get_indexes(1)[0]
+        rel_idx = self.relationship_manager.get_indexes()[0]
 
         src_idx, dst_idx = src_node.index, dst_node.index
 
@@ -639,7 +637,7 @@ class StorageManager:
             if relation is not None and relation.type == relation_type:
                 yield relation
 
-# --- Deletion methods --- #
+# --- Deletion Methods --- #
     def update_relation_links(self, node_id, prev_rel_id, next_rel_id):
         """
         Update the linked lists this relation was attached to for a given node
@@ -799,7 +797,7 @@ class StorageManager:
         """
         self.update_properties(relprops, updates, False)
 
-# --- Update methods --- #
+# --- Update Methods --- #
     def update_properties(self, itemprops, updates, node_flag):
         """
         Updates the given nodes or relationship properties
@@ -847,6 +845,418 @@ class StorageManager:
                     self.property_manager.write_item(prop)
         # Done with updates, clear cache
         cache.clear()
+
+# --- Alter Methods --- #
+    def drop_property(self, type_name, prop_name, node_flag):
+        type_data, type_schema = self.get_type_data(type_name, node_flag)
+
+        # Get the appropriate managers
+        # Deleting a node property
+        if node_flag:
+            cache = self.nodeprop
+            type_manager = self.nodeTypeManager
+            tt_manager = self.nodeTypeTypeManager
+            tt_name_manager = self.nodeTypeTypeNameManager
+            get_items = self.get_nodes_of_type
+        # Deleting a relationship property
+        else:
+            cache = self.relprop
+            type_manager = self.relTypeManager
+            tt_manager = self.relTypeTypeManager
+            tt_name_manager = self.relTypeTypeNameManager
+            get_items = self.get_relations_of_type
+
+        # Here we iterate over the schema of the node/relation to remove the
+        # corresponding property
+        prev_tt_id = None # schemas are singly-linked, so we need to track this
+        cur_tt_id = type_data.firstType
+        tt_index = 0
+        while cur_tt_id != 0:
+            tt = tt_manager.get_item_at_index(cur_tt_id)
+            type_name = tt_name_manager.read_string_at_index(tt.typeName)
+
+            if type_name == prop_name:
+                next_tt_id = tt.nextType
+                if prev_tt_id is not None:
+                    # not the first type
+                    prev_tt = tt_manager.get_item_at_index(prev_tt_id)
+                    prev_tt.nextType = next_tt_id
+                    tt_manager.write_item(prev_tt)
+                else:
+                    # the first type
+                    type_data.firstType = next_tt_id
+                    type_manager.write_item(type_data)
+                self.delete_type_type(tt, node_flag)
+                break
+
+            prev_tt_id = cur_tt_id
+            cur_tt_id = tt.nextType
+            tt_index += 1
+        else:
+            # If we never broke, that means we never found the desired property.
+            raise NonexistentPropertyException("Property with name %s does not exist." % prop_name)
+
+        for item_prop in get_items(type_data):
+            if node_flag:
+                item = item_prop.node
+            else:
+                item = item_prop.rel
+
+            # Now we remove the property from every node of this type.
+            cur_prop_id = item.propId
+            prop_ids = []
+            cur_prop_idx = 0
+            while cur_prop_id != 0:
+                prop = self.property_manager.get_item_at_index(cur_prop_id)
+
+                cur_prop_id = prop.nextPropId
+
+                # The properties are linked in the same order as the schema, so
+                # we just need the index.
+                if cur_prop_idx == tt_index:
+                    # Properties are doubly-linked, so we don't need to keep
+                    # track of prev/next.
+                    if prop.prevPropId != 0:
+                        # Not the first property
+                        prev_prop = self.property_manager.get_item_at_index(prop.prevPropId)
+                        prev_prop.nextPropId = prop.nextPropId
+                        self.property_manager.write_item(prev_prop)
+                    else:
+                        # The first property
+                        item.propId = prop.nextPropId
+
+                    if prop.nextPropId != 0:
+                        # Not the last property
+                        next_prop = self.property_manager.get_item_at_index(prop.nextPropId)
+                        next_prop.prevPropId = prop.prevPropId
+                        self.property_manager.write_item(next_prop)
+                    # Actually delete it
+                    self.delete_property(prop)
+                else:
+                    # Otherwise, add it to the property list we'll need to
+                    # update the cache with. We use ids here rather than the
+                    # actual properties because we need to ensure we have the
+                    # updated value.
+                    prop_ids.append(prop.index)
+
+                cur_prop_idx += 1
+
+            # Update the cache to reflect the new properties
+            props = map(self.property_manager.get_item_at_index, prop_ids)
+            cache[item.index] = (item, props)
+        # Sync cache to disk
+        cache.sync()
+
+    def add_property(self, type_name, tt_name, tt_type, node_flag):
+        type_data, type_schema = self.get_type_data(type_name, node_flag)
+
+        # Get the appropriate managers
+        # Deleting a node property
+        if node_flag:
+            cache = self.nodeprop
+            type_manager = self.nodeTypeManager
+            tt_manager = self.nodeTypeTypeManager
+            tt_name_manager = self.nodeTypeTypeNameManager
+            get_items = self.get_nodes_of_type
+        # Deleting a relationship property
+        else:
+            cache = self.relprop
+            type_manager = self.relTypeManager
+            tt_manager = self.relTypeTypeManager
+            tt_name_manager = self.relTypeTypeNameManager
+            get_items = self.get_relations_of_type
+
+        tt_id = tt_manager.get_indexes()[0]
+        if tt_type.find("[]") > -1:
+            tt_type = tt_type.replace("[]", "Array")
+        tt_name_id = tt_name_manager.write_string(tt_name)
+        kwargs = {
+            "property_type": Property.PropertyType[tt_type],
+            "type_name": tt_name_id,
+            "index": tt_id
+        }
+        new_tt = tt_manager.create_item(**kwargs)
+        if len(type_schema) > 0:
+            last_tt, _, __ = type_schema[-1]
+            last_tt.nextType = new_tt.index
+            tt_manager.write_item(last_tt)
+
+        default_val = getattr(Property.DefaultValue, tt_type)
+        for item_prop in get_items(type_data):
+            if node_flag:
+                item = item_prop.node
+            else:
+                item = item_prop.rel
+            props = []
+
+            cur_prop_id = item.propId
+            last_prop_id = 0
+            i = 0
+            while cur_prop_id != 0:
+                cur_prop = self.property_manager.get_item_at_index(cur_prop_id)
+                props.append(cur_prop)
+                last_prop_id = cur_prop_id
+                cur_prop_id = cur_prop.nextPropId
+
+            index = self.property_manager.get_indexes()[0]
+            kwargs = self.generate_property_args(index, Property.PropertyType[tt_type], default_val)
+            stored_prop = self.property_manager.create_item(**kwargs)
+
+            if last_prop_id == 0:
+                # If this is 0, that means we were in a relation with an empty
+                # schema.
+                item.propId = stored_prop.index
+            else:
+                # Otherwise, there was a schema beforehand.
+                stored_prop.prevPropId = last_prop_id
+                props[-1].nextPropId = stored_prop.index
+                self.property_manager.write_item(props[-1])
+
+            props.append(stored_prop)
+            cache[item.index] = (item, props)
+        # Sync cache to disk
+        cache.sync()
+
+        return new_tt
+
+    def change_property(self, type_name, tt_name, new_tt_type, node_flag):
+        type_data, type_schema = self.get_type_data(type_name, node_flag)
+
+        # Get the appropriate managers
+        # Changing a node property
+        if node_flag:
+            cache = self.nodeprop
+            type_manager = self.nodeTypeManager
+            tt_manager = self.nodeTypeTypeManager
+            tt_name_manager = self.nodeTypeTypeNameManager
+            get_items = self.get_nodes_of_type
+        # Changing a relationship property
+        else:
+            cache = self.relprop
+            type_manager = self.relTypeManager
+            tt_manager = self.relTypeTypeManager
+            tt_name_manager = self.relTypeTypeNameManager
+            get_items = self.get_relations_of_type
+
+        for i, (tt, name, tt_type) in enumerate(type_schema):
+            if name == tt_name:
+                prop_index = i
+                prop = tt
+                prop_type = tt_type
+                break
+        else:
+            raise NonexistentPropertyException("Property with name %s does not exist." % tt_name)
+
+        if new_tt_type.find("[]") > -1:
+            new_tt_type = new_tt_type.replace("[]", "Array")
+        new_type = Property.PropertyType[new_tt_type]
+        old_type = prop.propertyType
+        prop.propertyType = new_type
+
+        tt_manager.write_item(prop)
+
+        for item_prop in get_items(type_data):
+            if node_flag:
+                item = item_prop.node
+            else:
+                item = item_prop.rel
+            props = []
+            old_value = item_prop.properties[prop_index]
+            new_value = self.convert_value_between_types(old_value, old_type, new_type)
+
+            cur_prop_id = item.propId
+            i = 0
+            while cur_prop_id != 0:
+                cur_prop = self.property_manager.get_item_at_index(cur_prop_id)
+                if i == prop_index:
+                    cur_prop.type = new_type
+                    if Property.PropertyType.is_array(new_type):
+                        if Property.PropertyType.is_array(old_type):
+                            # Already had an array, so update
+                            array_idx = cur_prop.propBlockId
+                            array_block = self.array_manager.storeManager.get_item_at_index(array_idx)
+                            array_block.type = new_type
+                            self.array_manager.storeManager.write_item(array_block)
+                            self.array_manager.update_array_at_index(cur_prop.propBlockId, new_value)
+                        else:
+                            # Didn't have an array before, so have to write an
+                            # array and put it there
+                            cur_prop.propBlockId = self.array_manager.write_array(new_value, new_type)
+                    elif Property.PropertyType.is_string(new_type):
+                        if Property.PropertyType.is_string(old_type):
+                            # Already had a string, so update
+                            self.prop_string_manager.update_string_at_index(cur_prop.propBlockId, new_value)
+                        else:
+                            cur_prop.propBlockId = self.prop_string_manager.write_string(new_value)
+                    else:
+                        cur_prop.propBlockId = new_value
+                props.append(cur_prop)
+                cur_prop_id = cur_prop.nextPropId
+                i += 1
+
+            cache[item.index] = (item, props)
+        # Sync cache to disk
+        cache.sync()
+
+    def rename_property(self, type_name, tt_name, new_tt_name, node_flag):
+        type_data, type_schema = self.get_type_data(type_name, node_flag)
+
+        # Get the appropriate managers
+        # Renaming a node property
+        if node_flag:
+            cache = self.nodeprop
+            type_manager = self.nodeTypeManager
+            tt_manager = self.nodeTypeTypeManager
+            tt_name_manager = self.nodeTypeTypeNameManager
+        # Renaming a relationship property
+        else:
+            cache = self.relprop
+            type_manager = self.relTypeManager
+            tt_manager = self.relTypeTypeManager
+            tt_name_manager = self.relTypeTypeNameManager
+
+        # Here we iterate over the schema of the node/relation to rename the
+        # corresponding property
+        cur_tt_id = type_data.firstType
+        tt_index = 0
+        while cur_tt_id != 0:
+            tt = tt_manager.get_item_at_index(cur_tt_id)
+            type_name = tt_name_manager.read_string_at_index(tt.typeName)
+
+            if type_name == tt_name:
+                name_id = tt.typeName
+                tt_name_manager.update_string_at_index(name_id, new_tt_name)
+                break
+
+            cur_tt_id = tt.nextType
+            tt_index += 1
+        else:
+            # If we never broke, that means we never found the desired property.
+            raise NonexistentPropertyException("Property with name %s does not exist." % tt_name)
+
+
+# --- Helpers --- #
+    def generate_property_args(self, index, prop_type, prop_val):
+        kwargs = {
+            "index": index,
+            "prop_type": prop_type
+        }
+
+        # String, so write name
+        if prop_type == Property.PropertyType.string:
+            kwargs["prop_block_id"] = \
+                self.prop_string_manager.write_string(prop_val)
+        # Array, so use array manager
+        elif prop_type.value >= Property.PropertyType.intArray.value:
+            kwargs["prop_block_id"] = \
+                self.array_manager.write_array(prop_val, prop_type)
+        # Otherwise primitive
+        else:
+            kwargs["prop_block_id"] = prop_val
+
+        return kwargs
+
+    def is_convertible(self, from_type, to_type):
+        # Obviously, a type can be converted to itself.
+        if from_type == to_type:
+            return True
+        elif Property.PropertyType.is_array(from_type):
+            # T[] to S[] is valid only if T to S is.
+            if Property.PropertyType.is_array(to_type):
+                return self.is_convertible(Property.PropertyType.get_base_type(from_type),
+                                           Property.PropertyType.get_base_type(to_type))
+            # T[] to S is not valid.
+            else:
+                return False
+        elif Property.PropertyType.is_array(to_type):
+            # T to S[] is valid only if T to S is valid.
+            return self.is_convertible(from_type, Property.PropertyType.get_base_type(to_type))
+        else:
+            # T to S case, so we actually have to check.
+            if to_type == Property.PropertyType.bool or \
+               to_type == Property.PropertyType.char:
+                # Can't convert to a bool from anything other than a bool, same
+                # with chars
+                return False
+            elif from_type == Property.PropertyType.char and \
+                 to_type == Property.PropertyType.string:
+                # chars are convertible to strings
+                return True
+            elif (from_type == Property.PropertyType.bool or \
+                  Property.PropertyType.is_numerical(from_type)) and \
+                 Property.PropertyType.is_numerical(to_type):
+                # bools are convertible to numbers (True -> 1, False -> 0), and
+                # number to number is fine.
+                return True
+        return False
+
+    def convert_value_between_types(self, value, from_type, to_type):
+        """
+        Converts a value from one type to the other. There are a few potential
+        caveats here.
+
+        Converting from type T[] to type S will always result in the default
+        value for S, as there is no obvious choice for how to convert an array
+        to a single value.
+
+        Converting from type T to type S will attempt to convert from T to S if
+        the values have valid conversion methods; otherwise, we will return the
+        default value for S.
+
+        Converting from type T to type T[] will result in the original value
+        being wrapped in an array; e.g. from int to int[], 3 will be converted
+        into [3].
+
+        Converting from type T to type S[] has two possibilities. If T can be
+        converted validly to S, then that value is converted first and then
+        wrapped in an array. If not, we return the default value for S[].
+
+        Converting from T[] to type S[] works similarly as T to S[]; if T is
+        convertible to S, then we convert each value in the array. Otherwise, we
+        return the default value of S[].
+
+        :param value: Original value of property
+        :type value: object
+        :param from_type: Original type
+        :type from_type: Property.PropertyType
+        :param to_type: New type
+        :type to_type: Property.PropertyType
+        :return: The converted value
+        :rtype: object
+        """
+        if not self.is_convertible(from_type, to_type):
+            return getattr(Property.DefaultValue, to_type.name)
+        elif from_type == to_type:
+            return value
+        else:
+            if Property.PropertyType.is_array(to_type):
+                # Converting to an array...
+                if Property.PropertyType.is_array(from_type):
+                    # If the original is an array, do a map
+                    from_base = Property.PropertyType.get_base_type(from_type)
+                    to_base = Property.PropertyType.get_base_type(to_type)
+                    return map(lambda v: self.convert_value_between_types(v, from_base, to_base),
+                               value)
+                else:
+                    # Otherwise, just wrap value
+                    return [value]
+            elif from_type == Property.PropertyType.bool:
+                # Bool can only be converted to a number, so make a number first
+                # then convert.
+                num_value = 1 if value else 0
+                return self.convert_value_between_types(num_value, Property.PropertyType.int, to_type)
+            elif from_type == Property.PropertyType.char:
+                # Chars can be converted to strings... doesn't actually change
+                # the value though
+                return value
+            else:
+                # Otherwise dealing with numerical conversions.
+                if to_type in [Property.PropertyType.float, Property.PropertyType.double]:
+                    # Float/Double
+                    return float(value)
+                else:
+                    # Integer of some kind
+                    return int(value)
 
 # --- Tools --- #
     def cache_diagnostic(self):
