@@ -11,8 +11,10 @@ class Defragmenter:
     REF_STRUCT_FORMAT_STR = "= I"
     # Variable size format string for a reference type struct
     VAR_SIZE_REF_STRUCT_FORMAT_STR = "= %dI"
+    # Format string for a type enum value (char)
+    TYPE_STRUCT_FORMAT_STR = "= B"
 
-    def __init__(self, base_store, id_store, referencing_stores):
+    def __init__(self, base_store, id_store, referencing_stores, is_name=False):
         """
         Initialize a Defragmenter instance to use for defragmenting files
 
@@ -20,8 +22,10 @@ class Defragmenter:
         :type base_store: GeneralStore
         :param id_store: Id store for the base store
         :type id_store: IdStore
-        :param referencing_stores: Stores that reference this base store
+        :param referencing_stores: Stores that reference this store
         :type referencing_stores: list[GeneralStore]
+        :param is_name: Whether the given store to defragment is a name store
+        :type is_name: bool
         :return: Defragmenter instance for defragmenting base files
         :rtype: Defragmenter
         """
@@ -35,6 +39,12 @@ class Defragmenter:
         self.referencingStores = referencing_stores
         # Structure for a reference type (int, 4 bytes)
         self.referenceStruct = Struct(self.REF_STRUCT_FORMAT_STR)
+        # Structure for a type enum (char, 1 byte)
+        self.typeStruct = Struct(self.TYPE_STRUCT_FORMAT_STR)
+        # Whether we are defragmenting a name store
+        # Edge Case: We have to handle names separately from strings since
+        # they are kept in separate db files.
+        self.isName = is_name
         # Whether self references should be updated for this file
         self.shouldUpdateSelfRef = \
             self.baseStore.STORAGE_TYPE.__name__ in self.referenceMap
@@ -126,10 +136,25 @@ class Defragmenter:
         """
         # Type currently being defragmented
         defrag_type = self.baseStore.STORAGE_TYPE.__name__
-        # Size of the reference struct (4 bytes)
-        ref_size = self.referenceStruct.size
         assert defrag_type in ref_map, \
             "Can't update defrag references if reference map has none"
+        # Size of the reference struct (4 bytes)
+        ref_size = self.referenceStruct.size
+        # Whether we are defragmenting a string type, but not a name
+        is_string_but_not_name = defrag_type == kStringType and not self.isName
+        # Edge Case: defragmenting a string type, but not a name type and
+        # updating a property store. Property may contain a string reference.
+        # If this is the case, there is nothing else to update since name
+        # references are not updated when defragmenting strings.
+        if is_string_but_not_name and store_type == kProperty:
+            return self.handle_prop_payload_reference(swap_table, packed_data)
+        # Edge Case: defragmenting a string type, but not a name type and
+        # updating an array store. Array may be a string array containing
+        # string references.
+        # If this is the case, there is nothing else to update since name
+        # references are not updated when defragmenting strings.
+        elif is_string_but_not_name and store_type == kArrayType:
+            return self.handle_string_array_references(swap_table, packed_data)
         # New packed data after updates
         new_packed_data = ""
         prev_ending = 0
@@ -145,16 +170,6 @@ class Defragmenter:
             prev_ending = offset + ref_size
         # Append any remaining packed data
         new_packed_data += packed_data[prev_ending:]
-        # Edge Case: defragmenting a string type and updating a property store.
-        # Property may contain a string reference
-        if defrag_type == kStringType and store_type == kProperty:
-            new_packed_data = \
-                self.handle_prop_payload_reference(swap_table, new_packed_data)
-        # Edge Case: defragmenting a string type and updating an array store.
-        # Array may be a string array containing string references
-        if defrag_type == kStringType and store_type == kArrayType:
-            new_packed_data = \
-                self.handle_string_array_references(swap_table, new_packed_data)
         return new_packed_data
 
     def fix_references(self, swap_table, base_store, ref_map, id_fix_range):
@@ -210,6 +225,20 @@ class Defragmenter:
             ref_map = TypeReferenceMap[store.STORAGE_TYPE.__name__]
             id_fix_range = xrange(1, store.count() + 1)
             self.fix_references(swap_table, store, ref_map, id_fix_range)
+
+    def type_value_at_offset(self, packed_data, offset):
+        """
+        Returns the char value for the type of the packed data at the offset
+
+        :param packed_data: Packed data to get type from
+        :type packed_data: str
+        :param offset: Offset to look for value
+        :type offset: int
+        :return: Enum value at the given offset in the packed data
+        :rtype: int
+        """
+        packed_value = packed_data[offset:offset+self.typeStruct.size]
+        return self.typeStruct.unpack(packed_value)[0]
 
     def value_at_offset(self, packed_data, offset):
         """
@@ -275,8 +304,7 @@ class Defragmenter:
             return packed_data
         # Swap the payload reference with the new reference
         return packed_data[:kPropertyPayloadOffset] + \
-            self.referenceStruct.pack(swap_table[old_ref]) + \
-            packed_data[kPropertyPayloadOffset + self.referenceStruct.size:]
+            self.referenceStruct.pack(swap_table[old_ref])
 
     def handle_string_array_references(self, swap_table, packed_data):
         """
@@ -324,7 +352,7 @@ class Defragmenter:
         :return: True if the ref. type is the type currently being defragmented
         :rtype: bool
         """
-        type_value = self.value_at_offset(packed_data, kPropertyTypeOffset)
+        type_value = self.type_value_at_offset(packed_data, kPropertyTypeOffset)
         property_type = Property.PropertyType(type_value)
         if Property.type_is_array(property_type):
             return self.baseStore.STORAGE_TYPE.__name__ == kArrayType

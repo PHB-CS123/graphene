@@ -6,6 +6,7 @@ class DefragManager:
     def __init__(self, storage_manager):
         self.storageManager = storage_manager
         self.reference_map = self.build_reference_map(storage_manager)
+        self.name_stores = self.get_name_stores(storage_manager)
 
     def defragment(self, store_manager):
         """
@@ -13,13 +14,14 @@ class DefragManager:
 
         :param store_manager: Store manager to defragment
         :type store_manager: GeneralStoreManager
-        :return:
-        :rtype:
+        :return: Nothing
+        :rtype: None
         """
         base_store = store_manager.store
         id_store = store_manager.idStore
-        referencing_stores = self.reference_map[base_store]
-        Defragmenter(base_store, id_store, referencing_stores).defragment()
+        ref_stores = self.reference_map[base_store]
+        is_name = store_manager in self.name_stores
+        Defragmenter(base_store, id_store, ref_stores, is_name).defragment()
 
     @staticmethod
     def build_reference_map(sm):
@@ -69,3 +71,18 @@ class DefragManager:
             prop_a_base: [prop_base],
             prop_a_s_base: [prop_a_base],
         }
+
+    @staticmethod
+    def get_name_stores(sm):
+        """
+        Get a list of all the base stores that handle names
+
+        :param sm: Storage manager to get the name base stores from
+        :type sm: StorageManager
+        :return: List of base stores that handle names
+        :rtype: list[GeneralStoreManager]
+        """
+        return [sm.nodeTypeNameManager.storeManager.store,
+                sm.nodeTypeTypeNameManager.storeManager.store,
+                sm.relTypeNameManager.storeManager.store,
+                sm.relTypeTypeNameManager.storeManager.store]

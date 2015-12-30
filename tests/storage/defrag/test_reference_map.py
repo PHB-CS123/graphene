@@ -225,7 +225,7 @@ class TestReferenceMap(unittest.TestCase):
         Defragment |0,0->1->3,5| - |1,5->3->5,6| - |3,1->5->6,0|1,5->6->0,3|
         Result     |0,0->[1]->2,3|1,3->[3]->3,4|2,1->[5]->4,0|1,3->[6]->0,2|
 
-        Node References Update (Old Rel Index -> New Rel Index):
+        Node References Update (Old Rel Idx -> New Rel Idx):
         1 -> 1, 3 -> 2, 5 -> 3, 6 -> 4
         """
         # Create relationship store
@@ -304,7 +304,7 @@ class TestReferenceMap(unittest.TestCase):
         Defragment | 0->1->3 | - | 1->3->5 | - | 3->5->6 | 5->6->0 |
         Result     | 0->[1]->2 | 1->[3]->3 | 2->[5]->4 | 3->[6]->0 |
 
-        General Type References Update (Old String Index -> New String Index):
+        General Type References Update (Old Rel Idx -> New Rel Idx):
         1 -> 1, 3 -> 2, 5 -> 3, 6 -> 4
         """
         # Create string store
