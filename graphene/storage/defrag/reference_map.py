@@ -33,6 +33,7 @@ class HeaderType(Enum):
 
 kPropertyTypeOffset = 1
 kPropertyPayloadOffset = 14
+kArrayPayloadOffset = 18
 
 # ----------------------------- Offset Descriptor ---------------------------- #
 
@@ -77,10 +78,10 @@ NodeOffsetDescriptor = {
 PropertyOffsetDescriptor = {
     0: ("inUse", HeaderType.bool),
     1: ("type", HeaderType.int),
-    5: ("nameId", HeaderType.int),
-    9: ("prevPropId", HeaderType.int),
-    13: ("nextPropId", HeaderType.int),
-    17: ("propBlockId", HeaderType.data),
+    2: ("nameId", HeaderType.int),
+    6: ("prevPropId", HeaderType.int),
+    10: ("nextPropId", HeaderType.int),
+    14: ("propBlockId", HeaderType.data),
 }
 
 RelationshipOffsetDescriptor = {
@@ -162,11 +163,11 @@ NodeOffsetReferenceMap = {
 
 PropertyOffsetReferenceMap = {
     0: None,                       # inUse (bool, 1 byte)
-    1: None,                       # type (int, 4 bytes)
-    5: kStringType,                # nameId (int, 4 bytes)
-    9: kProperty,                  # prevPropId (int, 4 bytes)
-    13: kProperty,                 # nextPropId (int, 4 bytes)
-    17: (kStringType, kArrayType)  # propBlockId (4 bytes: data, strId, arrayId)
+    1: None,                       # type (char, 1 byte)
+    2: kStringType,                # nameId (int, 4 bytes)
+    6: kProperty,                  # prevPropId (int, 4 bytes)
+    10: kProperty,                 # nextPropId (int, 4 bytes)
+    14: (kStringType, kArrayType)  # propBlockId (4 bytes: data, strId, arrayId)
 }
 
 RelationshipOffsetReferenceMap = {
@@ -187,7 +188,7 @@ RelationshipOffsetReferenceMap = {
 
 ArrayTypeReferenceMap = {
     kArrayType: [2, 14],
-    kStringType: [18],
+    kPayload: [kArrayPayloadOffset],
 }
 
 GeneralTypeReferenceMap = {
