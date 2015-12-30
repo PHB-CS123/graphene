@@ -69,8 +69,7 @@ class Defragmenter:
         # Fix self references in this store (if any)
         if self.shouldUpdateSelfRef:
             # Remaining self-reference offsets that need to be updated
-            rem_ref_range = self.remaining_references(full_cont_blocks,
-                                                      self.baseStore.count())
+            rem_ref_range = self.remaining_references(full_cont_blocks)
             self.fix_references(swap_table, self.baseStore,
                                 self.referenceMap, rem_ref_range)
         # Fix the references in any of the files that reference this store
@@ -391,7 +390,7 @@ class Defragmenter:
         return dict(zip(full_non_cont_blocks, new_slots))
 
     @staticmethod
-    def remaining_references(full_cont_blocks, new_block_amt):
+    def remaining_references(full_cont_blocks):
         """
         The remaining self-reference offsets that were not updated are the
         full continuous blocks that were not swapped).
@@ -399,8 +398,6 @@ class Defragmenter:
 
         :param full_cont_blocks: IDs of full continuous blocks
         :type full_cont_blocks: list[int]
-        :param new_block_amt: Number of blocks in the new, defragmented file
-        :type new_block_amt: int
         :return: IDs of remaining references to be updated
         :rtype: xrange
         """
