@@ -2,11 +2,15 @@ from struct import Struct
 
 from graphene.storage.base.property import Property
 from reference_map import TypeReferenceMap, kArrayType, kStringType, kProperty,\
-                          kPropertyTypeOffset, kPropertyPayloadOffset
+                          kPropertyTypeOffset, kPropertyPayloadOffset, \
+                          kArrayPayloadOffset
 
 
 class Defragmenter:
-    REFERENCE_STRUCT_FORMAT_STR = "= I"
+    # Format string for a reference type struct (integer)
+    REF_STRUCT_FORMAT_STR = "= I"
+    # Variable size format string for a reference type struct
+    VAR_SIZE_REF_STRUCT_FORMAT_STR = "= %dI"
 
     def __init__(self, base_store, id_store, referencing_stores):
         """
@@ -30,7 +34,7 @@ class Defragmenter:
         # Base stores that reference this store
         self.referencingStores = referencing_stores
         # Structure for a reference type (int, 4 bytes)
-        self.referenceStruct = Struct(self.REFERENCE_STRUCT_FORMAT_STR)
+        self.referenceStruct = Struct(self.REF_STRUCT_FORMAT_STR)
         # Whether self references should be updated for this file
         self.shouldUpdateSelfRef = \
             self.baseStore.STORAGE_TYPE.__name__ in self.referenceMap
@@ -276,8 +280,40 @@ class Defragmenter:
             packed_data[kPropertyPayloadOffset + self.referenceStruct.size:]
 
     def handle_string_array_references(self, swap_table, packed_data):
-        # TODO
-        return packed_data
+        """
+        Update references in the payload of the given array packed data
+
+        :param swap_table: Swap table to get references to change from
+        :type swap_table: dict[int, int]
+        :param packed_data: Property packed data to modify if it contains a
+                            reference in the swap table
+        :type packed_data: str
+        :return: Packed data with any references updated
+        :rtype: str
+        """
+        header = packed_data[:kArrayPayloadOffset]
+        payload = packed_data[kArrayPayloadOffset:]
+        return header + self.update_string_array_references(swap_table, payload)
+
+    def update_string_array_references(self, swap_table, payload):
+        """
+        Update string array references in the given payload to reflect the new
+        swapped offsets
+
+        :param swap_table: Swap table to get references to change from
+        :type swap_table: dict[int, int]
+        :param payload: Packed payload string array containing string offsets
+        :type payload: str
+        :return: Updated, packed payload reflecting new offsets
+        :rtype: str
+        """
+        # If this is a string array, then every value in the array must be a
+        # reference type (int)
+        num_items = len(payload) / self.referenceStruct.size
+        ref_struct = Struct(self.VAR_SIZE_REF_STRUCT_FORMAT_STR % num_items)
+        items = ref_struct.unpack(payload)
+        new_items = map(lambda x: swap_table[x], items)
+        return ref_struct.pack(*new_items)
 
     def property_type_is_defrag_reference(self, packed_data):
         """
