@@ -1,0 +1,64 @@
+2000 result(s) found.
+Fixture: gp-scripts/benchmarks/Relation-Matching/500-people-2000-rels-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Relation-Matching/500-people-2000-rels-benchmark.gp
+------------------------------------------------------
+| COMMAND                           | TIME           |
+------------------------------------------------------
+| MATCH (p1:Person)-[k:KNOWS]->(... | 0.426820039749 |
+------------------------------------------------------
+250 result(s) found.
+Fixture: gp-scripts/benchmarks/Relation-Matching/500-people-250-rels-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Relation-Matching/500-people-250-rels-benchmark.gp
+-------------------------------------------------------
+| COMMAND                           | TIME            |
+-------------------------------------------------------
+| MATCH (p1:Person)-[k:KNOWS]->(... | 0.0571699142456 |
+-------------------------------------------------------
+1750 result(s) found.
+Fixture: gp-scripts/benchmarks/Relation-Matching/500-people-1750-rels-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Relation-Matching/500-people-1750-rels-benchmark.gp
+------------------------------------------------------
+| COMMAND                           | TIME           |
+------------------------------------------------------
+| MATCH (p1:Person)-[k:KNOWS]->(... | 0.378520011902 |
+------------------------------------------------------
+1250 result(s) found.
+Fixture: gp-scripts/benchmarks/Relation-Matching/500-people-1250-rels-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Relation-Matching/500-people-1250-rels-benchmark.gp
+------------------------------------------------------
+| COMMAND                           | TIME           |
+------------------------------------------------------
+| MATCH (p1:Person)-[k:KNOWS]->(... | 0.271133899689 |
+------------------------------------------------------
+750 result(s) found.
+Fixture: gp-scripts/benchmarks/Relation-Matching/500-people-750-rels-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Relation-Matching/500-people-750-rels-benchmark.gp
+------------------------------------------------------
+| COMMAND                           | TIME           |
+------------------------------------------------------
+| MATCH (p1:Person)-[k:KNOWS]->(... | 0.159615039825 |
+------------------------------------------------------
+500 result(s) found.
+Fixture: gp-scripts/benchmarks/Relation-Matching/500-people-500-rels-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Relation-Matching/500-people-500-rels-benchmark.gp
+------------------------------------------------------
+| COMMAND                           | TIME           |
+------------------------------------------------------
+| MATCH (p1:Person)-[k:KNOWS]->(... | 0.140869855881 |
+------------------------------------------------------
+1500 result(s) found.
+Fixture: gp-scripts/benchmarks/Relation-Matching/500-people-1500-rels-benchmark-fixture.gp
+Benchmark: gp-scripts/benchmarks/Relation-Matching/500-people-1500-rels-benchmark.gp
+------------------------------------------------------
+| COMMAND                           | TIME           |
+------------------------------------------------------
+| MATCH (p1:Person)-[k:KNOWS]->(... | 0.305792808533 |
+------------------------------------------------------
+
+250,0.0571699142456
+500,0.140869855881
+750,0.159615039825
+1250,0.271133899689
+1500,0.305792808533
+1750,0.378520011902
+2000,0.426820039749

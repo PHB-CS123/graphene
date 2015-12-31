@@ -79,3 +79,33 @@ class TestPropertyMethods(unittest.TestCase):
         self.assertTrue(prop3.is_array())
         self.assertFalse(prop3.is_string())
         self.assertFalse(prop3.is_primitive())
+
+    def test_property_type_methods(self):
+        self.assertFalse(Property.PropertyType.is_array(Property.PropertyType.int))
+        self.assertFalse(Property.PropertyType.is_string(Property.PropertyType.int))
+        self.assertTrue(Property.PropertyType.is_primitive(Property.PropertyType.int))
+        self.assertTrue(Property.PropertyType.is_numerical(Property.PropertyType.int))
+
+        self.assertFalse(Property.PropertyType.is_numerical(Property.PropertyType.bool))
+        self.assertFalse(Property.PropertyType.is_numerical(Property.PropertyType.char))
+
+        self.assertTrue(Property.PropertyType.is_array(Property.PropertyType.intArray))
+        self.assertFalse(Property.PropertyType.is_string(Property.PropertyType.intArray))
+        self.assertFalse(Property.PropertyType.is_primitive(Property.PropertyType.intArray))
+        self.assertFalse(Property.PropertyType.is_numerical(Property.PropertyType.intArray))
+
+        self.assertFalse(Property.PropertyType.is_array(Property.PropertyType.string))
+        self.assertTrue(Property.PropertyType.is_string(Property.PropertyType.string))
+        self.assertFalse(Property.PropertyType.is_primitive(Property.PropertyType.string))
+        self.assertFalse(Property.PropertyType.is_numerical(Property.PropertyType.string))
+
+        self.assertFalse(Property.PropertyType.is_array(Property.PropertyType.undefined))
+        self.assertFalse(Property.PropertyType.is_string(Property.PropertyType.undefined))
+        self.assertFalse(Property.PropertyType.is_primitive(Property.PropertyType.undefined))
+        self.assertFalse(Property.PropertyType.is_numerical(Property.PropertyType.undefined))
+
+        with self.assertRaises(AssertionError):
+            Property.PropertyType.get_base_type(Property.PropertyType.int)
+            Property.PropertyType.get_array_type(Property.PropertyType.intArray)
+        self.assertEqual(Property.PropertyType.get_base_type(Property.PropertyType.intArray), Property.PropertyType.int)
+        self.assertEqual(Property.PropertyType.get_array_type(Property.PropertyType.int), Property.PropertyType.intArray)

@@ -21,4 +21,7 @@ class GrapheneStore:
 
     def remove_test_datafiles(self):
         if GrapheneStore.TESTING:
-            shutil.rmtree(self.datafilesDir)
+            try:
+                shutil.rmtree(self.datafilesDir)
+            except:
+                pass
