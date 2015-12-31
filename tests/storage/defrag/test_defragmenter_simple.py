@@ -7,7 +7,7 @@ from graphene.storage.base.property_store import PropertyStore, Property
 from graphene.storage.defrag.defragmenter import *
 
 
-class TestDefragmenterMethods(unittest.TestCase):
+class TestDefragmenterSimple(unittest.TestCase):
     def setUp(self):
         """
         Set up the GrapheneStore so that it writes datafiles to the testing

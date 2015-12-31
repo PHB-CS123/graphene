@@ -1,6 +1,6 @@
 from struct import Struct
 
-from graphene.storage.base.property import Property
+from graphene.storage.base.property_store import PropertyStore, Property
 from reference_map import TypeReferenceMap, kArrayType, kStringType, kProperty,\
                           kPropertyTypeOffset, kPropertyPayloadOffset, \
                           kArrayPayloadOffset
@@ -79,9 +79,8 @@ class Defragmenter:
         # Fix self references in this store (if any)
         if self.shouldUpdateSelfRef:
             # Remaining self-reference offsets that need to be updated
-            rem_ref_range = self.remaining_references(full_cont_blocks)
             self.fix_references(swap_table, self.baseStore,
-                                self.referenceMap, rem_ref_range)
+                                self.referenceMap, full_cont_blocks)
         # Fix the references in any of the files that reference this store
         self.fix_external_references(swap_table)
 
@@ -136,12 +135,10 @@ class Defragmenter:
         """
         # Type currently being defragmented
         defrag_type = self.baseStore.STORAGE_TYPE.__name__
-        assert defrag_type in ref_map, \
-            "Can't update defrag references if reference map has none"
         # Size of the reference struct (4 bytes)
         ref_size = self.referenceStruct.size
         # Whether we are defragmenting a string type, but not a name
-        is_string_but_not_name = defrag_type == kStringType and not self.isName
+        is_string_but_not_name = self.is_string_but_not_name()
         # Edge Case: defragmenting a string type, but not a name type and
         # updating a property store. Property may contain a string reference.
         # If this is the case, there is nothing else to update since name
@@ -155,6 +152,9 @@ class Defragmenter:
         # references are not updated when defragmenting strings.
         elif is_string_but_not_name and store_type == kArrayType:
             return self.handle_string_array_references(swap_table, packed_data)
+        # We need a reference map for all other cases
+        assert defrag_type in ref_map, \
+            "Can't update defrag references if reference map has none"
         # New packed data after updates
         new_packed_data = ""
         prev_ending = 0
@@ -183,34 +183,36 @@ class Defragmenter:
         :param ref_map: Reference map with the offsets for reference updates
         :type ref_map: dict[str, list[int]]
         :param id_fix_range: Range of IDs that might need their references fixed
-        :type id_fix_range: xrange
+        :type id_fix_range: collections.Iterable[int]
         :return: Nothing
         :rtype: None
         """
-        # Type of the store whose references are being fixed
+        # Type store whose references are being fixed
         store_type = base_store.STORAGE_TYPE.__name__
-        # Edge Case: The only time not having a reference map is allowed is when
-        # an Array type is being defragmented. In this case the Property payload
-        # may or may not contain a reference to an Array. This would also
-        # be the case for a String type, but a Property has a reference to
-        # its name at offset 5, and may or may not have a reference to a String
-        # in its payload.
-        if not ref_map:
-            assert self.baseStore.STORAGE_TYPE.__name__ == kArrayType, \
-                   "Only arrays are allowed to have no reference map"
+        # Edge Case: We need a reference map when updating references in any
+        # store type except when defragmenting a string store and updating
+        # string array payload references (all refs. to update are in payload)
+        assert ref_map is not None or \
+            (self.is_string_but_not_name() and store_type == kArrayType), \
+            "Need reference map offsets to fix refs."
+        # Edge Case: Array type is being defragmented and we are updating a
+        # property store. In this case the Property payload may or may not
+        # contain a reference to an Array. Reference map is unused.
+        if self.baseStore.STORAGE_TYPE.__name__ == kArrayType and \
+                isinstance(base_store, PropertyStore):
             # Update the property payloads for the array type
             self.handle_prop_payload_references(swap_table, base_store,
                                                 id_fix_range)
             return
 
-        for block_idx in id_fix_range:
+        for block_id in id_fix_range:
             # Update references
-            packed_data = base_store.read_from_index_packed_data(block_idx)
+            packed_data = base_store.read_from_index_packed_data(block_id)
             new_packed_data = self.update_references(ref_map, packed_data,
                                                      swap_table, store_type)
             # Only re-write the data if it has changed
             if packed_data != new_packed_data:
-                base_store.write_to_index_packed_data(block_idx, new_packed_data)
+                base_store.write_to_index_packed_data(block_id, new_packed_data)
 
     def fix_external_references(self, swap_table):
         """
@@ -266,7 +268,7 @@ class Defragmenter:
         :param base_store: Base store to update references of
         :type base_store: GeneralStore
         :param id_fix_range: Range of IDs that might need their references fixed
-        :type id_fix_range: xrange
+        :type id_fix_range: collections.Iterable[int]
         :return: Nothing
         :rtype: None
         """
@@ -338,9 +340,10 @@ class Defragmenter:
         # reference type (int)
         num_items = len(payload) / self.referenceStruct.size
         ref_struct = Struct(self.VAR_SIZE_REF_STRUCT_FORMAT_STR % num_items)
-        items = ref_struct.unpack(payload)
-        new_items = map(lambda x: swap_table[x], items)
-        return ref_struct.pack(*new_items)
+        # Update any swapped references
+        old = ref_struct.unpack(payload)
+        new = map(lambda x: x if x not in swap_table else swap_table[x], old)
+        return ref_struct.pack(*new)
 
     def property_type_is_defrag_reference(self, packed_data):
         """
@@ -360,6 +363,16 @@ class Defragmenter:
             return self.baseStore.STORAGE_TYPE.__name__ == kStringType
         else:
             return False
+
+    def is_string_but_not_name(self):
+        """
+        Whether we are defragmenting a string type, but not a name string type.
+
+        :return: True if we are defragmenting a string type that is not a name
+        :rtype: bool
+        """
+        defrag_type = self.baseStore.STORAGE_TYPE.__name__
+        return defrag_type == kStringType and not self.isName
 
     # ------------------ Computation Helpers ----------------- #
     @staticmethod
@@ -391,7 +404,7 @@ class Defragmenter:
 
         :param ids: List of IDs to filter
         :type ids: list[int]
-        :return: List of non-continuous IDs
+        :return: Tuple with a list of cont. ids and a list of non-cont. ids
         :rtype: (list[int],list[int])
         """
         # We're 1-indexing since block 0 is always empty
@@ -413,21 +426,10 @@ class Defragmenter:
         :return: Dictionary of src->dest index maps for the swaps needed
         :rtype: dict[int,int]
         """
+        # If we have no empty, blocks then there are no swaps to be done,
+        # If we have no full non-continous blocks, there is no fragmentation.
+        if not empty_blocks or not full_non_cont_blocks:
+            return {}
         num_swaps = len(full_non_cont_blocks)
         new_slots = list(range(empty_blocks[0], empty_blocks[0] + num_swaps))
         return dict(zip(full_non_cont_blocks, new_slots))
-
-    @staticmethod
-    def remaining_references(full_cont_blocks):
-        """
-        The remaining self-reference offsets that were not updated are the
-        full continuous blocks that were not swapped).
-        These references weren't fixed since they weren't loaded into RAM
-
-        :param full_cont_blocks: IDs of full continuous blocks
-        :type full_cont_blocks: list[int]
-        :return: IDs of remaining references to be updated
-        :rtype: xrange
-        """
-        return [] if len(full_cont_blocks) == 0 \
-            else xrange(1, max(full_cont_blocks) + 1, 1)
