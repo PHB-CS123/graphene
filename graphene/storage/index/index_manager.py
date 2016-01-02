@@ -15,8 +15,6 @@ class IndexManager(object):
     GLOBAL_INDEX_MANAGER = None
 
     def __new__(cls, *args, **kwargs):
-        assert IndexManager.GLOBAL_INDEX_MANAGER is None, \
-            "IndexManager should be a singleton"
         IndexManager.GLOBAL_INDEX_MANAGER = object.__new__(cls)
         return IndexManager.GLOBAL_INDEX_MANAGER
 
