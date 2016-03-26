@@ -4,6 +4,7 @@ from difflib import unified_diff
 from graphene.storage.base.graphene_store import GrapheneStore
 from tests_e2e.setup.server_ext import GrapheneTestServer
 
+
 class E2EUtils:
     END_OF_COMMAND = ";"
     LINE_COMMENT = "#"
@@ -27,25 +28,61 @@ class E2EUtils:
         self.previousCommand = command
         self.testServer.do_test_command(command, self.previousOutputIO)
 
-    def re_run_previous_command(self, print_diff=True):
+    def do_command_cmp(self, command, old_out, print_diff=True):
         """
-        Runs the previous command again and compares the output
+        Runs the given command and compares the output to the given output string
 
+        :param command: Command to run and capture output for
+        :type command: str
+        :param old_out: Old command output
+        :type old_out: str
+        :param print_diff: Whether differences in output should be printed
+        :type print_diff: bool
         :return: True if the results were the same, False otherwise
         :rtype: bool
         """
+        s, _ = self._do_command_cmp(command, old_out, print_diff)
+        return s
+
+    def re_run_previous_command(self, print_diff=True):
+        """
+        Runs the previously-run command and compares output to the old output
+
+        :param print_diff: Whether differences in output should be printed
+        :type print_diff: bool
+        :return: True if the results were the same, False otherwise
+        :rtype: bool
+        """
+        s, n_io = self._do_command_cmp(self.previousCommand,
+                                       self.previousOutputIO.getvalue(),
+                                       print_diff)
+        self.replace_old_output_io(n_io)
+        return s
+
+    def _do_command_cmp(self, cmd, previous_output, print_diff=True):
+        """
+        Runs the previous command again and compares the output
+
+        :param cmd: Command to run and capture output for
+        :type cmd: str
+        :param previous_output: Output string of previous command to compare
+        :type previous_output: str
+        :param print_diff: Whether differences in output should be printed
+        :type print_diff: bool
+        :return: True if the results were the same, False otherwise along with
+                 the result of re-running the command
+        :rtype: tuple(bool, StringIO)
+        """
         new_output_io = StringIO()
-        self.testServer.do_test_command(self.previousCommand, new_output_io)
+        self.testServer.do_test_command(cmd, new_output_io)
         new_output = new_output_io.getvalue()
-        old_output = self.previousOutputIO.getvalue()
-        same = new_output == old_output
+        same = new_output == previous_output
         if print_diff:
             if same:
                 print "Command returned the same output."
             else:
-                self.print_diff(old_output, new_output)
-        self.replace_old_output_io(new_output_io)
-        return same
+                self.print_diff(previous_output, new_output)
+        return same, new_output_io
 
     def replace_old_output_io(self, new_output_io):
         if self.previousOutputIO:
@@ -101,6 +138,7 @@ class E2EUtils:
             if command.find(cls.END_OF_COMMAND) != -1:
                 commands.append(command.strip())
                 command = ""
+        setup_file.close()
         return commands
 
     @staticmethod

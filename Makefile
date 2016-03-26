@@ -4,7 +4,8 @@ ANTLR4 = java -cp $(JAR_FILE) org.antlr.v4.Tool $(JAVA_OPTS)
 SRC = graphene
 BUILD_DIR = build/
 TEST_DIR = tests/
-COV_OPTS = --cov-report term-missing --cov-report html --cov-config .coveragerc --cov $(SRC) $(TEST_DIR)
+E2E_TEST_DIR = tests_e2e/
+COV_OPTS = --cov-report term-missing --cov-report html --cov-config .coveragerc --cov
 PARSER_FILES = $(SRC)/parser/GQLLexer.py $(SRC)/parser/GQLParser.py
 
 default: parser
@@ -25,7 +26,10 @@ run: default
 	./graphene-client
 
 test: default build-index
-	py.test $(COV_OPTS)
+	py.test $(COV_OPTS) $(SRC) $(TEST_DIR)
+
+test-e2e: default build-index
+	py.test $(SRC) $(E2E_TEST_DIR)
 
 # need to make parser here since docs will run parser code
 docs: build-index parser
